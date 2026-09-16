@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>TimeTracker.Wpf</RootNamespace>
+    <AssemblyName>TimeTracker</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <StartupObject>TimeTracker.Wpf.App</StartupObject>
+
+    <!-- WPF требует Windows Desktop SDK -->
+    <UseWindowsForms>false</UseWindowsForms>
+
+    <!-- Подавляем предупреждения от генерируемого WPF-кода -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TimeTracker.Application\TimeTracker.Application.csproj" />
+    <ProjectReference Include="..\TimeTracker.Infrastructure\TimeTracker.Infrastructure.csproj" />
+  </ItemGroup>
+  
+  <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences"
+        Condition="'$(HUSKY)' != 0 AND Exists('$(MSBuildThisFileDirectory)..\..\.config\dotnet-tools.json')">
+  <Exec Command="dotnet tool restore"
+        WorkingDirectory="$(MSBuildThisFileDirectory)..\.."
+        StandardOutputImportance="Low"
+        StandardErrorImportance="High" />
+  <Exec Command="dotnet husky install"
+        WorkingDirectory="$(MSBuildThisFileDirectory)..\.."
+        StandardOutputImportance="Low"
+        StandardErrorImportance="High" />
+</Target>
+
+
+</Project>

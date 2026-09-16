@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "▶ pre-commit: dotnet format"
+dotnet format --verify-no-changes --no-restore
+if [ $? -ne 0 ]; then
+  echo "✖ Форматирование не соответствует .editorconfig"
+  echo "  Запустите: dotnet format"
+  exit 1
+fi
+
+echo "▶ pre-commit: dotnet build"
+dotnet build --no-restore -c Debug

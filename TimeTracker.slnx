@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TimeTracker.Application/TimeTracker.Application.csproj" />
+    <Project Path="src/TimeTracker.Domain/TimeTracker.Domain.csproj" />
+    <Project Path="src/TimeTracker.Infrastructure/TimeTracker.Infrastructure.csproj" />
+    <Project Path="src/TimeTracker.Wpf/TimeTracker.Wpf.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TimeTracker.Application.Tests/TimeTracker.Application.Tests.csproj" />
+    <Project Path="tests/TimeTracker.Domain.Tests/TimeTracker.Domain.Tests.csproj" />
+    <Project Path="tests/TimeTracker.Integration.Tests/TimeTracker.Integration.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Элементы решения/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+</Solution>
