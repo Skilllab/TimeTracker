@@ -1,77 +1,140 @@
 # Документация: https://editorconfig.org
+# Сообщает редакторам и тулингу: «это корневой .editorconfig, дальше вверх по遞реву не искать». 
+# Без него .editorconfig из родительских директорий (например, D:\) тоже был бы применен и мог бы переопределить настройки.
 root = true
 
 [*]
+# кодировка UTF-8 без BOM. На Windows IDE по умолчанию может писать UTF-8 with BOM — это правило отключает BOM.
 charset = utf-8
+
+# перевод строки `\n` (Unix). На Windows по умолчанию `\r\n` (CRLF) — это правило выравнивает поведение между ОС и устраняет вечные `git diff` из-за line endings.
 end_of_line = lf
+
+# true = в конце файла обязательно должен быть перевод строки. Стандарт POSIX, убирает шум в диффах.
 insert_final_newline = true
+
+# true = обрезать пробелы в конце строк.
 trim_trailing_whitespace = true
+
+# space = отступы пробелами, не табами.
 indent_style = space
+
+# 4 = 4 пробела на уровень.
 indent_size = 4
 
 [*.{cs,csx}]
-# File-scoped namespaces
-csharp_style_namespace_declarations = file_scoped:warning
+# File-scoped namespaces: использовать компактный синтаксис (namespace Foo;) вместо блочного с фигурными скобками ({ ... }). 
+csharp_style_namespace_declarations = file_scoped:error
 
-# var
-csharp_style_var_for_built_in_types = true:suggestion
-csharp_style_var_when_type_is_apparent = true:suggestion
-csharp_style_var_elsewhere = false:suggestion
+# Использовать var для встроенных типов (int, string, bool...)
+csharp_style_var_for_built_in_types = true:error
 
-# Braces
-csharp_prefer_braces = true:warning
+# Использовать var, когда тип очевиден из правой части (new Object(), explicit cast...)
+csharp_style_var_when_type_is_apparent = true:error
 
-# this.
+# Использовать var во всех остальных случаях
+csharp_style_var_elsewhere = true:error
+
+# Предпочитать отсутствие фигурных скобок для однострочных блоков (например, в if, for). 
+# Если блок занимает несколько строк, скобки обязательны. Нарушение этого правила считается ошибкой компиляции (:error).
+csharp_prefer_braces = when_multiline:error
+
+# this.: не требовать указания this. при обращении к полям класса. Нарушение дает подсказку (:suggestion).
 dotnet_style_qualification_for_field = false:suggestion
+
+# this.: не требовать указания this. при обращении к свойствам класса. Нарушение дает подсказку (:suggestion).
 dotnet_style_qualification_for_property = false:suggestion
+
+# this.: не требовать указания this. при вызове методов класса. Нарушение дает подсказку (:suggestion).
 dotnet_style_qualification_for_method = false:suggestion
 
-# Modifiers
+# Modifiers: требовать явного указания модификаторов доступа (private, public и т.д.) для всех членов, кроме интерфейсов. 
+# Отсутствие модификатора приведет к предупреждению (:warning).
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+
+# Modifiers: рекомендовать делать локальные функции статическими (static), если они не захватывают переменные из внешней области. 
+# Нарушение дает подсказку (:suggestion).
 csharp_prefer_static_local_function = true:suggestion
 
-# Usings
+# Usings: сортировать директивы using по алфавиту, но при этом директивы System.* всегда ставить на первое место.
 dotnet_sort_system_directives_first = true
+
+# Usings: не разделять группы директив using (например, System, сторонние библиотеки и внутренние пространства) пустой строкой.
 dotnet_separate_import_directive_groups = false
 
-# Primary constructors
+# Primary constructors: предпочитать использование первичных конструкторов (введенных в C# 12) для классов и структур. 
+# Нарушение дает подсказку (:suggestion).
 csharp_style_prefer_primary_constructors = true:suggestion
 
-# Collection expressions
+# Collection expressions: предпочитать использование выражений коллекций (например, [1, 2, 3] вместо new[] { 1, 2, 3 }). 
+# Нарушение дает подсказку (:suggestion).
 csharp_style_prefer_collection_expression = true:suggestion
 
 # Pattern matching
+# true: предпочитать использование pattern matching (например, is int i) вместо явного приведения типов. Нарушение дает подсказку (:suggestion).
 csharp_style_prefer_pattern_matching = true:suggestion
+
+# true: предпочитать лаконичные switch-выражения (switch expressions) классическим операторам switch (switch statements). Нарушение дает подсказку (:suggestion).
 csharp_style_prefer_switch_expression = true:suggestion
 
 # Null checks
+# true: предпочитать использование паттерн-матчинга для проверки на null (например, x is not null) вместо классических проверок типов. Нарушение дает подсказку (:suggestion).
 csharp_style_prefer_null_check_over_type_check = true:suggestion
 
-# Диагностика
-dotnet_diagnostic.CA1062.severity = warning  # validate arguments
-dotnet_diagnostic.CA2007.severity = none     # ConfigureAwait — не нужно в WPF
-dotnet_diagnostic.CA1848.severity = none     # LoggerMessage delegates — преждевременно
-dotnet_diagnostic.IDE0290.severity = suggestion # primary constructors
-dotnet_diagnostic.CS1591.severity = none     # missing XML doc
+# Диагностика (Roslyn Analyzers)
+# CA1062: Требовать валидацию публичных аргументов методов на null перед их использованием. Нарушение выдает предупреждение (:warning).
+dotnet_diagnostic.CA1062.severity = warning
+
+# CA2007: Должен ли вызываться ConfigureAwait(false) для Task. Значение none отключает правило (актуально для WPF, где важен контекст синхронизации UI).
+dotnet_diagnostic.CA2007.severity = none
+
+# CA1848: Рекомендация использовать LoggerMessage для высокопроизводительного логирования. Отключено (none), чтобы избежать преждевременной оптимизации.
+dotnet_diagnostic.CA1848.severity = none
+
+# IDE0290: Предложение использовать первичные конструкторы (Primary Constructors), добавленные в C# 12. Нарушение дает подсказку (:suggestion).
+dotnet_diagnostic.IDE0290.severity = suggestion
+
+# CS1591: Предупреждение о пропущенной XML-документации для публичных членов кода. Отключено (none), чтобы не захламлять код обязательными комментариями.
+dotnet_diagnostic.CS1591.severity = none
 
 [*.{xaml,xml,csproj,props,targets,json,yml,yaml}]
+# Для файлов разметки, конфигураций и сериализации данных устанавливается компактный размер отступа в 2 пробела.
 indent_size = 2
 
 [*.{md,markdown}]
+# false: отключает обрезание пробелов в конце строк для файлов Markdown, так как двойной пробел в конце строки в MD означает перенос строки.
 trim_trailing_whitespace = false
 
 [*.{sln,slnx}]
+# Для файлов решений Visual Studio (Solution) сохраняется стандартный отступ в 4 пробела.
 indent_size = 4
 
 [*.cshtml]
+# Для файлов Razor-страниц (HTML + C#) устанавливается размер отступа в 4 пробела для сохранения читаемости C#-кода.
 indent_size = 4
 
 # ============================================================
 # Тестовые проекты
 # ============================================================
 [tests/**/*.cs]
+# CA1707: Имена методов не должны содержать символы подчеркивания. Отключено (none) для тестов, так как в них принято разделять слова через `_` (например, Method_ShouldDoSomething_WhenCondition).
 dotnet_diagnostic.CA1707.severity = none
+
+# CA1062: Валидация аргументов на null отключена (none) для тестов, так как тестовые методы не принимают внешние публичные параметры.
 dotnet_diagnostic.CA1062.severity = none
+
+# CA2007: Проверка вызова ConfigureAwait(false) отключена (none) для тестов.
 dotnet_diagnostic.CA2007.severity = none
+
+# CA1861: Не создавать постоянные массивы в качестве аргументов (лучше выносить в readonly поля). Отключено (none) ради удобства передачи inline-данных в тестах.
 dotnet_diagnostic.CA1861.severity = none
+
+# CA1859: Рекомендация использовать конкретные типы вместо интерфейсов для локальных переменных ради производительности. Отключено (none) в тестах.
 dotnet_diagnostic.CA1859.severity = none
+
+[*.cs]
+# false: запрещает размещать тело оператора 'if' или цикла на той же строке, где объявлено условие (даже если там всего одно выражение).
+csharp_preserve_single_line_blocks = false
+
+# false: принудительно переносит тело вложенного оператора на новую строку, если у него отсутствуют фигурные скобки. Нарушение выдает предупреждение (:warning).
+csharp_style_allow_embedded_statements_on_same_line_experimental = false:warning

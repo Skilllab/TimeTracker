@@ -6,5 +6,12 @@ namespace TimeTracker.Domain.Tests;
 public class SmokeTests
 {
     [Fact]
-    public void Project_Builds() => true.Should().BeTrue();
+    public void Project_Builds()
+    {
+        // Act
+        var result = true;
+
+        // Assert
+        result.Should().BeTrue();
+    }
 }
