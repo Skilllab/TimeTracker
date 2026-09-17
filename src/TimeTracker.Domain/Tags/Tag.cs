@@ -9,7 +9,7 @@ namespace TimeTracker.Domain.Tags;
 /// Пользователь назначает теги вручную на этапе UI (этап 5) и может
 /// фильтровать записи по ним в отчетах
 /// </summary>
-public readonly record struct Tag
+public record class Tag
 {
     /// <summary>
     /// Максимальная длина имени тега после нормализации
