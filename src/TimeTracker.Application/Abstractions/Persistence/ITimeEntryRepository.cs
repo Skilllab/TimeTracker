@@ -25,12 +25,12 @@ public interface ITimeEntryRepository
     /// <summary>
     /// Получить записи, у которых Range.Start попадает в [from, to).
     /// </summary>
-    /// <param name="from">Начало диапазона (включительно), UTC</param>
-    /// <param name="to">Конец диапазона (не включая), UTC</param>
+    /// <param name="rangeStart">Начало диапазона (включительно), UTC</param>
+    /// <param name="rangeEnd">Конец диапазона (не включая), UTC</param>
     /// <param name="ct">Токен отмены операции</param>
     Task<IReadOnlyList<TimeEntry>> GetByDateRangeAsync(
-        DateTimeOffset from,
-        DateTimeOffset to,
+        DateTimeOffset rangeStart,
+        DateTimeOffset rangeEnd,
         CancellationToken ct = default);
 
     /// <summary>
