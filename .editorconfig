@@ -138,3 +138,7 @@ csharp_preserve_single_line_blocks = false
 
 # false: принудительно переносит тело вложенного оператора на новую строку, если у него отсутствуют фигурные скобки. Нарушение выдает предупреждение (:warning).
 csharp_style_allow_embedded_statements_on_same_line_experimental = false:warning
+
+# EF Core конфигурации: builder создаётся фреймворком, null невозможен
+[**/Persistence/Configurations/*.cs]
+dotnet_diagnostic.CA1062.severity = none
