@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TimeTracker.Application.Abstractions.Persistence;
 using TimeTracker.Infrastructure.Persistence;
+using TimeTracker.Infrastructure.Persistence.Interceptors;
 using TimeTracker.Infrastructure.Repositories;
 
 namespace TimeTracker.Infrastructure;
@@ -16,8 +17,12 @@ public static class DependencyInjection
     {
         AppPaths.EnsureCreated();
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite($"Data Source={AppPaths.DatabaseFile}"));
+        services.AddSingleton<TimeEntryShadowPropertiesInterceptor>();
+
+        services.AddDbContext<AppDbContext>((sp, options) =>
+            options
+                .UseSqlite($"Data Source={AppPaths.DatabaseFile}")
+                .AddInterceptors(sp.GetRequiredService<TimeEntryShadowPropertiesInterceptor>()));
 
         services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();

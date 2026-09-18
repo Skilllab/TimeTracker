@@ -7,7 +7,14 @@ using TimeTracker.Infrastructure.Persistence.Converters;
 namespace TimeTracker.Infrastructure.Persistence.Configurations;
 
 /// <summary>
-/// Конфигурация маппинга TimeEntry в БД
+/// Конфигурация маппинга TimeEntry в БД.
+///
+/// Range маппится как одна строка через TimeRangeConverter.
+/// Дополнительно объявлены два shadow property — Range_Start_Ticks
+/// и Range_End_Ticks — технические столбцы INTEGER, которые заполняет
+/// TimeEntryShadowPropertiesInterceptor. По ним работает SQL-фильтрация
+/// (running-записи, диапазоны дат) и индексы, потому что фильтровать
+/// по строке Range через value converter EF Core не умеет.
 /// </summary>
 public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
 {
@@ -24,10 +31,27 @@ public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
             .HasMaxLength(TimeEntry.MaxDescriptionLength)
             .IsRequired();
 
+        // Range — единое значение VO, хранится как строка.
         builder.Property(x => x.Range)
             .HasConversion<TimeRangeConverter>()
             .HasColumnName("Range")
             .IsRequired();
+
+        // Shadow property: UtcTicks старта. NOT NULL.
+        // Используется для фильтрации по датам и сортировки.
+        // Заполняется TimeEntryShadowPropertiesInterceptor.
+        builder.Property<long>("Range_Start_Ticks")
+            .HasColumnName("Range_Start_Ticks")
+            .IsRequired();
+
+        // Shadow property: UtcTicks окончания или NULL для running.
+        // Используется для фильтрации running/stopped.
+        // Заполняется TimeEntryShadowPropertiesInterceptor.
+        builder.Property<long?>("Range_End_Ticks")
+            .HasColumnName("Range_End_Ticks");
+
+        builder.HasIndex("Range_Start_Ticks");
+        builder.HasIndex("Range_End_Ticks");
 
         builder.Property(x => x.ProjectId)
             .HasConversion<ProjectIdConverter>()
@@ -51,15 +75,8 @@ public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
                 .IsRequired();
         });
 
-        // ImmutableArray<Tag> — структура, поэтому builder.Navigation(...)
-        // не подходит. Вместо этого указываем EF работать через backing
-        // field _tags напрямую.
-        //
-        // ВАЖНО: _tags НЕ readonly — EF присваивает новое значение
-        // при материализации.
-        builder.Metadata
-            .FindNavigation(nameof(TimeEntry.Tags))!
-            .SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(x => x.Tags)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Ignore(x => x.DomainEvents);
     }

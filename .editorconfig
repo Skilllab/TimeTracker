@@ -148,3 +148,20 @@ dotnet_diagnostic.CA1062.severity = none
 [**/Persistence/Configurations/*.cs]
 dotnet_diagnostic.CA1062.severity = none
 dotnet_diagnostic.CA1812.severity = none
+
+# Файлы миграций генерируются EF Tools автоматически.
+# Их не нужно править руками — при следующей миграции они перезапишутся.
+[**/Migrations/*.cs]
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.CA1062.severity = none
+dotnet_diagnostic.IDE0005.severity = none
+dotnet_diagnostic.IDE0300.severity = none
+dotnet_diagnostic.IDE0301.severity = none
+dotnet_diagnostic.IDE0305.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1852.severity = none
+
+# SaveChangesInterceptor.SavingChanges / SavingChangesAsync —
+# хуки EF Core. eventData создаётся фреймворком, null невозможен.
+[**/Persistence/Interceptors/*.cs]
+dotnet_diagnostic.CA1062.severity = none

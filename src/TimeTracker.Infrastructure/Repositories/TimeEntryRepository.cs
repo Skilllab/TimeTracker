@@ -15,8 +15,8 @@ public sealed class TimeEntryRepository(AppDbContext db) : ITimeEntryRepository
 
     public Task<TimeEntry?> GetRunningAsync(CancellationToken ct = default)
         => db.TimeEntries
-            .Where(e => e.Range.End == null)
-            .OrderByDescending(e => e.Range.Start)
+            .Where(e => EF.Property<long?>(e, "Range_End_Ticks") == null)
+            .OrderByDescending(e => EF.Property<long>(e, "Range_Start_Ticks"))
             .FirstOrDefaultAsync(ct);
 
     public async Task<IReadOnlyList<TimeEntry>> GetByDateRangeAsync(
@@ -24,8 +24,9 @@ public sealed class TimeEntryRepository(AppDbContext db) : ITimeEntryRepository
         DateTimeOffset rangeEnd,
         CancellationToken ct = default)
         => await db.TimeEntries
-            .Where(e => e.Range.Start >= rangeStart && e.Range.Start < rangeEnd)
-            .OrderByDescending(e => e.Range.Start)
+            .Where(e => EF.Property<long>(e, "Range_Start_Ticks") >= rangeStart.UtcTicks
+                        && EF.Property<long>(e, "Range_Start_Ticks") < rangeEnd.UtcTicks)
+            .OrderByDescending(e => EF.Property<long>(e, "Range_Start_Ticks"))
             .ToListAsync(ct);
 
     public async Task AddAsync(TimeEntry entry, CancellationToken ct = default)

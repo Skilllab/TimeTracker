@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using TimeTracker.Domain.Abstractions;
 using TimeTracker.Domain.Common;
 using TimeTracker.Domain.Projects;
@@ -23,7 +24,13 @@ public sealed class TimeEntry : AggregateRoot<TimeEntryId>
     /// <summary>
     /// Список тегов записи
     /// </summary>
-    private ImmutableArray<Tag> _tags = ImmutableArray<Tag>.Empty;
+    private readonly List<Tag> _tags = [];
+
+    /// <summary>
+    /// Read-only-обертка над _tags.
+    /// </summary>
+    private readonly ReadOnlyCollection<Tag> _tagsView;
+
 
     /// <summary>
     /// Описание записи
@@ -60,12 +67,10 @@ public sealed class TimeEntry : AggregateRoot<TimeEntryId>
     }
 
     /// <summary>
-    /// Теги записи. Возвращается как ImmutableArray — структура,
-    /// которая не создаёт аллокаций при чтении (копируется по стеку)
-    /// и не позволяет менять содержимое снаружи.
-
+    /// Теги записи. Возвращается read-only-обертка
     /// </summary>
-    public ImmutableArray<Tag> Tags => _tags;
+    public IReadOnlyList<Tag> Tags => _tagsView;
+
 
     private TimeEntry(
         TimeEntryId id,
@@ -78,6 +83,7 @@ public sealed class TimeEntry : AggregateRoot<TimeEntryId>
         Range = range;
         ProjectId = projectId;
         IsBillable = isBillable;
+        _tagsView = _tags.AsReadOnly();
     }
 
     /// <summary>
@@ -124,7 +130,7 @@ public sealed class TimeEntry : AggregateRoot<TimeEntryId>
     {
         var entry = new TimeEntry(id, description, range, projectId, isBillable);
         if (tags is not null)
-            entry._tags = entry._tags.AddRange(tags);
+            entry._tags.AddRange(tags);
         return entry;
     }
 
@@ -181,7 +187,7 @@ public sealed class TimeEntry : AggregateRoot<TimeEntryId>
         if (_tags.Contains(tag))
             return;
 
-        _tags = _tags.Add(tag);
+        _tags.Add(tag);
         Raise(new EntryEditedEvent(Id, DateTimeOffset.UtcNow));
     }
 
@@ -191,11 +197,9 @@ public sealed class TimeEntry : AggregateRoot<TimeEntryId>
     /// <param name="tag">Тег для удаления</param>
     public void RemoveTag(Tag tag)
     {
-        var index = _tags.IndexOf(tag);
-        if (index < 0)
+        if (!_tags.Remove(tag))
             return;
 
-        _tags = _tags.RemoveAt(index);
         Raise(new EntryEditedEvent(Id, DateTimeOffset.UtcNow));
     }
 
@@ -215,7 +219,6 @@ public sealed class TimeEntry : AggregateRoot<TimeEntryId>
         var value = description?.Trim() ?? string.Empty;
         if (value.Length > MaxDescriptionLength)
             throw new DomainException($"Description exceeds maximum length of {MaxDescriptionLength}.");
-
         return value;
     }
 }
