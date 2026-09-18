@@ -1,6 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using TimeTracker.Infrastructure.Persistence;
+using TimeTracker.Infrastructure.Persistence.Interceptors;
 using Xunit;
 
 namespace TimeTracker.Integration.Tests.Fixtures;
@@ -20,14 +21,13 @@ public sealed class SqliteInMemoryFixture : IAsyncLifetime
 {
     private SqliteConnection _connection = null!;
 
-    /// <summary>
-    /// Создать новый DbContext, привязанный к общему in-memory
-    /// соединению. Каждый вызов — новый экземпляр, но одна БД.
-    /// </summary>
     public AppDbContext CreateDbContext()
     {
+        var interceptor = new TimeEntryShadowPropertiesInterceptor();
+
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite(_connection)
+            .AddInterceptors(interceptor)
             .Options;
 
         return new AppDbContext(options);
@@ -35,7 +35,6 @@ public sealed class SqliteInMemoryFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        // Arrange (lifecycle): открыть соединение и создать схему.
         _connection = new SqliteConnection("DataSource=:memory:");
         await _connection.OpenAsync();
 

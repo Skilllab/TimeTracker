@@ -276,22 +276,51 @@ public class TimeEntryTests
     }
 
     [Fact]
-    public void Tags_CannotBeMutatedOutside()
+    public void Tags_ReturnsSameViewInstance()
     {
-        var entry = TimeEntry.StartNew("Работушка", startedAt: Now);
-        entry.AddTag(Tag.Create("ASAP"));
+        // Arrange
+        var entry = TimeEntry.StartNew("work", startedAt: Now);
 
-        var tags = entry.Tags;
+        // Act
+        var view1 = entry.Tags;
+        var view2 = entry.Tags;
 
-        // ImmutableArray<Tag> не имеет метода Add, возвращающего void
-        // или мутирующего текущий массив. Единственный способ «изменить», это
-        // присвоить tags = tags.Add(...), но это меняет локальную копию
-        // переменной, а не _tags внутри entry.
-        var changed = tags.Add(Tag.Create("отложено"));
+        // Assert: кэшированная обёртка, один и тот же объект
+        view1.Should().BeSameAs(view2);
+    }
 
-        tags.Length.Should().Be(1);
-        changed.Length.Should().Be(2);
-        entry.Tags.Length.Should().Be(1);   // entry не изменился
+    [Fact]
+    public void Tags_ReflectsMutations()
+    {
+        // Arrange
+        var entry = TimeEntry.StartNew("work", startedAt: Now);
+        var view = entry.Tags;   // держим обёртку
+
+        // Act: мутируем агрегат
+        entry.AddTag(Tag.Create("urgent"));
+
+        // Assert: обёртка видит изменение, потому что держит ссылку
+        // на тот же List<Tag>
+        view.Should().ContainSingle()
+            .Which.Name.Should().Be("urgent");
+    }
+
+    [Fact]
+    public void Tags_IsReadOnlyOutside()
+    {
+        // Arrange
+        var entry = TimeEntry.StartNew("work", startedAt: Now);
+        entry.AddTag(Tag.Create("urgent"));
+
+        // Act
+        var view = entry.Tags;
+
+        // Assert: view — ReadOnlyCollection, не List
+        view.Should().NotBeAssignableTo<List<Tag>>();
+
+        // Проверить, что добавить нельзя — через explicit cast к ICollection
+        var act = () => ((ICollection<Tag>)view).Add(Tag.Create("hacked"));
+        act.Should().Throw<NotSupportedException>();
     }
 
     [Fact]

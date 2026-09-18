@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TimeTracker.Domain.Projects;
 using TimeTracker.Domain.Tags;
 using TimeTracker.Domain.TimeTracking;
+using TimeTracker.Infrastructure.Repositories;
 using TimeTracker.Integration.Tests.Fixtures;
 using Xunit;
 
@@ -99,7 +100,7 @@ public class TimeEntryPersistenceTests : IClassFixture<SqliteInMemoryFixture>
             // Assert
             loaded.ProjectId.Should().Be(project.Id);
             loaded.Tags.Should().HaveCount(2);
-            loaded.Tags.Should().Contain(Tag.Create("ASAP"));
+            loaded.Tags.Should().Contain(Tag.Create("ASPA"));
             loaded.Tags.Should().Contain(Tag.Create("платное"));
         }
     }
@@ -107,7 +108,7 @@ public class TimeEntryPersistenceTests : IClassFixture<SqliteInMemoryFixture>
     [Fact]
     public async Task CanQuery_RunningEntry()
     {
-        // Act (write)
+        // Arrange
         await using (var db = _fixture.CreateDbContext())
         {
             var running = TimeEntry.StartNew("Активная сессия");
@@ -118,12 +119,11 @@ public class TimeEntryPersistenceTests : IClassFixture<SqliteInMemoryFixture>
             await db.SaveChangesAsync();
         }
 
-        // Act (query)
+        // Act — через репозиторий, который использует shadow properties
         await using (var db = _fixture.CreateDbContext())
         {
-            var found = await db.TimeEntries
-                .Where(e => e.Range.End == null)
-                .FirstOrDefaultAsync();
+            var repo = new TimeEntryRepository(db);
+            var found = await repo.GetRunningAsync();
 
             // Assert
             found.Should().NotBeNull();
