@@ -10,7 +10,7 @@ namespace TimeTracker.Domain.Tests;
 
 public class TimeEntryTests
 {
-    private static readonly DateTimeOffset Now = new(2025, 1, 15, 10, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset Now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
 
     [Fact]
     public void StartNew_CreatesRunningEntry()
@@ -279,7 +279,7 @@ public class TimeEntryTests
     public void Tags_ReturnsSameViewInstance()
     {
         // Arrange
-        var entry = TimeEntry.StartNew("work", startedAt: Now);
+        var entry = TimeEntry.StartNew("работушка", startedAt: Now);
 
         // Act
         var view1 = entry.Tags;
@@ -293,7 +293,7 @@ public class TimeEntryTests
     public void Tags_ReflectsMutations()
     {
         // Arrange
-        var entry = TimeEntry.StartNew("work", startedAt: Now);
+        var entry = TimeEntry.StartNew("работушка", startedAt: Now);
         var view = entry.Tags;   // держим обёртку
 
         // Act: мутируем агрегат
@@ -309,7 +309,7 @@ public class TimeEntryTests
     public void Tags_IsReadOnlyOutside()
     {
         // Arrange
-        var entry = TimeEntry.StartNew("work", startedAt: Now);
+        var entry = TimeEntry.StartNew("работушка", startedAt: Now);
         entry.AddTag(Tag.Create("urgent"));
 
         // Act

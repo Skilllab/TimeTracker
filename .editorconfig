@@ -165,3 +165,6 @@ dotnet_diagnostic.CA1852.severity = none
 # хуки EF Core. eventData создаётся фреймворком, null невозможен.
 [**/Persistence/Interceptors/*.cs]
 dotnet_diagnostic.CA1062.severity = none
+
+#отключаем CA1873 для логирования
+dotnet_diagnostic.CA1873.severity = none
