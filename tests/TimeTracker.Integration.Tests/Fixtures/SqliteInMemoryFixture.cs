@@ -17,7 +17,7 @@ namespace TimeTracker.Integration.Tests.Fixtures;
 /// каждый получит свою изолированную БД в памяти, и persistence
 /// не будет проверяться.
 /// </summary>
-public sealed class SqliteInMemoryFixture : IAsyncLifetime
+public sealed class SqliteInMemoryFixture : IAsyncLifetime, IAsyncDisposable
 {
     private SqliteConnection _connection = null!;
 
@@ -44,6 +44,12 @@ public sealed class SqliteInMemoryFixture : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _connection.DisposeAsync();
+        if (_connection != null)
+            await _connection.DisposeAsync();
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        await DisposeAsync();
     }
 }
