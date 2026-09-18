@@ -7,7 +7,7 @@ namespace TimeTracker.Domain.Tests;
 
 public class TimeRangeTests
 {
-    private static readonly DateTimeOffset Now = new(2025, 1, 15, 10, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset Now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
 
     [Fact]
     public void Ctor_EndBeforeStart_Throws()

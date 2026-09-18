@@ -28,7 +28,6 @@ public sealed partial class TimerService : ITimerService, IDisposable
     private DateTimeOffset? _pauseStartedAt;
 
     public TimerState State => _state;
-
     public TimeEntry? CurrentEntry => _currentEntry;
 
     public Duration CurrentDuration
@@ -41,7 +40,6 @@ public sealed partial class TimerService : ITimerService, IDisposable
             var now = _timeProvider.GetUtcNow();
             var elapsed = now - _currentEntry.Range.Start - _pausedAccumulated;
 
-            // Если сейчас пауза — вычитаем её длину.
             if (_state == TimerState.Paused && _pauseStartedAt is not null)
                 elapsed -= now - _pauseStartedAt.Value;
 
@@ -82,11 +80,10 @@ public sealed partial class TimerService : ITimerService, IDisposable
         }
 
         _currentEntry = running;
-        _state = TimerState.Running;
-        StartTickLoop();
+        // TransitionTo(Running) сам запустит тик-цикл.
+        TransitionTo(TimerState.Running);
 
         LogRestoredEntry(running.Id, running.Range.Start);
-        RaiseStateChanged(TimerState.Idle, TimerState.Running);
     }
 
     public async Task StartTimerAsync(
@@ -104,6 +101,7 @@ public sealed partial class TimerService : ITimerService, IDisposable
         _currentEntry = entry;
         _pausedAccumulated = TimeSpan.Zero;
         _pauseStartedAt = null;
+        // TransitionTo(Running) сам запустит тик-цикл.
         TransitionTo(TimerState.Running);
 
         LogStartedEntry(entry.Id);
@@ -117,8 +115,6 @@ public sealed partial class TimerService : ITimerService, IDisposable
         if (_currentEntry is null)
             throw new InvalidOperationException("Cannot stop: no current entry.");
 
-        // Если стоим на паузе — закрыть её, чтобы не потерять
-        // накопленное время.
         if (_state == TimerState.Paused && _pauseStartedAt is not null)
         {
             _pausedAccumulated += _timeProvider.GetUtcNow() - _pauseStartedAt.Value;
@@ -129,18 +125,15 @@ public sealed partial class TimerService : ITimerService, IDisposable
         _currentEntry.Stop(now);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        StopTickLoop();
-
         var stoppedEntry = _currentEntry;
-        var oldState = _state;
 
         _currentEntry = null;
         _pausedAccumulated = TimeSpan.Zero;
         _pauseStartedAt = null;
-        _state = TimerState.Idle;
+        // TransitionTo(Idle) сам остановит тик-цикл.
+        TransitionTo(TimerState.Idle);
 
         LogStoppedEntry(stoppedEntry.Id, stoppedEntry.Range.Duration);
-        RaiseStateChanged(oldState, TimerState.Idle);
     }
 
     public void PauseTimer()
@@ -149,7 +142,7 @@ public sealed partial class TimerService : ITimerService, IDisposable
             throw new InvalidOperationException($"Cannot pause: state is {_state}, expected Running.");
 
         _pauseStartedAt = _timeProvider.GetUtcNow();
-        StopTickLoop();
+        // TransitionTo(Paused) сам остановит тик-цикл.
         TransitionTo(TimerState.Paused);
 
         LogPausedEntry(_currentEntry?.Id);
@@ -166,7 +159,7 @@ public sealed partial class TimerService : ITimerService, IDisposable
             _pauseStartedAt = null;
         }
 
-        StartTickLoop();
+        // TransitionTo(Running) сам запустит тик-цикл.
         TransitionTo(TimerState.Running);
 
         LogResumedEntry(_currentEntry?.Id);
@@ -179,21 +172,35 @@ public sealed partial class TimerService : ITimerService, IDisposable
         Tick?.Invoke(this, new TimerTickEventArgs(CurrentDuration));
     }
 
-    private void StartTickLoop() =>
-        _tickTimer.Change(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
-
-    private void StopTickLoop() =>
-        _tickTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-
+    /// <summary>
+    /// Единая точка переходов стейт-машины.
+    ///
+    /// Управляет тик-циклом: включает его при переходе в Running,
+    /// выключает при переходе в Paused и Idle. Это гарантирует,
+    /// что StartTickLoop/StopTickLoop не забудутся в одном из методов.
+    ///
+    /// Все публичные методы (StartTimerAsync, StopTimerAsync, PauseTimer,
+    /// ResumeTimer, RestoreTimerAsync) вызывают TransitionTo и не
+    /// трогают тик-цикл напрямую.
+    /// </summary>
     private void TransitionTo(TimerState newState)
     {
         var oldState = _state;
         _state = newState;
-        RaiseStateChanged(oldState, newState);
-    }
 
-    private void RaiseStateChanged(TimerState oldState, TimerState newState) =>
+        switch (newState)
+        {
+            case TimerState.Running:
+                _tickTimer.Change(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+                break;
+            case TimerState.Paused:
+            case TimerState.Idle:
+                _tickTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                break;
+        }
+
         StateChanged?.Invoke(this, new TimerStateChangedEventArgs(oldState, newState));
+    }
 
     public void Dispose() => _tickTimer.Dispose();
 
