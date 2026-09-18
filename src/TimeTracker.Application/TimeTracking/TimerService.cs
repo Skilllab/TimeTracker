@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TimeTracker.Application.Abstractions.Persistence;
 using TimeTracker.Domain.Projects;
@@ -27,6 +28,7 @@ public sealed partial class TimerService : ITimerService, IDisposable
     private DateTimeOffset? _pauseStartedAt;
 
     public TimerState State => _state;
+
     public TimeEntry? CurrentEntry => _currentEntry;
 
     public Duration CurrentDuration
@@ -39,6 +41,7 @@ public sealed partial class TimerService : ITimerService, IDisposable
             var now = _timeProvider.GetUtcNow();
             var elapsed = now - _currentEntry.Range.Start - _pausedAccumulated;
 
+            // Если сейчас пауза — вычитаем её длину.
             if (_state == TimerState.Paused && _pauseStartedAt is not null)
                 elapsed -= now - _pauseStartedAt.Value;
 
@@ -114,6 +117,8 @@ public sealed partial class TimerService : ITimerService, IDisposable
         if (_currentEntry is null)
             throw new InvalidOperationException("Cannot stop: no current entry.");
 
+        // Если стоим на паузе — закрыть её, чтобы не потерять
+        // накопленное время.
         if (_state == TimerState.Paused && _pauseStartedAt is not null)
         {
             _pausedAccumulated += _timeProvider.GetUtcNow() - _pauseStartedAt.Value;
