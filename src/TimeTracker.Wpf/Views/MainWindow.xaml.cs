@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace TimeTracker.Wpf;
+namespace TimeTracker.Wpf.Views;
 
 public partial class MainWindow : Window
 {

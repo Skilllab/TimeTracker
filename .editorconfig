@@ -168,3 +168,12 @@ dotnet_diagnostic.CA1062.severity = none
 
 #отключаем CA1873 для логирования
 dotnet_diagnostic.CA1873.severity = none
+
+
+# CA1873: логирование настраивается один раз при старте,
+# логи в хендлерах — редкие, при фатальных исключениях.
+# Hot-path логирования здесь нет, source-generated logging
+# через [LoggerMessage] не окупается.
+[**/App.xaml.cs]
+dotnet_diagnostic.CA1873.severity = none
+
