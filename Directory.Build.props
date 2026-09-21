@@ -15,18 +15,18 @@
     <!-- Документация: XML-комментарии обязательны для публичных членов -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <!-- Отключаем строгие правила документации для тестовых проектов -->
-    <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
-      <GenerateDocumentationFile>false</GenerateDocumentationFile>
-      <NoWarn>$(NoWarn);CS1591</NoWarn>
-    </PropertyGroup>
-
     <!-- Воспроизводимость сборки -->
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
 
     <!-- Центральное управление версиями NuGet (см. Directory.Packages.props) -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- Отключаем строгие правила документации для тестовых проектов -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
