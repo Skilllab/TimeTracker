@@ -1,24 +1,33 @@
-﻿using Avalonia;
 using System;
+using Avalonia;
 
 namespace TimeTracker.Desktop;
 
-class Program
+/// <summary>
+/// Точка входа приложения TimeTracker.
+/// </summary>
+internal static class Program
 {
-    // Initialization code. Don't use any Avalonia, third-party APIs or any
-    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-    // yet and stuff might break.
+    /// <summary>
+    /// Запускает приложение Avalonia с классическим жизненным циклом настольного приложения.
+    /// </summary>
+    /// <param name="args">Аргументы командной строки.</param>
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
+    public static void Main(string[] args)
+    {
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    }
 
-    // Avalonia configuration, don't remove; also used by visual designer.
+    /// <summary>
+    /// Создаёт и настраивает построитель приложения Avalonia.
+    /// Используется также дизайнером XAML — поэтому метод публичный.
+    /// </summary>
+    /// <returns>Настроенный <see cref="AppBuilder"/>.</returns>
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        return AppBuilder.Configure<App>()
             .UsePlatformDetect()
-#if DEBUG
-            .WithDeveloperTools()
-#endif
             .WithInterFont()
             .LogToTrace();
+    }
 }
