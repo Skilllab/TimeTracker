@@ -1,0 +1,38 @@
+<Project>
+
+  <!-- Общие свойства для всех проектов решения TimeTracker -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Качество кода: включаем анализаторы и трактуем предупреждения как ошибки -->
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Документация: XML-комментарии обязательны для публичных членов -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Отключаем строгие правила документации для тестовых проектов -->
+    <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+      <GenerateDocumentationFile>false</GenerateDocumentationFile>
+      <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+
+    <!-- Воспроизводимость сборки -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- Центральное управление версиями NuGet (см. Directory.Packages.props) -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>TimeTracker</Product>
+    <Company>TimeTracker</Company>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+</Project>
