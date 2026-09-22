@@ -9,73 +9,141 @@ public sealed class TimerSessionTests
     private static readonly DateTimeOffset Start = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
     [Fact]
-    public void NewSession_IsNotRunning()
-    {
-        var session = new TimerSession();
-
-        session.IsRunning.Should().BeFalse();
-        session.Current.Should().BeNull();
-    }
-
-    [Fact]
-    public void Start_OpensCurrentRange()
+    public void Start_FromIdle_OpensRange()
     {
         var session = new TimerSession();
 
         session.Start(Start);
 
-        session.IsRunning.Should().BeTrue();
+        session.State.Should().Be(TimerState.Running);
         session.Current!.Start.Should().Be(Start);
-        session.Current.IsOpen.Should().BeTrue();
     }
 
     [Fact]
-    public void Stop_ClosesCurrentRange()
+    public void Pause_FromRunning_SetsPaused()
     {
         var session = new TimerSession();
         session.Start(Start);
 
-        session.Stop(Start.AddSeconds(30));
+        session.Pause(Start.AddSeconds(10));
 
-        session.IsRunning.Should().BeFalse();
-        session.Current!.End.Should().Be(Start.AddSeconds(30));
+        session.State.Should().Be(TimerState.Paused);
     }
 
     [Fact]
-    public void Stop_WithoutStart_Throws()
+    public void Resume_FromPaused_ReturnsToRunning()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+        session.Pause(Start.AddSeconds(10));
+
+        session.Resume(Start.AddMinutes(1));
+
+        session.State.Should().Be(TimerState.Running);
+    }
+
+    [Fact]
+    public void Start_Twice_Throws()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+
+        var act = () => session.Start(Start.AddSeconds(10));
+
+        act.Should().Throw<InvalidTimerStateException>()
+            .WithMessage("Нельзя начать запись, если она уже начата или завершена.");
+    }
+
+    [Fact]
+    public void Pause_WithoutStart_Throws()
+    {
+        var session = new TimerSession();
+
+        var act = () => session.Pause(Start);
+
+        act.Should().Throw<InvalidTimerStateException>()
+            .WithMessage("Нельзя приостановить запись, которая не идет.");
+    }
+
+    [Fact]
+    public void Pause_WhilePaused_Throws()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+        session.Pause(Start.AddSeconds(10));
+
+        var act = () => session.Pause(Start.AddSeconds(20));
+
+        act.Should().Throw<InvalidTimerStateException>()
+            .WithMessage("Нельзя приостановить запись, которая не идет.");
+    }
+
+    [Fact]
+    public void Resume_WithoutPause_Throws()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+
+        var act = () => session.Resume(Start.AddSeconds(10));
+
+        act.Should().Throw<InvalidTimerStateException>()
+            .WithMessage("Нельзя возобновить запись, которая не приостановлена.");
+    }
+
+    [Fact]
+    public void Stop_FromIdle_Throws()
     {
         var session = new TimerSession();
 
         var act = () => session.Stop(Start);
 
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("Нельзя остановить незапущенную запись.");
+        act.Should().Throw<InvalidTimerStateException>()
+            .WithMessage("Нельзя завершить незапущенную запись.");
     }
 
     [Fact]
-    public void Stop_Twice_Throws()
+    public void Start_AfterFinish_Throws()
     {
         var session = new TimerSession();
         session.Start(Start);
         session.Stop(Start.AddSeconds(10));
 
-        var act = () => session.Stop(Start.AddSeconds(20));
+        var act = () => session.Start(Start.AddMinutes(1));
 
-        act.Should().Throw<InvalidOperationException>();
+        act.Should().Throw<InvalidTimerStateException>()
+            .WithMessage("Нельзя начать запись, если она уже начата или завершена.");
     }
 
     [Fact]
-    public void Start_AfterStop_StartsNewRange()
+    public void ElapsedAt_WhilePaused_DoesNotGrow()
     {
         var session = new TimerSession();
         session.Start(Start);
-        session.Stop(Start.AddSeconds(10));
+        session.Pause(Start.AddSeconds(10));
 
-        var restart = Start.AddMinutes(1);
-        session.Start(restart);
+        session.ElapsedAt(Start.AddMinutes(5)).Should().Be(Duration.From(TimeSpan.FromSeconds(10)));
+    }
 
-        session.IsRunning.Should().BeTrue();
-        session.Current!.Start.Should().Be(restart);
-        session.Current.IsOpen.Should().BeTrue();
+    [Fact]
+    public void ElapsedAt_AfterResume_ExcludesPauseTime()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+        session.Pause(Start.AddSeconds(10));
+        session.Resume(Start.AddMinutes(1));
+
+        session.ElapsedAt(Start.AddMinutes(1).AddSeconds(5)).Should().Be(Duration.From(TimeSpan.FromSeconds(15)));
+    }
+
+    [Fact]
+    public void ElapsedAt_AfterStop_KeepsFrozenValue()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+        session.Pause(Start.AddSeconds(10));
+        session.Stop(Start.AddMinutes(1));
+
+        session.State.Should().Be(TimerState.Finished);
+        session.ElapsedAt(Start.AddHours(5)).Should().Be(Duration.From(TimeSpan.FromSeconds(10)));
     }
 }
