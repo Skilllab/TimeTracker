@@ -43,7 +43,6 @@ internal static class Program
     {
         var timeProvider = TimeProvider.System;
         var paths = new AppDataPaths();
-        var session = new TimerSession();
 
         var context = CreateContext(paths);
         context.Database.Migrate();
@@ -51,8 +50,12 @@ internal static class Program
         ITimeEntryRepository repository = new TimeEntryRepository(context);
         IUnitOfWork unitOfWork = new EfUnitOfWork(context);
 
+        var session = new TimerSession();
+
         ITimerControl timerControl = new TimerControl(session, timeProvider, repository, unitOfWork);
         ITimeEntryList entryList = new TimeEntryList(repository, timeProvider);
+
+        timerControl.RestoreAsync().GetAwaiter().GetResult();
 
         return new App(() => new MainWindow(new MainWindowViewModel(timerControl, entryList)));
     }

@@ -65,6 +65,6 @@ public sealed class EfUnitOfWorkTests
 
     private static TimeEntry CreateEntry()
     {
-        return new TimeEntry(Guid.NewGuid(), "Работа", Start, Start.AddMinutes(30), 0, false, null);
+        return new TimeEntry(Guid.NewGuid(), "Работа", Start, Start.AddMinutes(30), 0, null, false, null);
     }
 }

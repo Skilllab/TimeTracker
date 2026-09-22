@@ -58,4 +58,25 @@ public sealed class TimeEntryRepository : ITimeEntryRepository
             .OrderBy(entry => entry.StartedAt)
             .ToListAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Обновляет запись времени.
+    /// </summary>
+    /// <param name="entry">Обновляемая запись.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task UpdateAsync(TimeEntry entry, CancellationToken cancellationToken = default)
+    {
+        var tracked = _context.ChangeTracker
+            .Entries<TimeEntry>()
+            .FirstOrDefault(item => item.Entity.Id == entry.Id);
+
+        if (tracked is not null)
+        {
+            tracked.State = EntityState.Detached;
+        }
+
+        _context.TimeEntries.Update(entry);
+
+        return Task.CompletedTask;
+    }
 }

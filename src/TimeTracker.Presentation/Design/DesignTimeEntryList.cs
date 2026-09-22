@@ -18,8 +18,25 @@ internal sealed class DesignTimeEntryList : ITimeEntryList
 
         IReadOnlyList<TimeEntry> entries = new List<TimeEntry>
         {
-            new TimeEntry(Guid.NewGuid(), "Работа над отчетом", start, start.AddMinutes(45), 10, false, null),
-            new TimeEntry(Guid.NewGuid(), "Созвон с клиентом", start.AddHours(1), start.AddHours(1).AddMinutes(30), 0, true, null)
+            new TimeEntry(
+                id: Guid.NewGuid(),
+                description: "Работа над отчетом",
+                startedAt: start,
+                endedAt: start.AddMinutes(45),
+                pausedSeconds: 10,
+                pausedAt: null,
+                isBillable: false,
+                projectId: null),
+
+            new TimeEntry(
+                id: Guid.NewGuid(),
+                description: "Созвон с клиентом",
+                startedAt: start.AddHours(1),
+                endedAt: start.AddHours(1).AddMinutes(30),
+                pausedSeconds: 0,
+                pausedAt: null,
+                isBillable: true,
+                projectId: null)
         };
 
         return Task.FromResult(entries);

@@ -11,6 +11,7 @@ public sealed class TimerControl : ITimerControl
     private readonly TimeProvider _timeProvider;
     private readonly ITimeEntryRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private TimeEntry? _active;
 
     /// <summary>
     /// Создает сценарий.
@@ -49,41 +50,87 @@ public sealed class TimerControl : ITimerControl
     /// <summary>
     /// Запускает запись.
     /// </summary>
-    public void Start() => _session.Start(_timeProvider.GetUtcNow());
+    public async Task Start()
+    {
+        var now = _timeProvider.GetUtcNow();
+        _session.Start(now);
+
+        _active = new TimeEntry(
+            Guid.NewGuid(),
+            string.Empty,
+            now,
+            null,
+            0,
+            null,
+            false,
+            null);
+
+        await _repository.AddAsync(_active);
+        await _unitOfWork.SaveChangesAsync();
+    }
 
     /// <summary>
     /// Приостанавливает идущую запись.
     /// </summary>
-    public void Pause() => _session.Pause(_timeProvider.GetUtcNow());
+    public async Task Pause()
+    {
+        var now = _timeProvider.GetUtcNow();
+        _session.Pause(now);
 
-    /// <summary>
-    /// Возвращает длительность записи без времени пауз.
-    /// </summary>
-    public Duration GetElapsed() => _session.ElapsedAt(_timeProvider.GetUtcNow());
+        _active = _active!.Pause(now);
+
+        await _repository.UpdateAsync(_active);
+        await _unitOfWork.SaveChangesAsync();
+    }
 
     /// <summary>
     /// Возобновляет приостановленную запись.
     /// </summary>
-    public void Resume() => _session.Resume(_timeProvider.GetUtcNow());
+    public async Task Resume()
+    {
+        var now = _timeProvider.GetUtcNow();
+        _session.Resume(now);
+
+        _active = _active!.Resume(now);
+
+        await _repository.UpdateAsync(_active);
+        await _unitOfWork.SaveChangesAsync();
+    }
 
     /// <summary>
     /// Завершает запись и сохраняет ее.
     /// </summary>
     public async Task Stop()
     {
-        _session.Stop(_timeProvider.GetUtcNow());
+        var now = _timeProvider.GetUtcNow();
+        _session.Stop(now);
 
-        var current = _session.Current!;
-        var entry = new TimeEntry(
-            Guid.NewGuid(),
-            string.Empty,
-            current.Start,
-            current.End,
-            _session.PausedSeconds,
-            false,
-            null);
+        _active = _active!.Close(now);
 
-        await _repository.AddAsync(entry);
+        await _repository.UpdateAsync(_active);
         await _unitOfWork.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Восстанавливает незавершенную сессию из хранилища.
+    /// </summary>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public async Task RestoreAsync(CancellationToken cancellationToken = default)
+    {
+        var active = await _repository.GetActiveAsync(cancellationToken);
+
+        if (active is null)
+        {
+            return;
+        }
+
+        _session.Restore(active, _timeProvider.GetUtcNow());
+        _active = active;
+    }
+
+    /// <summary>
+    /// Возвращает длительность записи без времени пауз.
+    /// </summary>
+    public Duration GetElapsed() => _session.ElapsedAt(_timeProvider.GetUtcNow());
+
 }

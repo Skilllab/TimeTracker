@@ -93,6 +93,32 @@ public sealed class TimeEntryRepositoryTests
         entries[1].Description.Should().Be("Позже");
     }
 
+    [Fact]
+    public async Task UpdateAsync_AfterClose_KeepsEntryClosed()
+    {
+        using var connection = CreateConnection();
+        await using var context = CreateContext(connection);
+
+        var repository = new TimeEntryRepository(context);
+        var unitOfWork = new EfUnitOfWork(context);
+
+        var entry = new TimeEntry(Guid.NewGuid(), "Работа", Start, null, 0, null, false, null);
+
+        await repository.AddAsync(entry, TestContext.Current.CancellationToken);
+        await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await repository.UpdateAsync(entry.Close(Start.AddMinutes(30)), TestContext.Current.CancellationToken);
+        await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await using var other = CreateContext(connection);
+        var stored = await new TimeEntryRepository(other)
+            .GetRangeAsync(Start.AddHours(-1), Start.AddHours(1), TestContext.Current.CancellationToken);
+
+        stored.Should().HaveCount(1);
+        stored[0].IsOpen.Should().BeFalse();
+        stored[0].EndedAt.Should().Be(Start.AddMinutes(30));
+    }
+
     private static SqliteConnection CreateConnection()
     {
         var connection = new SqliteConnection("Data Source=:memory:");
@@ -115,6 +141,14 @@ public sealed class TimeEntryRepositoryTests
 
     private static TimeEntry CreateEntry(string description, DateTimeOffset startedAt, DateTimeOffset? endedAt)
     {
-        return new TimeEntry(Guid.NewGuid(), description, startedAt, endedAt, 0, false, null);
+        return new TimeEntry(
+            id: Guid.NewGuid(),
+            description: description,
+            startedAt: startedAt,
+            endedAt: endedAt,
+            pausedSeconds: 0,
+            pausedAt: null,
+            isBillable: false,
+            projectId: null);
     }
 }

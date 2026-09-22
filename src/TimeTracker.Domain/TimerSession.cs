@@ -8,6 +8,18 @@ public sealed class TimerSession
     private readonly List<TimeRange> _pauses = new();
     private TimeRange? _current;
     private DateTimeOffset? _pausedAt;
+    private TimeSpan _pausedTotal;
+
+    /// <summary>
+    /// Накопленное время пауз в секундах.
+    /// </summary>
+    public int PausedSeconds => (int)_pausedTotal.TotalSeconds;
+
+    /// <summary>
+    /// Момент начала текущей паузы; <c>null</c>, если паузы нет.
+    /// </summary>
+    public DateTimeOffset? PausedAt => _pausedAt;
+
 
     /// <summary>
     /// Текущее состояние записи.
@@ -20,14 +32,14 @@ public sealed class TimerSession
     public TimeRange? Current => _current;
 
     /// <summary>
-    /// Накопленное время пауз в секундах.
-    /// </summary>
-    public int PausedSeconds => (int)_pauses.Sum(pause => (pause.End!.Value - pause.Start).TotalSeconds);
-
-    /// <summary>
     /// Начинает запись с указанного момента.
+    /// Создает открытый интервал записи, поэтому конца у него нет,
+    /// и переводит сессию в состояние записи.
+    /// Начать можно только из свободного состояния: если запись уже идет
+    /// или завершена, бросается <c>InvalidTimerStateException</c> и состояние не меняется.
+    /// Накопленное время пауз на момент начала равно нулю.
     /// </summary>
-    /// <param name="now">Момент начала записи.</param>
+    /// <param name="now">Момент начала записи; он же начало интервала.</param>
     public void Start(DateTimeOffset now)
     {
         if (State != TimerState.Idle)
@@ -41,8 +53,13 @@ public sealed class TimerSession
 
     /// <summary>
     /// Приостанавливает идущую запись.
+    /// Запоминает момент начала паузы, но не пополняет накопленное время пауз:
+    /// незакрытая пауза начинает учитываться только при возобновлении или завершении,
+    /// поэтому на время паузы длительность записи замирает.
+    /// Приостановить можно только идущую запись: в остальных состояниях
+    /// бросается <c>InvalidTimerStateException</c> и состояние не меняется.
     /// </summary>
-    /// <param name="now">Момент приостановки.</param>
+    /// <param name="now">Момент приостановки; он же момент начала паузы.</param>
     public void Pause(DateTimeOffset now)
     {
         if (State != TimerState.Running)
@@ -55,9 +72,14 @@ public sealed class TimerSession
     }
 
     /// <summary>
-    /// Возобновляет приостановленную запись.
+    /// Приостанавливает идущую запись.
+    /// Запоминает момент начала паузы, но не пополняет накопленное время пауз:
+    /// незакрытая пауза начинает учитываться только при возобновлении или завершении,
+    /// поэтому на время паузы длительность записи замирает.
+    /// Приостановить можно только идущую запись: в остальных состояниях
+    /// бросается <c>InvalidTimerStateException</c> и состояние не меняется.
     /// </summary>
-    /// <param name="now">Момент возобновления.</param>
+    /// <param name="now">Момент приостановки; он же момент начала паузы.</param>
     public void Resume(DateTimeOffset now)
     {
         if (State != TimerState.Paused || _pausedAt is null)
@@ -65,15 +87,26 @@ public sealed class TimerSession
             throw new InvalidTimerStateException("Нельзя возобновить запись, которая не приостановлена.");
         }
 
-        _pauses.Add(new TimeRange(_pausedAt.Value, now));
+        if (now < _pausedAt.Value)
+        {
+            throw new InvalidTimerStateException("Момент возобновления не может быть раньше начала паузы.");
+        }
+
+        _pausedTotal += now - _pausedAt.Value;
         _pausedAt = null;
         State = TimerState.Running;
     }
 
     /// <summary>
     /// Завершает запись и фиксирует ее длительность.
+    /// Если запись стоит на паузе, незакрытая пауза пополняет накопленное время пауз,
+    /// поэтому простой до момента завершения в длительность не попадает.
+    /// Интервал записи закрывается моментом завершения, а состояние становится конечным:
+    /// после завершения ни начать, ни приостановить запись нельзя.
+    /// Завершить можно только идущую или приостановленную запись, иначе
+    /// бросается <c>InvalidTimerStateException</c> и состояние не меняется.
     /// </summary>
-    /// <param name="now">Момент завершения.</param>
+    /// <param name="now">Момент завершения; он же конец интервала записи.</param>
     public void Stop(DateTimeOffset now)
     {
         if (State != TimerState.Running && State != TimerState.Paused)
@@ -83,7 +116,7 @@ public sealed class TimerSession
 
         if (_pausedAt is not null)
         {
-            _pauses.Add(new TimeRange(_pausedAt.Value, now));
+            _pausedTotal += now - _pausedAt.Value;
             _pausedAt = null;
         }
 
@@ -92,9 +125,15 @@ public sealed class TimerSession
     }
 
     /// <summary>
-    /// Считает длительность записи без времени пауз.
+    /// Завершает запись и фиксирует ее длительность.
+    /// Если запись стоит на паузе, незакрытая пауза пополняет накопленное время пауз,
+    /// поэтому простой до момента завершения в длительность не попадает.
+    /// Интервал записи закрывается моментом завершения, а состояние становится конечным:
+    /// после завершения ни начать, ни приостановить запись нельзя.
+    /// Завершить можно только идущую или приостановленную запись, иначе
+    /// бросается <c>InvalidTimerStateException</c> и состояние не меняется.
     /// </summary>
-    /// <param name="now">Текущий момент времени.</param>
+    /// <param name="now">Момент завершения; он же конец интервала записи.</param>
     public Duration ElapsedAt(DateTimeOffset now)
     {
         if (_current is null)
@@ -109,13 +148,37 @@ public sealed class TimerSession
             _ => now
         };
 
-        var total = end <= _current.Start ? TimeSpan.Zero : end - _current.Start;
-
-        foreach (var pause in _pauses)
-        {
-            total -= pause.End!.Value - pause.Start;
-        }
+        var total = end <= _current.Start ? TimeSpan.Zero : end - _current.Start - _pausedTotal;
 
         return total <= TimeSpan.Zero ? Duration.Zero : Duration.From(total);
+    }
+
+    /// <summary>
+    /// Завершает запись и фиксирует ее длительность.
+    /// Если запись стоит на паузе, незакрытая пауза пополняет накопленное время пауз,
+    /// поэтому простой до момента завершения в длительность не попадает.
+    /// Интервал записи закрывается моментом завершения, а состояние становится конечным:
+    /// после завершения ни начать, ни приостановить запись нельзя.
+    /// Завершить можно только идущую или приостановленную запись, иначе
+    /// бросается <c>InvalidTimerStateException</c> и состояние не меняется.
+    /// </summary>
+    /// <param name="entry"></param>
+    /// <param name="now">Момент завершения; он же конец интервала записи.</param>
+    public void Restore(TimeEntry entry, DateTimeOffset now)
+    {
+        if (entry is null)
+        {
+            throw new ArgumentNullException(nameof(entry));
+        }
+
+        if (!entry.IsOpen)
+        {
+            throw new InvalidTimerStateException("Восстановить можно только незавершенную запись.");
+        }
+
+        _current = new TimeRange(entry.StartedAt);
+        _pausedTotal = TimeSpan.FromSeconds(entry.PausedSeconds);
+        _pausedAt = entry.PausedAt ?? now;
+        State = TimerState.Paused;
     }
 }

@@ -53,19 +53,19 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// Запускает, приостанавливает или возобновляет запись в зависимости от состояния.
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanToggle))]
-    private void Toggle()
+    private async Task Toggle()
     {
         if (_timerControl.IsRunning)
         {
-            _timerControl.Pause();
+            await _timerControl.Pause();
         }
         else if (_timerControl.IsPaused)
         {
-            _timerControl.Resume();
+            await _timerControl.Resume();
         }
         else
         {
-            _timerControl.Start();
+            await _timerControl.Start();
         }
 
         RefreshState();
