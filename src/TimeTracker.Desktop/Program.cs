@@ -1,4 +1,3 @@
-using System;
 using Avalonia;
 
 namespace TimeTracker.Desktop;
@@ -9,9 +8,9 @@ namespace TimeTracker.Desktop;
 internal static class Program
 {
     /// <summary>
-    /// Запускает приложение Avalonia с классическим жизненным циклом настольного приложения.
+    /// Запускает приложение Avalonia с классическим жизненным циклом настольного приложения
     /// </summary>
-    /// <param name="args">Аргументы командной строки.</param>
+    /// <param name="args">Аргументы командной строки</param>
     [STAThread]
     public static void Main(string[] args)
     {
@@ -19,10 +18,8 @@ internal static class Program
     }
 
     /// <summary>
-    /// Создаёт и настраивает построитель приложения Avalonia.
-    /// Используется также дизайнером XAML — поэтому метод публичный.
+    /// Создает и настраивает билдер приложения Avalonia.
     /// </summary>
-    /// <returns>Настроенный <see cref="AppBuilder"/>.</returns>
     public static AppBuilder BuildAvaloniaApp()
     {
         return AppBuilder.Configure<App>()

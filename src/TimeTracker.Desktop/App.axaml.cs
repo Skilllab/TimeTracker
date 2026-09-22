@@ -11,7 +11,7 @@ namespace TimeTracker.Desktop;
 public partial class App : Application
 {
     /// <summary>
-    /// Загружает XAML приложения.
+    /// Загружает XAML приложения
     /// </summary>
     public override void Initialize()
     {
@@ -19,12 +19,11 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Создаёт главное окно после инициализации платформы.
+    /// Создает главное окно после инициализации платформы
     /// </summary>
     public override void OnFrameworkInitializationCompleted()
     {
-        // StartupUri не используем: окно создаётся явно, чтобы позже
-        // подставить ViewModel/DI без правки XAML.
+        // Окно создается явно, а не по StartupUri, чтобы позже подставить ViewModel/DI без правки XAML
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow();
