@@ -11,7 +11,7 @@ public sealed class TimeEntry
     /// Создает запись времени.
     /// </summary>
     /// <param name="id">Идентификатор записи.</param>
-    /// <param name="description">Описание работы.</param>
+    /// <param name="description">Описание работы; обрезается по краям.</param>
     /// <param name="startedAt">Момент начала записи.</param>
     /// <param name="endedAt">Момент окончания; <c>null</c>, пока запись идет.</param>
     /// <param name="pausedSeconds">Накопленное время пауз в секундах.</param>
@@ -36,14 +36,24 @@ public sealed class TimeEntry
             throw new InvalidTimeEntryException("Накопленное время пауз не может быть отрицательным.");
         }
 
+        var normalized = (description ?? string.Empty).Trim();
+
+        if (normalized.Length > MaxDescriptionLength)
+        {
+            throw new InvalidTimeEntryException($"Описание длиннее {MaxDescriptionLength} символов.");
+        }
+
         Id = id;
-        Description = description;
+        Description = normalized;
         StartedAt = startedAt;
         EndedAt = endedAt;
         PausedSeconds = pausedSeconds;
         IsBillable = isBillable;
         ProjectId = projectId;
     }
+
+    /// <summary>Предельная длина описания.</summary>
+    private const int MaxDescriptionLength = 500;
 
     /// <summary>Идентификатор записи.</summary>
     public Guid Id { get; }
