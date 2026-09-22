@@ -27,6 +27,5 @@ public sealed class InMemoryTimerService : ITimerService
     /// <summary>
     /// Получить пройденное время.
     /// </summary>
-    /// <returns></returns>
     public Duration GetElapsed() => _active.ElapsedAt(_timeProvider.GetUtcNow());
 }
