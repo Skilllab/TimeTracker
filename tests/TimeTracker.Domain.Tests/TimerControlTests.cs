@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using TimeTracker.Application;
-using TimeTracker.Domain;
 using Xunit;
 
 namespace TimeTracker.Domain.Tests;
@@ -98,7 +93,7 @@ public sealed class TimerControlTests
     }
 
     [Fact]
-    public void Pause_WithoutStart_Throws()
+    public async Task Pause_WithoutStart_Throws()
     {
         var (control, _, _, _) = CreateControl();
 
