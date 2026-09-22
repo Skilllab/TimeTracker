@@ -20,6 +20,11 @@ public sealed class TimerSession
     public TimeRange? Current => _current;
 
     /// <summary>
+    /// Накопленное время пауз в секундах.
+    /// </summary>
+    public int PausedSeconds => (int)_pauses.Sum(pause => (pause.End!.Value - pause.Start).TotalSeconds);
+
+    /// <summary>
     /// Начинает запись с указанного момента.
     /// </summary>
     /// <param name="now">Момент начала записи.</param>

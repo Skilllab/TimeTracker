@@ -38,9 +38,9 @@ public interface ITimerControl
     void Resume();
 
     /// <summary>
-    /// Завершает запись.
+    /// Завершает запись и сохраняет ее.
     /// </summary>
-    void Stop();
+    Task Stop();
 
     /// <summary>
     /// Возвращает длительность записи без времени пауз.
