@@ -1,6 +1,9 @@
+using System.IO;
 using Avalonia;
+using Microsoft.EntityFrameworkCore;
 using TimeTracker.Application;
 using TimeTracker.Domain;
+using TimeTracker.Infrastructure;
 using TimeTracker.Presentation;
 using TimeTracker.Presentation.ViewModels;
 using TimeTracker.Presentation.Views;
@@ -35,15 +38,39 @@ internal static class Program
     }
 
     /// <summary>
-    /// Создает приложение: сессия, входящий порт и ViewModel собираются в одном месте.
+    /// Создает приложение: хранилище, порты и ViewModel собираются в одном месте.
     /// </summary>
     private static App CreateApp()
     {
         var timeProvider = TimeProvider.System;
+        var paths = new AppDataPaths();
         var session = new TimerSession();
 
-        ITimerControl timerControl = new TimerControl(session, timeProvider);
+        var context = CreateContext(paths);
+        context.Database.Migrate();
 
-        return new App(() => new MainWindow(new MainWindowViewModel(timerControl)));
+        ITimeEntryRepository repository = new TimeEntryRepository(context);
+        IUnitOfWork unitOfWork = new EfUnitOfWork(context);
+
+        ITimerControl timerControl = new TimerControl(session, timeProvider, repository, unitOfWork);
+        ITimeEntryList entryList = new TimeEntryList(repository, timeProvider);
+
+        return new App(() => new MainWindow(new MainWindowViewModel(timerControl, entryList)));
+    }
+
+    /// <summary>
+    /// Создает контекст базы данных в папке данных приложения.
+    /// </summary>
+    /// <param name="paths">Пути к папке данных.</param>
+    private static TimeTrackerDbContext CreateContext(IAppDataPaths paths)
+    {
+        Directory.CreateDirectory(paths.DataDirectory);
+
+        var databasePath = Path.Combine(paths.DataDirectory, "timetracker.db");
+        var options = new DbContextOptionsBuilder<TimeTrackerDbContext>()
+            .UseSqlite($"Data Source={databasePath}")
+            .Options;
+
+        return new TimeTrackerDbContext(options);
     }
 }

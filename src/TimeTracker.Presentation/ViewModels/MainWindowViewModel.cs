@@ -1,16 +1,21 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TimeTracker.Application;
+using TimeTracker.Domain;
 
 namespace TimeTracker.Presentation.ViewModels;
 
 /// <summary>
-/// ViewModel главного окна: управляет записью и показывает счетчик.
+/// ViewModel главного окна: управляет записью, показывает счетчик и список за сегодня.
 /// </summary>
 public sealed partial class MainWindowViewModel : ObservableObject
 {
     private readonly ITimerControl _timerControl;
+    private readonly ITimeEntryList _entryList;
     private readonly DispatcherTimer _ticker = new() { Interval = TimeSpan.FromSeconds(1) };
 
     [ObservableProperty]
@@ -20,22 +25,31 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// Создает ViewModel главного окна.
     /// </summary>
     /// <param name="timerControl">Входящий порт управления записью.</param>
-    public MainWindowViewModel(ITimerControl timerControl)
+    /// <param name="entryList">Входящий порт списка записей.</param>
+    public MainWindowViewModel(ITimerControl timerControl, ITimeEntryList entryList)
     {
         _timerControl = timerControl ?? throw new ArgumentNullException(nameof(timerControl));
+        _entryList = entryList ?? throw new ArgumentNullException(nameof(entryList));
 
         _ticker.Tick += OnTick;
         _ticker.Start();
 
         RefreshCounter();
+
+        _ = RefreshEntriesAsync();
     }
+
+    /// <summary>
+    /// Записи времени за сегодня.
+    /// </summary>
+    public ObservableCollection<TimeEntry> Entries { get; } = new();
 
     /// <summary>
     /// Надпись на кнопке переключения: называет действие, которое будет выполнено.
     /// </summary>
-    public string ToggleCaption => _timerControl.IsRunning ? "Пауза"
-        : _timerControl.IsPaused ? "Продолжить"
-        : "Старт";
+    public string ToggleCaption => _timerControl.IsRunning ? "Pause"
+        : _timerControl.IsPaused ? "Resume"
+        : "Start";
 
     /// <summary>
     /// Запускает, приостанавливает или возобновляет запись в зависимости от состояния.
@@ -60,12 +74,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Завершает запись.
+    /// Завершает запись и обновляет список.
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanFinish))]
-    private void Finish()
+    private async Task Finish()
     {
-        _timerControl.Stop();
+        await _timerControl.Stop();
+
+        await RefreshEntriesAsync();
 
         RefreshState();
     }
@@ -101,5 +117,20 @@ public sealed partial class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(ToggleCaption));
 
         RefreshCounter();
+    }
+
+    /// <summary>
+    /// Перечитывает записи за сегодня.
+    /// </summary>
+    private async Task RefreshEntriesAsync()
+    {
+        var entries = await _entryList.GetTodayAsync();
+
+        Entries.Clear();
+
+        foreach (var entry in entries)
+        {
+            Entries.Add(entry);
+        }
     }
 }

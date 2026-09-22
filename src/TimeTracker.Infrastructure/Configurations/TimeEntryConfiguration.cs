@@ -21,8 +21,10 @@ public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
         builder.Property(entry => entry.Id).ValueGeneratedNever();
         builder.Property(entry => entry.Description).IsRequired().HasMaxLength(500);
         builder.Property(entry => entry.StartedAt).IsRequired();
+        builder.Property(entry => entry.EndedAt);
         builder.Property(entry => entry.PausedSeconds).IsRequired();
         builder.Property(entry => entry.IsBillable).IsRequired();
+        builder.Property(entry => entry.ProjectId);
 
         builder.Ignore(entry => entry.IsOpen);
 

@@ -11,6 +11,8 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using TimeTracker.Application;
 using TimeTracker.Domain;
 
@@ -23,7 +24,7 @@ internal sealed class DesignTimerControl : ITimerControl
     public bool IsPaused => false;
 
     /// <summary>
-    /// Признак того, что запись завершена и зафиксирована.
+    /// Признак того, что запись завершена и сохранена.
     /// </summary>
     public bool IsFinished => false;
 
@@ -51,9 +52,7 @@ internal sealed class DesignTimerControl : ITimerControl
     /// <summary>
     /// Завершает запись.
     /// </summary>
-    public void Stop()
-    {
-    }
+    public Task Stop() => Task.CompletedTask;
 
     /// <summary>
     /// Возвращает длительность записи без времени пауз.
