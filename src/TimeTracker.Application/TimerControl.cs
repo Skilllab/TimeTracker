@@ -42,6 +42,6 @@ public sealed class TimerControl : ITimerControl
     public Duration GetElapsed()
     {
         var current = _session.Current;
-        return current is null ? Duration.Zero : current.ElapsedAt(_timeProvider.GetUtcNow());
+        return current?.ElapsedAt(_timeProvider.GetUtcNow()) ?? Duration.Zero;
     }
 }
