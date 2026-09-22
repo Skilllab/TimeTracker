@@ -3,9 +3,6 @@ using Xunit;
 
 namespace TimeTracker.Domain.Tests;
 
-/// <summary>
-/// Тесты доменного значения <see cref="Duration"/>.
-/// </summary>
 public sealed class DurationTests
 {
 

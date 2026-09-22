@@ -15,10 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Ссылаемся на слои, а не на точку входа: тестируем домен и порт -->
+    <!-- Ссылаемся на слои, а не на точку входа: тестируем домен и сценарий -->
     <ProjectReference Include="..\..\src\TimeTracker.Domain\TimeTracker.Domain.csproj" />
     <ProjectReference Include="..\..\src\TimeTracker.Application\TimeTracker.Application.csproj" />
-    <ProjectReference Include="..\..\src\TimeTracker.Infrastructure\TimeTracker.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

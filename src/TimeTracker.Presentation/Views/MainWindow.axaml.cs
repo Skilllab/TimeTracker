@@ -1,45 +1,34 @@
 using Avalonia.Controls;
-using Avalonia.Threading;
-using TimeTracker.Application;
+using TimeTracker.Presentation.Design;
+using TimeTracker.Presentation.ViewModels;
 
 namespace TimeTracker.Presentation.Views;
 
 /// <summary>
-/// Главное окно приложения: показывает счетчик в формате MM:SS.
+/// Главное окно приложения: показывает счетчик и управляет записью.
 /// </summary>
 public partial class MainWindow : Window
 {
-    private readonly ITimerService _timerService;
-
-    /// <summary>Тикер интерфейса: только перерисовка, время он не считает.</summary>
-    private readonly DispatcherTimer _ticker = new() { Interval = TimeSpan.FromSeconds(1) };
+    /// <summary>
+    /// Создает главное окно для дизайнера XAML: DataContext заполняется образцом данных.
+    /// </summary>
+    public MainWindow()
+        : this(new MainWindowViewModel(new DesignTimerControl()))
+    {
+    }
 
     /// <summary>
     /// Создает главное окно.
     /// </summary>
-    /// <param name="timerService">Порт источника времени; реализацию подставляет composition root.</param>
-    public MainWindow(ITimerService timerService)
+    /// <param name="viewModel">ViewModel окна.</param>
+    public MainWindow(MainWindowViewModel viewModel)
     {
-        _timerService = timerService ?? throw new ArgumentNullException(nameof(timerService));
+        if (viewModel is null)
+        {
+            throw new ArgumentNullException(nameof(viewModel));
+        }
 
         InitializeComponent();
-
-        _ticker.Tick += OnTick;
-        _ticker.Start();
-
-        RefreshCounter();
-    }
-
-    /// <summary>
-    /// Перерисовывает счетчик раз в секунду.
-    /// </summary>
-    private void OnTick(object? sender, EventArgs e) => RefreshCounter();
-
-    /// <summary>
-    /// Берет длительность у порта и форматирует ее как MM:SS.
-    /// </summary>
-    private void RefreshCounter()
-    {
-        CounterText.Text = _timerService.GetElapsed().ToClockString();
+        DataContext = viewModel;
     }
 }

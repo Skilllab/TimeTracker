@@ -1,7 +1,8 @@
 using Avalonia;
 using TimeTracker.Application;
-using TimeTracker.Infrastructure;
+using TimeTracker.Domain;
 using TimeTracker.Presentation;
+using TimeTracker.Presentation.ViewModels;
 using TimeTracker.Presentation.Views;
 
 namespace TimeTracker.Desktop;
@@ -34,11 +35,15 @@ internal static class Program
     }
 
     /// <summary>
-    /// Создает приложение: порт <see cref="ITimerService"/> получает реализацию из Infrastructure.
+    /// Создает приложение: сессия, входящий порт и ViewModel собираются в одном месте.
     /// </summary>
     private static App CreateApp()
     {
-        ITimerService timerService = new InMemoryTimerService(TimeProvider.System);
-        return new App(() => new MainWindow(timerService));
+        var timeProvider = TimeProvider.System;
+        var session = new TimerSession();
+
+        ITimerControl timerControl = new TimerControl(session, timeProvider);
+
+        return new App(() => new MainWindow(new MainWindowViewModel(timerControl)));
     }
 }

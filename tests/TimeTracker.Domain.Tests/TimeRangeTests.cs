@@ -3,9 +3,7 @@ using Xunit;
 
 namespace TimeTracker.Domain.Tests;
 
-/// <summary>
-/// Тесты интервала <see cref="TimeRange"/>.
-/// </summary>
+
 public sealed class TimeRangeTests
 {
     private static readonly DateTimeOffset Start = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);

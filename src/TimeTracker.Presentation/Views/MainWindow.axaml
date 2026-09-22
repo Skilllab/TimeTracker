@@ -1,6 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimeTracker.Presentation.ViewModels"
         x:Class="TimeTracker.Presentation.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
         Title="TimeTracker"
         Width="900"
         Height="600"
@@ -8,11 +10,21 @@
         MinHeight="420"
         WindowStartupLocation="CenterScreen">
 
-  <TextBlock x:Name="CounterText"
-             Text="00:00"
-             FontSize="72"
-             FontFamily="{DynamicResource ContentControlThemeFontFamily}"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center" />
+  <StackPanel HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Spacing="16">
+
+    <TextBlock Text="{Binding Path=Counter}"
+               FontSize="72"
+               FontFamily="{StaticResource ContentControlThemeFontFamily}"
+               HorizontalAlignment="Center" />
+
+    <Button Content="{Binding ToggleCaption}"
+            Command="{Binding ToggleCommand}"
+            Padding="24,8"
+            FontSize="18"
+            HorizontalAlignment="Center" />
+
+  </StackPanel>
 
 </Window>
