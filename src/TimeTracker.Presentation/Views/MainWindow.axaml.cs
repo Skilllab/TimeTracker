@@ -1,5 +1,5 @@
-using System;
 using Avalonia.Controls;
+using TimeTracker.Presentation.Design;
 using TimeTracker.Presentation.ViewModels;
 
 namespace TimeTracker.Presentation.Views;
@@ -9,6 +9,14 @@ namespace TimeTracker.Presentation.Views;
 /// </summary>
 public partial class MainWindow : Window
 {
+    /// <summary>
+    /// Создает главное окно для дизайнера XAML: DataContext заполняется образцом данных.
+    /// </summary>
+    public MainWindow()
+        : this(new MainWindowViewModel(new DesignTimerControl()))
+    {
+    }
+
     /// <summary>
     /// Создает главное окно.
     /// </summary>
