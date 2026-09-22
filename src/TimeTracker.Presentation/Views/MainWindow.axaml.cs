@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace TimeTracker.Desktop.Views;
+namespace TimeTracker.Presentation.Views;
 
 /// <summary>
 /// Главное окно приложения. На этом этапе — пустое, только заголовок.
@@ -8,7 +8,7 @@ namespace TimeTracker.Desktop.Views;
 public partial class MainWindow : Window
 {
     /// <summary>
-    /// Создаёт экземпляр главного окна.
+    /// Создает экземпляр главного окна.
     /// </summary>
     public MainWindow()
     {

@@ -1,9 +1,9 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using TimeTracker.Desktop.Views;
+using TimeTracker.Presentation.Views;
 
-namespace TimeTracker.Desktop;
+namespace TimeTracker.Presentation;
 
 /// <summary>
 /// Корневой класс приложения Avalonia.
@@ -11,19 +11,22 @@ namespace TimeTracker.Desktop;
 public partial class App : Application
 {
     /// <summary>
-    /// Загружает XAML приложения
+    /// Загружает XAML приложения и в Debug-сборке подключает инспектор Avalonia
+    /// (без этого вызова пакет AvaloniaUI.DiagnosticsSupport не активируется).
     /// </summary>
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+#if DEBUG
+        this.AttachDeveloperTools();
+#endif
     }
 
     /// <summary>
-    /// Создает главное окно после инициализации платформы
+    /// Создает главное окно после инициализации платформы.
     /// </summary>
     public override void OnFrameworkInitializationCompleted()
     {
-        // Окно создается явно, а не по StartupUri, чтобы позже подставить ViewModel/DI без правки XAML
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow();
