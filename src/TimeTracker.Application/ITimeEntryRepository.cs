@@ -21,4 +21,15 @@ public interface ITimeEntryRepository
     /// </summary>
     /// <param name="cancellationToken">Признак отмены операции.</param>
     Task<TimeEntry?> GetActiveAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Возвращает записи, начавшиеся в указанном интервале, в порядке начала.
+    /// </summary>
+    /// <param name="from">Начало интервала выборки.</param>
+    /// <param name="to">Конец интервала выборки.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task<IReadOnlyList<TimeEntry>> GetRangeAsync(
+        DateTimeOffset from,
+        DateTimeOffset to,
+        CancellationToken cancellationToken = default);
 }
