@@ -1,0 +1,11 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TimeTracker.Presentation.Views.MainWindow"
+        Title="TimeTracker"
+        Width="900"
+        Height="600"
+        MinWidth="640"
+        MinHeight="420"
+        WindowStartupLocation="CenterScreen">
+  <!-- Содержимое окна появится на этапе 03 -->
+</Window>

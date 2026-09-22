@@ -26,6 +26,9 @@
 
 - .NET SDK **10.0**
 - Git
+- Для отладки UI (только Debug): инструмент **AvaloniaUI.DeveloperTools** — устанавливается отдельно
+  (`dotnet tool install --global AvaloniaUI.DeveloperTools`, команда `avdt`). Без него вызов
+  `AttachDeveloperTools()` не сможет подключиться к инспектору.
 
 ## Команды
 

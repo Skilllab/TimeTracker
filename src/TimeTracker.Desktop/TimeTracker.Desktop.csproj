@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>TimeTracker.Desktop</RootNamespace>
+    <AssemblyName>TimeTracker</AssemblyName>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Проект как Composition root -->
+    <ProjectReference Include="..\TimeTracker.Presentation\TimeTracker.Presentation.csproj" />
+    <ProjectReference Include="..\TimeTracker.Infrastructure\TimeTracker.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

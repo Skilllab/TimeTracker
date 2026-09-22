@@ -1,4 +1,11 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TimeTracker.Application/TimeTracker.Application.csproj" />
+    <Project Path="src/TimeTracker.Desktop/TimeTracker.Desktop.csproj" />
+    <Project Path="src/TimeTracker.Domain/TimeTracker.Domain.csproj" />
+    <Project Path="src/TimeTracker.Infrastructure/TimeTracker.Infrastructure.csproj" />
+    <Project Path="src/TimeTracker.Presentation/TimeTracker.Presentation.csproj" />
+  </Folder>
   <Folder Name="/Элементы решения/">
     <File Path=".editorconfig" />
     <File Path=".gitattributes" />

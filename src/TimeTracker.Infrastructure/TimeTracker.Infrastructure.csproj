@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>TimeTracker.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TimeTracker.Application\TimeTracker.Application.csproj" />
+    <ProjectReference Include="..\TimeTracker.Domain\TimeTracker.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
