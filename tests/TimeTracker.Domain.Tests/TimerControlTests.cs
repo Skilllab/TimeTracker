@@ -1,13 +1,10 @@
 using FluentAssertions;
 using TimeTracker.Application;
-using TimeTracker.Domain;
 using Xunit;
 
 namespace TimeTracker.Domain.Tests;
 
-/// <summary>
-/// Тесты сценария управления: входящий порт поверх доменной сессии.
-/// </summary>
+
 public sealed class TimerControlTests
 {
     private static readonly DateTimeOffset Start = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
@@ -68,6 +65,19 @@ public sealed class TimerControlTests
         time.Advance(TimeSpan.FromSeconds(5));
 
         control.GetElapsed().ToClockString().Should().Be("00:05");
+    }
+
+    [Fact]
+    public void Start_AfterStop_StartsNewRecord()
+    {
+        var (control, time) = CreateControl();
+        control.Start();
+        time.Advance(TimeSpan.FromSeconds(10));
+        control.Stop();
+
+        control.Start();
+
+        control.GetElapsed().Should().Be(Duration.Zero);
     }
 
     [Fact]

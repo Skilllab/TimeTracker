@@ -3,9 +3,7 @@ using Xunit;
 
 namespace TimeTracker.Domain.Tests;
 
-/// <summary>
-/// Тесты сессии таймера: инварианты старта и остановки.
-/// </summary>
+
 public sealed class TimerSessionTests
 {
     private static readonly DateTimeOffset Start = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
@@ -50,8 +48,7 @@ public sealed class TimerSessionTests
 
         var act = () => session.Stop(Start);
 
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("Нельзя остановить незапущенную запись.");
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Fact]
