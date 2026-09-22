@@ -1,4 +1,3 @@
-using System.IO;
 using Avalonia;
 using Microsoft.EntityFrameworkCore;
 using TimeTracker.Application;

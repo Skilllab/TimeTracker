@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using TimeTracker.Domain;
 
 namespace TimeTracker.Application;

@@ -1,5 +1,3 @@
-using System;
-
 namespace TimeTracker.Domain;
 
 /// <summary>
