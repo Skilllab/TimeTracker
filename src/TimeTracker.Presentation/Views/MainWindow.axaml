@@ -14,9 +14,9 @@
               VerticalAlignment="Center"
               Spacing="16">
 
-    <TextBlock Text="{Binding Counter}"
+    <TextBlock Text="{Binding Path=Counter}"
                FontSize="72"
-               FontFamily="{DynamicResource ContentControlThemeFontFamily}"
+               FontFamily="{StaticResource ContentControlThemeFontFamily}"
                HorizontalAlignment="Center" />
 
     <Button Content="{Binding ToggleCaption}"
