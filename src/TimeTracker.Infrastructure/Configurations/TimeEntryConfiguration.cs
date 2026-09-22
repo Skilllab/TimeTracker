@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TimeTracker.Domain;
@@ -20,8 +21,20 @@ public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
         builder.HasKey(entry => entry.Id);
         builder.Property(entry => entry.Id).ValueGeneratedNever();
         builder.Property(entry => entry.Description).IsRequired().HasMaxLength(500);
-        builder.Property(entry => entry.StartedAt).IsRequired();
-        builder.Property(entry => entry.EndedAt);
+
+        builder.Property(entry => entry.StartedAt)
+            .IsRequired()
+            .HasConversion(
+                value => value.UtcDateTime.ToString("O", CultureInfo.InvariantCulture),
+                value => DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
+
+        builder.Property(entry => entry.EndedAt)
+            .HasConversion(
+                value => value.HasValue ? value.Value.UtcDateTime.ToString("O", CultureInfo.InvariantCulture) : null,
+                value => value == null
+                    ? null
+                    : DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
+
         builder.Property(entry => entry.PausedSeconds).IsRequired();
         builder.Property(entry => entry.IsBillable).IsRequired();
         builder.Property(entry => entry.ProjectId);
