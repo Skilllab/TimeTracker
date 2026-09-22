@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <!-- xUnit.net v3: проект становится исполняемым (внедряется точка входа) -->
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="FluentAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ссылаемся на слои, а не на точку входа: тестируем домен и порт -->
+    <ProjectReference Include="..\..\src\TimeTracker.Domain\TimeTracker.Domain.csproj" />
+    <ProjectReference Include="..\..\src\TimeTracker.Application\TimeTracker.Application.csproj" />
+    <ProjectReference Include="..\..\src\TimeTracker.Infrastructure\TimeTracker.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
