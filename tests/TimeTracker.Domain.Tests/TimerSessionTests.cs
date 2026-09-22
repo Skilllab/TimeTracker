@@ -48,7 +48,8 @@ public sealed class TimerSessionTests
 
         var act = () => session.Stop(Start);
 
-        act.Should().Throw<InvalidOperationException>();
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("Нельзя остановить незапущенную запись.");
     }
 
     [Fact]
