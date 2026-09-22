@@ -159,4 +159,43 @@ public sealed class TimerSessionTests
 
         session.PausedSeconds.Should().Be(110);
     }
+
+    [Fact]
+    public void Restore_FromOpenEntry_StartsPaused()
+    {
+        var session = new TimerSession();
+        var entry = new TimeEntry(Guid.NewGuid(), string.Empty, Start, null, 0, null, false, null);
+
+        session.Restore(entry, Start.AddHours(1));
+
+        session.State.Should().Be(TimerState.Paused);
+        session.Current!.Start.Should().Be(Start);
+        session.PausedSeconds.Should().Be(0);
+    }
+
+    [Fact]
+    public void Restore_FromPausedEntry_KeepsPausedAt()
+    {
+        var session = new TimerSession();
+        var entry = new TimeEntry(Guid.NewGuid(), string.Empty, Start, null, 300, Start.AddMinutes(15), false, null);
+
+        session.Restore(entry, Start.AddHours(1));
+
+        session.State.Should().Be(TimerState.Paused);
+        session.PausedAt.Should().Be(Start.AddMinutes(15));
+        session.PausedSeconds.Should().Be(300);
+        session.ElapsedAt(Start.AddHours(1)).Should().Be(Duration.From(TimeSpan.FromMinutes(10)));
+    }
+
+
+    [Fact]
+    public void Restore_FromClosedEntry_Throws()
+    {
+        var session = new TimerSession();
+        var entry = new TimeEntry(Guid.NewGuid(), string.Empty, Start, Start.AddMinutes(5), 0, null, false, null);
+
+        var act = () => session.Restore(entry, Start.AddHours(1));
+
+        act.Should().Throw<InvalidTimerStateException>();
+    }
 }

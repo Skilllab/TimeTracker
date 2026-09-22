@@ -29,28 +29,28 @@ internal sealed class DesignTimerControl : ITimerControl
     /// <summary>
     /// Запускает запись.
     /// </summary>
-    public void Start()
-    {
-    }
+    public Task Start() => Task.CompletedTask;
 
     /// <summary>
     /// Приостанавливает идущую запись.
     /// </summary>
-    public void Pause()
-    {
-    }
+    public Task Pause() => Task.CompletedTask;
 
     /// <summary>
     /// Возобновляет приостановленную запись.
     /// </summary>
-    public void Resume()
-    {
-    }
+    public Task Resume() => Task.CompletedTask;
 
     /// <summary>
     /// Завершает запись.
     /// </summary>
     public Task Stop() => Task.CompletedTask;
+
+    /// <summary>
+    /// Восстанавливает незавершенную сессию.
+    /// </summary>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task RestoreAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     /// <summary>
     /// Возвращает длительность записи без времени пауз.

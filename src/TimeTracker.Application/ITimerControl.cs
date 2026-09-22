@@ -25,17 +25,17 @@ public interface ITimerControl
     /// <summary>
     /// Запускает запись.
     /// </summary>
-    void Start();
+    Task Start();
 
     /// <summary>
     /// Приостанавливает идущую запись.
     /// </summary>
-    void Pause();
+    Task Pause();
 
     /// <summary>
     /// Возобновляет приостановленную запись.
     /// </summary>
-    void Resume();
+    Task Resume();
 
     /// <summary>
     /// Завершает запись и сохраняет ее.
@@ -46,4 +46,10 @@ public interface ITimerControl
     /// Возвращает длительность записи без времени пауз.
     /// </summary>
     Duration GetElapsed();
+
+    /// <summary>
+    /// Восстанавливает незавершенную сессию из хранилища.
+    /// </summary>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task RestoreAsync(CancellationToken cancellationToken = default);
 }

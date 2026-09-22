@@ -30,4 +30,11 @@ public interface ITimeEntryRepository
         DateTimeOffset from,
         DateTimeOffset to,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Обновляет запись времени.
+    /// </summary>
+    /// <param name="entry">Обновляемая запись.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task UpdateAsync(TimeEntry entry, CancellationToken cancellationToken = default);
 }
