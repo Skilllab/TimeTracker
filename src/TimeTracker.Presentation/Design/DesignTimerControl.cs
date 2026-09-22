@@ -18,21 +18,45 @@ internal sealed class DesignTimerControl : ITimerControl
     public bool IsRunning => true;
 
     /// <summary>
-    /// Начинает новую запись.
+    /// Признак того, что запись приостановлена.
+    /// </summary>
+    public bool IsPaused => false;
+
+    /// <summary>
+    /// Признак того, что запись завершена и зафиксирована.
+    /// </summary>
+    public bool IsFinished => false;
+
+    /// <summary>
+    /// Запускает запись.
     /// </summary>
     public void Start()
     {
     }
 
     /// <summary>
-    /// Останавливает активную запись.
+    /// Приостанавливает идущую запись.
+    /// </summary>
+    public void Pause()
+    {
+    }
+
+    /// <summary>
+    /// Возобновляет приостановленную запись.
+    /// </summary>
+    public void Resume()
+    {
+    }
+
+    /// <summary>
+    /// Завершает запись.
     /// </summary>
     public void Stop()
     {
     }
 
     /// <summary>
-    /// Возвращает длительность текущей записи к текущему моменту.
+    /// Возвращает длительность записи без времени пауз.
     /// </summary>
     public Duration GetElapsed() => Sample;
 }

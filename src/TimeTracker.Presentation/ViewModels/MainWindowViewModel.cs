@@ -31,35 +31,54 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Признак того, что запись идет.
+    /// Надпись на кнопке переключения: называет действие, которое будет выполнено.
     /// </summary>
-    public bool IsRunning => _timerControl.IsRunning;
+    public string ToggleCaption => _timerControl.IsRunning ? "Pause"
+        : _timerControl.IsPaused ? "Resume"
+        : "Start";
 
     /// <summary>
-    /// Надпись на кнопке: называет действие, которое будет выполнено.
+    /// Запускает, приостанавливает или возобновляет запись в зависимости от состояния.
     /// </summary>
-    public string ToggleCaption => _timerControl.IsRunning ? "Stop" : "Start";
-
-    /// <summary>
-    /// Запускает или останавливает запись в зависимости от текущего состояния.
-    /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanToggle))]
     private void Toggle()
     {
         if (_timerControl.IsRunning)
         {
-            _timerControl.Stop();
+            _timerControl.Pause();
+        }
+        else if (_timerControl.IsPaused)
+        {
+            _timerControl.Resume();
         }
         else
         {
             _timerControl.Start();
         }
 
-        OnPropertyChanged(nameof(IsRunning));
-        OnPropertyChanged(nameof(ToggleCaption));
-
-        RefreshCounter();
+        RefreshState();
     }
+
+    /// <summary>
+    /// Завершает запись.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanFinish))]
+    private void Finish()
+    {
+        _timerControl.Stop();
+
+        RefreshState();
+    }
+
+    /// <summary>
+    /// Разрешает переключение, пока запись не завершена.
+    /// </summary>
+    private bool CanToggle() => !_timerControl.IsFinished;
+
+    /// <summary>
+    /// Разрешает завершение идущей или приостановленной записи.
+    /// </summary>
+    private bool CanFinish() => _timerControl.IsRunning || _timerControl.IsPaused;
 
     /// <summary>
     /// Перерисовывает счетчик раз в секунду.
@@ -70,4 +89,17 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// Берет длительность у входящего порта и форматирует ее как MM:SS.
     /// </summary>
     private void RefreshCounter() => Counter = _timerControl.GetElapsed().ToClockString();
+
+    /// <summary>
+    /// Обновляет надписи и доступность команд после смены состояния.
+    /// </summary>
+    private void RefreshState()
+    {
+        ToggleCommand.NotifyCanExecuteChanged();
+        FinishCommand.NotifyCanExecuteChanged();
+
+        OnPropertyChanged(nameof(ToggleCaption));
+
+        RefreshCounter();
+    }
 }

@@ -3,7 +3,7 @@ using TimeTracker.Domain;
 namespace TimeTracker.Application;
 
 /// <summary>
-/// Входящий порт: управление активной записью времени.
+/// Входящий порт: управление записью времени и чтение ее длительности.
 /// </summary>
 public interface ITimerControl
 {
@@ -13,17 +13,37 @@ public interface ITimerControl
     bool IsRunning { get; }
 
     /// <summary>
-    /// Начинает новую запись.
+    /// Признак того, что запись приостановлена.
+    /// </summary>
+    bool IsPaused { get; }
+
+    /// <summary>
+    /// Признак того, что запись завершена и зафиксирована.
+    /// </summary>
+    bool IsFinished { get; }
+
+    /// <summary>
+    /// Запускает запись.
     /// </summary>
     void Start();
 
     /// <summary>
-    /// Останавливает активную запись.
+    /// Приостанавливает идущую запись.
+    /// </summary>
+    void Pause();
+
+    /// <summary>
+    /// Возобновляет приостановленную запись.
+    /// </summary>
+    void Resume();
+
+    /// <summary>
+    /// Завершает запись.
     /// </summary>
     void Stop();
 
     /// <summary>
-    /// Возвращает длительность текущей записи к текущему моменту.
+    /// Возвращает длительность записи без времени пауз.
     /// </summary>
     Duration GetElapsed();
 }

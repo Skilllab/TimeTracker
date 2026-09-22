@@ -23,6 +23,8 @@ public sealed class TimerControlTests
         var (control, _) = CreateControl();
 
         control.IsRunning.Should().BeFalse();
+        control.IsPaused.Should().BeFalse();
+        control.IsFinished.Should().BeFalse();
         control.GetElapsed().Should().Be(Duration.Zero);
     }
 
@@ -39,45 +41,59 @@ public sealed class TimerControlTests
     }
 
     [Fact]
-    public void Stop_FreezesElapsed()
+    public void Pause_FreezesElapsed()
     {
         var (control, time) = CreateControl();
         control.Start();
         time.Advance(TimeSpan.FromSeconds(10));
 
-        control.Stop();
+        control.Pause();
         time.Advance(TimeSpan.FromMinutes(5));
 
-        control.IsRunning.Should().BeFalse();
+        control.IsPaused.Should().BeTrue();
         control.GetElapsed().ToClockString().Should().Be("00:10");
     }
 
     [Fact]
-    public void Start_AfterStop_CountsFromNewMoment()
+    public void Resume_ContinuesFromSameValue()
     {
         var (control, time) = CreateControl();
         control.Start();
         time.Advance(TimeSpan.FromSeconds(10));
-        control.Stop();
-
+        control.Pause();
         time.Advance(TimeSpan.FromMinutes(1));
-        control.Start();
+
+        control.Resume();
         time.Advance(TimeSpan.FromSeconds(5));
 
-        control.GetElapsed().ToClockString().Should().Be("00:05");
+        control.IsRunning.Should().BeTrue();
+        control.GetElapsed().ToClockString().Should().Be("00:15");
     }
 
     [Fact]
-    public void Start_AfterStop_StartsNewRecord()
+    public void Stop_FromPaused_ExcludesPauseTime()
     {
         var (control, time) = CreateControl();
         control.Start();
         time.Advance(TimeSpan.FromSeconds(10));
+        control.Pause();
+        time.Advance(TimeSpan.FromMinutes(1));
+
         control.Stop();
+        time.Advance(TimeSpan.FromMinutes(5));
 
-        control.Start();
+        control.IsFinished.Should().BeTrue();
+        control.GetElapsed().ToClockString().Should().Be("00:10");
+    }
 
-        control.GetElapsed().Should().Be(Duration.Zero);
+    [Fact]
+    public void Pause_WithoutStart_Throws()
+    {
+        var (control, _) = CreateControl();
+
+        var act = () => control.Pause();
+
+        act.Should().Throw<InvalidTimerStateException>();
     }
 
     [Fact]
@@ -87,6 +103,6 @@ public sealed class TimerControlTests
 
         var act = () => control.Stop();
 
-        act.Should().Throw<InvalidOperationException>();
+        act.Should().Throw<InvalidTimerStateException>();
     }
 }

@@ -19,11 +19,21 @@
                FontFamily="{StaticResource ContentControlThemeFontFamily}"
                HorizontalAlignment="Center" />
 
-    <Button Content="{Binding ToggleCaption}"
-            Command="{Binding ToggleCommand}"
-            Padding="24,8"
-            FontSize="18"
-            HorizontalAlignment="Center" />
+    <StackPanel Orientation="Horizontal"
+                Spacing="12"
+                HorizontalAlignment="Center">
+
+      <Button Content="{Binding ToggleCaption}"
+              Command="{Binding ToggleCommand}"
+              Padding="24,8"
+              FontSize="18" />
+
+      <Button Content="Stop"
+              Command="{Binding FinishCommand}"
+              Padding="24,8"
+              FontSize="18" />
+
+    </StackPanel>
 
   </StackPanel>
 

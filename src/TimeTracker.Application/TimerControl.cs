@@ -1,9 +1,10 @@
+using System;
 using TimeTracker.Domain;
 
 namespace TimeTracker.Application;
 
 /// <summary>
-/// Сценарий управления записью времени: владеет доменной сессией и считает ее длительность.
+/// Сценарий управления записью времени: читает часы и делегирует в доменную сессию.
 /// </summary>
 public sealed class TimerControl : ITimerControl
 {
@@ -24,24 +25,40 @@ public sealed class TimerControl : ITimerControl
     /// <summary>
     /// Признак того, что запись идет.
     /// </summary>
-    public bool IsRunning => _session.IsRunning;
+    public bool IsRunning => _session.State == TimerState.Running;
 
     /// <summary>
-    /// Начинает новую запись.
+    /// Признак того, что запись приостановлена.
+    /// </summary>
+    public bool IsPaused => _session.State == TimerState.Paused;
+
+    /// <summary>
+    /// Признак того, что запись завершена и зафиксирована.
+    /// </summary>
+    public bool IsFinished => _session.State == TimerState.Finished;
+
+    /// <summary>
+    /// Запускает запись.
     /// </summary>
     public void Start() => _session.Start(_timeProvider.GetUtcNow());
 
     /// <summary>
-    /// Останавливает активную запись.
+    /// Приостанавливает идущую запись.
+    /// </summary>
+    public void Pause() => _session.Pause(_timeProvider.GetUtcNow());
+
+    /// <summary>
+    /// Возобновляет приостановленную запись.
+    /// </summary>
+    public void Resume() => _session.Resume(_timeProvider.GetUtcNow());
+
+    /// <summary>
+    /// Завершает запись.
     /// </summary>
     public void Stop() => _session.Stop(_timeProvider.GetUtcNow());
 
     /// <summary>
-    /// Возвращает длительность текущей записи к текущему моменту.
+    /// Возвращает длительность записи без времени пауз.
     /// </summary>
-    public Duration GetElapsed()
-    {
-        var current = _session.Current;
-        return current?.ElapsedAt(_timeProvider.GetUtcNow()) ?? Duration.Zero;
-    }
+    public Duration GetElapsed() => _session.ElapsedAt(_timeProvider.GetUtcNow());
 }
