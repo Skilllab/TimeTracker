@@ -33,9 +33,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// <summary>
     /// Надпись на кнопке переключения: называет действие, которое будет выполнено.
     /// </summary>
-    public string ToggleCaption => _timerControl.IsRunning ? "Pause"
-        : _timerControl.IsPaused ? "Resume"
-        : "Start";
+    public string ToggleCaption => _timerControl.IsRunning ? "Пауза"
+        : _timerControl.IsPaused ? "Продолжить"
+        : "Старт";
 
     /// <summary>
     /// Запускает, приостанавливает или возобновляет запись в зависимости от состояния.

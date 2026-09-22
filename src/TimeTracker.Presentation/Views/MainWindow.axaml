@@ -28,7 +28,7 @@
               Padding="24,8"
               FontSize="18" />
 
-      <Button Content="Stop"
+      <Button Content="Стоп"
               Command="{Binding FinishCommand}"
               Padding="24,8"
               FontSize="18" />
