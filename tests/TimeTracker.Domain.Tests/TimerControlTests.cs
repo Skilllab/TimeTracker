@@ -9,18 +9,20 @@ public sealed class TimerControlTests
 {
     private static readonly DateTimeOffset Start = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    private static (ITimerControl Control, FakeTimeProvider Time) CreateControl()
+    private static (ITimerControl Control, FakeTimeProvider Time, FakeRepository Repository, FakeUnitOfWork UnitOfWork) CreateControl()
     {
         var time = new FakeTimeProvider(Start);
-        ITimerControl control = new TimerControl(new TimerSession(), time);
+        var repository = new FakeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        ITimerControl control = new TimerControl(new TimerSession(), time, repository, unitOfWork);
 
-        return (control, time);
+        return (control, time, repository, unitOfWork);
     }
 
     [Fact]
     public void BeforeStart_ElapsedIsZero()
     {
-        var (control, _) = CreateControl();
+        var (control, _, _, _) = CreateControl();
 
         control.IsRunning.Should().BeFalse();
         control.IsPaused.Should().BeFalse();
@@ -31,7 +33,7 @@ public sealed class TimerControlTests
     [Fact]
     public void Start_ThenTimeAdvance_CountsUp()
     {
-        var (control, time) = CreateControl();
+        var (control, time, _, _) = CreateControl();
 
         control.Start();
         time.Advance(TimeSpan.FromSeconds(65));
@@ -43,7 +45,7 @@ public sealed class TimerControlTests
     [Fact]
     public void Pause_FreezesElapsed()
     {
-        var (control, time) = CreateControl();
+        var (control, time, _, _) = CreateControl();
         control.Start();
         time.Advance(TimeSpan.FromSeconds(10));
 
@@ -57,7 +59,7 @@ public sealed class TimerControlTests
     [Fact]
     public void Resume_ContinuesFromSameValue()
     {
-        var (control, time) = CreateControl();
+        var (control, time, _, _) = CreateControl();
         control.Start();
         time.Advance(TimeSpan.FromSeconds(10));
         control.Pause();
@@ -71,25 +73,29 @@ public sealed class TimerControlTests
     }
 
     [Fact]
-    public void Stop_FromPaused_ExcludesPauseTime()
+    public async Task Stop_SavesEntryWithPauseSeconds()
     {
-        var (control, time) = CreateControl();
+        var (control, time, repository, unitOfWork) = CreateControl();
         control.Start();
         time.Advance(TimeSpan.FromSeconds(10));
         control.Pause();
         time.Advance(TimeSpan.FromMinutes(1));
 
-        control.Stop();
-        time.Advance(TimeSpan.FromMinutes(5));
+        await control.Stop();
 
         control.IsFinished.Should().BeTrue();
-        control.GetElapsed().ToClockString().Should().Be("00:10");
+        repository.Added.Should().HaveCount(1);
+        repository.Added[0].StartedAt.Should().Be(Start);
+        repository.Added[0].EndedAt.Should().Be(Start.AddSeconds(70));
+        repository.Added[0].PausedSeconds.Should().Be(60);
+        repository.Added[0].ElapsedAt(Start).ToClockString().Should().Be("00:10");
+        unitOfWork.SaveCount.Should().Be(1);
     }
 
     [Fact]
-    public void Pause_WithoutStart_Throws()
+    public async Task Pause_WithoutStart_Throws()
     {
-        var (control, _) = CreateControl();
+        var (control, _, _, _) = CreateControl();
 
         var act = () => control.Pause();
 
@@ -97,12 +103,50 @@ public sealed class TimerControlTests
     }
 
     [Fact]
-    public void Stop_WithoutStart_Throws()
+    public async Task Stop_WithoutStart_Throws()
     {
-        var (control, _) = CreateControl();
+        var (control, _, repository, unitOfWork) = CreateControl();
 
-        var act = () => control.Stop();
+        var act = async () => await control.Stop();
 
-        act.Should().Throw<InvalidTimerStateException>();
+        await act.Should().ThrowAsync<InvalidTimerStateException>();
+        repository.Added.Should().BeEmpty();
+        unitOfWork.SaveCount.Should().Be(0);
+    }
+
+    private sealed class FakeRepository : ITimeEntryRepository
+    {
+        public List<TimeEntry> Added { get; } = new();
+
+        public Task AddAsync(TimeEntry entry, CancellationToken cancellationToken = default)
+        {
+            Added.Add(entry);
+            return Task.CompletedTask;
+        }
+
+        public Task<TimeEntry?> GetActiveAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Added.Find(entry => entry.IsOpen));
+        }
+
+        public Task<IReadOnlyList<TimeEntry>> GetRangeAsync(
+            DateTimeOffset from,
+            DateTimeOffset to,
+            CancellationToken cancellationToken = default)
+        {
+            IReadOnlyList<TimeEntry> entries = Added;
+            return Task.FromResult(entries);
+        }
+    }
+
+    private sealed class FakeUnitOfWork : IUnitOfWork
+    {
+        public int SaveCount { get; private set; }
+
+        public Task SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            SaveCount++;
+            return Task.CompletedTask;
+        }
     }
 }

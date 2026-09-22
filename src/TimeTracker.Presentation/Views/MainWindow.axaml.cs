@@ -13,7 +13,7 @@ public partial class MainWindow : Window
     /// Создает главное окно для дизайнера XAML: DataContext заполняется образцом данных.
     /// </summary>
     public MainWindow()
-        : this(new MainWindowViewModel(new DesignTimerControl()))
+        : this(new MainWindowViewModel(new DesignTimerControl(), new DesignTimeEntryList()))
     {
     }
 

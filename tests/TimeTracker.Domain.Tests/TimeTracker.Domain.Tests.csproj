@@ -12,12 +12,14 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Ссылаемся на слои, а не на точку входа: тестируем домен и сценарий -->
     <ProjectReference Include="..\..\src\TimeTracker.Domain\TimeTracker.Domain.csproj" />
     <ProjectReference Include="..\..\src\TimeTracker.Application\TimeTracker.Application.csproj" />
+    <ProjectReference Include="..\..\src\TimeTracker.Infrastructure\TimeTracker.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

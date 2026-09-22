@@ -146,4 +146,17 @@ public sealed class TimerSessionTests
         session.State.Should().Be(TimerState.Finished);
         session.ElapsedAt(Start.AddHours(5)).Should().Be(Duration.From(TimeSpan.FromSeconds(10)));
     }
+
+    [Fact]
+    public void PausedSeconds_SumsAllPauses()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+        session.Pause(Start.AddSeconds(10));
+        session.Resume(Start.AddMinutes(1));
+        session.Pause(Start.AddMinutes(2));
+        session.Resume(Start.AddMinutes(3));
+
+        session.PausedSeconds.Should().Be(110);
+    }
 }

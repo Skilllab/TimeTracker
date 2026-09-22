@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+        xmlns:domain="using:TimeTracker.Domain"
         x:Class="TimeTracker.Presentation.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="TimeTracker"
@@ -10,17 +11,19 @@
         MinHeight="420"
         WindowStartupLocation="CenterScreen">
 
-  <StackPanel HorizontalAlignment="Center"
-              VerticalAlignment="Center"
-              Spacing="16">
+  <Grid RowDefinitions="Auto,Auto,*"
+        Margin="24">
 
-    <TextBlock Text="{Binding Path=Counter}"
+    <TextBlock Grid.Row="0"
+               Text="{Binding Path=Counter}"
                FontSize="72"
                FontFamily="{StaticResource ContentControlThemeFontFamily}"
                HorizontalAlignment="Center" />
 
-    <StackPanel Orientation="Horizontal"
+    <StackPanel Grid.Row="1"
+                Orientation="Horizontal"
                 Spacing="12"
+                Margin="0,16"
                 HorizontalAlignment="Center">
 
       <Button Content="{Binding ToggleCaption}"
@@ -28,13 +31,33 @@
               Padding="24,8"
               FontSize="18" />
 
-      <Button Content="Стоп"
+      <Button Content="Stop"
               Command="{Binding FinishCommand}"
               Padding="24,8"
               FontSize="18" />
 
     </StackPanel>
 
-  </StackPanel>
+    <ListBox Grid.Row="2"
+             ItemsSource="{Binding Entries}">
+
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="domain:TimeEntry">
+
+          <StackPanel Orientation="Horizontal"
+                      Spacing="12">
+
+            <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:HH:mm}'}" />
+            <TextBlock Text="{Binding EndedAt, StringFormat='{}{0:HH:mm}'}" />
+            <TextBlock Text="{Binding Description}" />
+
+          </StackPanel>
+
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+
+    </ListBox>
+
+  </Grid>
 
 </Window>

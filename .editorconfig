@@ -1,4 +1,4 @@
-# TimeTracker — единые правила стиля кода для всех проектов решения
+﻿# TimeTracker — единые правила стиля кода для всех проектов решения
 root = true
 
 [*]
@@ -118,3 +118,7 @@ dotnet_style_expression_bodied_operators = false:suggestion
 dotnet_style_expression_bodied_local_functions = false:suggestion
 # Доступ к свойствам (лямбда для get/set)
 dotnet_style_expression_bodied_accessors = false:suggestion
+
+# Сгенерированные миграции: стиль кода не проверяется
+[src/TimeTracker.Infrastructure/Migrations/*.cs]
+generated_code = true
