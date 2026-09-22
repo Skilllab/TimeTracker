@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
         run: dotnet build TimeTracker.slnx -c Release --no-restore
 
       - name: Test
-        run: dotnet test TimeTracker.slnx -c Release --no-build --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test TimeTracker.slnx -c Release --no-build --report-trx --report-trx-filename test-results.trx
 
       - name: Upload test results
         if: always()
