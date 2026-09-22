@@ -28,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      # SDK берётся из global.json (10.0.401, rollForward: latestFeature)
+      # SDK берётся из global.json
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
@@ -53,3 +53,23 @@ jobs:
           name: test-results-${{ matrix.os }}
           path: '**/test-results.trx'
           if-no-files-found: ignore
+
+  # Проверка форматирования. Отдельный job и не зависит от ОС, поэтому не дублируется в matrix
+  format:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore TimeTracker.slnx
+
+      # Упадет, если код не соответствует правилам в  .editorconfig
+      - name: Format check
+        run: dotnet format TimeTracker.slnx --verify-no-changes --no-restore

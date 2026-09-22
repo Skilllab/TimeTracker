@@ -8,4 +8,5 @@
     <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="src/TimeTracker.Desktop/TimeTracker.Desktop.csproj" />
 </Solution>
