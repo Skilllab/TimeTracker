@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+             x:Class="TimeTracker.Presentation.Views.TimerView"
+             x:DataType="vm:TimerViewModel">
+
+  <StackPanel HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Spacing="{DynamicResource SpacingLg}">
+
+    <TextBlock Classes="counter"
+               Text="{Binding Path=Counter}"
+               HorizontalAlignment="Center" />
+
+    <StackPanel Orientation="Horizontal"
+                Spacing="{DynamicResource SpacingMd}"
+                HorizontalAlignment="Center">
+
+      <Button Classes="accent"
+              Content="{Binding ToggleCaption}"
+              Command="{Binding ToggleCommand}" />
+
+      <Button Content="{DynamicResource Timer.Stop}"
+              Command="{Binding FinishCommand}" />
+
+    </StackPanel>
+
+  </StackPanel>
+
+</UserControl>
