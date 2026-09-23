@@ -1,134 +1,125 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using TimeTracker.Application;
-using TimeTracker.Domain;
+using TimeTracker.Presentation.Shell;
 
 namespace TimeTracker.Presentation.ViewModels;
 
 /// <summary>
-/// ViewModel главного окна: управляет записью, показывает счетчик и список за сегодня.
+/// ViewModel оболочки: навигация между экранами, выбор темы и языка.
 /// </summary>
 public sealed partial class MainWindowViewModel : ObservableObject
 {
-    private readonly ITimerControl _timerControl;
-    private readonly ITimeEntryList _entryList;
-    private readonly DispatcherTimer _ticker = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly ThemeManager _themeManager;
+    private readonly LocalizationManager _localizationManager;
 
+    /// <summary>
+    /// Создает оболочку.
+    /// </summary>
+    /// <param name="timerViewModel">Экран таймера.</param>
+    /// <param name="entriesViewModel">Экран записей за сегодня.</param>
+    /// <param name="themeManager">Управление темой.</param>
+    /// <param name="localizationManager">Управление языком.</param>
+    public MainWindowViewModel(
+        TimerViewModel timerViewModel,
+        EntriesViewModel entriesViewModel,
+        ThemeManager themeManager,
+        LocalizationManager localizationManager)
+    {
+        _themeManager = themeManager ?? throw new ArgumentNullException(nameof(themeManager));
+        _localizationManager = localizationManager ?? throw new ArgumentNullException(nameof(localizationManager));
+
+        Items.Add(new NavigationItem("Nav.Timer", timerViewModel));
+        Items.Add(new NavigationItem("Nav.Entries", entriesViewModel));
+
+        SelectedItem = Items[0];
+    }
+
+    /// <summary>
+    /// Пункты навигации.
+    /// </summary>
+    public ObservableCollection<NavigationItem> Items { get; } = new();
+
+    /// <summary>
+    /// Выбранный пункт навигации.
+    /// </summary>
     [ObservableProperty]
-    private string _counter = "00:00";
+    private NavigationItem? _selectedItem;
 
     /// <summary>
-    /// Создает ViewModel главного окна.
+    /// Экран выбранного пункта.
     /// </summary>
-    /// <param name="timerControl">Входящий порт управления записью.</param>
-    /// <param name="entryList">Входящий порт списка записей.</param>
-    public MainWindowViewModel(ITimerControl timerControl, ITimeEntryList entryList)
+    public object? CurrentPage => SelectedItem?.Page;
+
+    /// <summary>
+    /// Доступные темы.
+    /// </summary>
+    public IReadOnlyList<AppTheme> Themes { get; } = ThemeManager.AvailableThemes;
+
+    /// <summary>
+    /// Доступные языки.
+    /// </summary>
+    public IReadOnlyList<AppLanguage> Languages { get; } = LocalizationManager.AvailableLanguages;
+
+    /// <summary>
+    /// Текущая тема.
+    /// </summary>
+    public AppTheme Theme
     {
-        _timerControl = timerControl ?? throw new ArgumentNullException(nameof(timerControl));
-        _entryList = entryList ?? throw new ArgumentNullException(nameof(entryList));
-
-        _ticker.Tick += OnTick;
-        _ticker.Start();
-
-        RefreshCounter();
-
-        _ = RefreshEntriesAsync();
-    }
-
-    /// <summary>
-    /// Записи времени за сегодня.
-    /// </summary>
-    public ObservableCollection<TimeEntry> Entries { get; } = new();
-
-    /// <summary>
-    /// Надпись на кнопке переключения: называет действие, которое будет выполнено.
-    /// </summary>
-    public string ToggleCaption => _timerControl.IsRunning ? "Pause"
-        : _timerControl.IsPaused ? "Resume"
-        : "Start";
-
-    /// <summary>
-    /// Запускает, приостанавливает или возобновляет запись в зависимости от состояния.
-    /// </summary>
-    [RelayCommand(CanExecute = nameof(CanToggle))]
-    private async Task Toggle()
-    {
-        if (_timerControl.IsRunning)
+        get => _themeManager.Current;
+        set
         {
-            await _timerControl.Pause();
+            _themeManager.Select(value);
+            OnPropertyChanged();
         }
-        else if (_timerControl.IsPaused)
+    }
+
+    /// <summary>
+    /// Текущий язык.
+    /// </summary>
+    public AppLanguage Language
+    {
+        get => _localizationManager.Language;
+        set
         {
-            await _timerControl.Resume();
+            _localizationManager.Select(value);
+            OnPropertyChanged();
+            RefreshTitles();
         }
-        else
+    }
+
+    /// <summary>
+    /// Открывает выбранный пункт навигации.
+    /// </summary>
+    /// <param name="item">Пункт, который нужно открыть.</param>
+    [RelayCommand]
+    private void Select(NavigationItem? item)
+    {
+        if (item is not null)
         {
-            await _timerControl.Start();
+            SelectedItem = item;
         }
-
-        RefreshState();
     }
 
     /// <summary>
-    /// Завершает запись и обновляет список.
+    /// Обновляет заголовки пунктов после смены языка.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanFinish))]
-    private async Task Finish()
+    private void RefreshTitles()
     {
-        await _timerControl.Stop();
-
-        await RefreshEntriesAsync();
-
-        RefreshState();
-    }
-
-    /// <summary>
-    /// Разрешает переключение, пока запись не завершена.
-    /// </summary>
-    private bool CanToggle() => !_timerControl.IsFinished;
-
-    /// <summary>
-    /// Разрешает завершение идущей или приостановленной записи.
-    /// </summary>
-    private bool CanFinish() => _timerControl.IsRunning || _timerControl.IsPaused;
-
-    /// <summary>
-    /// Перерисовывает счетчик раз в секунду.
-    /// </summary>
-    private void OnTick(object? sender, EventArgs e) => RefreshCounter();
-
-    /// <summary>
-    /// Берет длительность у входящего порта и форматирует ее как MM:SS.
-    /// </summary>
-    private void RefreshCounter() => Counter = _timerControl.GetElapsed().ToClockString();
-
-    /// <summary>
-    /// Обновляет надписи и доступность команд после смены состояния.
-    /// </summary>
-    private void RefreshState()
-    {
-        ToggleCommand.NotifyCanExecuteChanged();
-        FinishCommand.NotifyCanExecuteChanged();
-
-        OnPropertyChanged(nameof(ToggleCaption));
-
-        RefreshCounter();
-    }
-
-    /// <summary>
-    /// Перечитывает записи за сегодня.
-    /// </summary>
-    private async Task RefreshEntriesAsync()
-    {
-        var entries = await _entryList.GetTodayAsync();
-
-        Entries.Clear();
-
-        foreach (var entry in entries)
+        foreach (var item in Items)
         {
-            Entries.Add(entry);
+            item.RefreshTitle();
+        }
+    }
+
+    partial void OnSelectedItemChanged(NavigationItem? value)
+    {
+        OnPropertyChanged(nameof(CurrentPage));
+
+        if (value?.Page is EntriesViewModel entries)
+        {
+            _ = entries.RefreshAsync();
         }
     }
 }

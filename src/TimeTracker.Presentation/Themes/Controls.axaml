@@ -1,0 +1,100 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Style Selector="TextBlock">
+    <Setter Property="FontSize" Value="{DynamicResource FontSizeBody}" />
+    <Setter Property="FontWeight" Value="{DynamicResource FontWeightRegular}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+  </Style>
+
+  <Style Selector="TextBlock.counter">
+    <Setter Property="FontSize" Value="{DynamicResource FontSizeCounter}" />
+    <Setter Property="FontWeight" Value="{DynamicResource FontWeightAccent}" />
+  </Style>
+
+  <Style Selector="TextBlock.title">
+    <Setter Property="FontSize" Value="{DynamicResource FontSizeTitle}" />
+    <Setter Property="FontWeight" Value="{DynamicResource FontWeightAccent}" />
+  </Style>
+
+  <Style Selector="TextBlock.subtitle">
+    <Setter Property="FontSize" Value="{DynamicResource FontSizeSubtitle}" />
+    <Setter Property="FontWeight" Value="{DynamicResource FontWeightAccent}" />
+  </Style>
+
+  <Style Selector="TextBlock.secondary">
+    <Setter Property="FontSize" Value="{DynamicResource FontSizeSmall}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+  </Style>
+
+  <Style Selector="Button">
+    <Setter Property="Padding" Value="16,8" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}" />
+    <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
+  <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushAccent}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushOnAccent}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}" />
+  </Style>
+
+  <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushAccent}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushOnAccent}" />
+  </Style>
+
+  <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Opacity" Value="0.5" />
+  </Style>
+
+  <Style Selector="Button:focus /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}" />
+  </Style>
+
+  <Style Selector="Button.accent">
+    <Setter Property="Background" Value="{DynamicResource BrushAccent}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushOnAccent}" />
+  </Style>
+
+  <Style Selector="Button.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+
+  <Style Selector="Button.nav.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+  </Style>
+
+  <Style Selector="Panel.card">
+    <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+  </Style>
+
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusCard}" />
+    <Setter Property="Padding" Value="{DynamicResource PaddingCard}" />
+  </Style>
+
+ <Style Selector="ListBoxItem">
+  <Setter Property="Padding" Value="{DynamicResource PaddingCard}" />
+  <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}" />
+  <Setter Property="Background" Value="Transparent" />
+</Style>
+
+<Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+  <Setter Property="Background" Value="{DynamicResource BrushHover}" />
+</Style>
+
+<Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+  <Setter Property="Background" Value="{DynamicResource BrushSelected}" />
+  <Setter Property="BorderBrush" Value="{DynamicResource BrushSelectedBorder}" />
+  <Setter Property="BorderThickness" Value="1" />
+</Style>
+
+</Styles>

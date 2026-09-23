@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+             xmlns:domain="using:TimeTracker.Domain"
+             x:Class="TimeTracker.Presentation.Views.EntriesView"
+             x:DataType="vm:EntriesViewModel">
+
+  <DockPanel Margin="{DynamicResource MarginPage}"
+             LastChildFill="True">
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="title"
+               Text="{DynamicResource Entries.Title}" />
+
+    <ListBox Margin="{DynamicResource PaddingCard}"
+             ItemsSource="{Binding Entries}">
+
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="domain:TimeEntry">
+
+          <StackPanel Orientation="Horizontal"
+                      Spacing="{DynamicResource SpacingMd}">
+
+            <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:HH:mm}'}" />
+            <TextBlock Classes="secondary"
+                       Text="{Binding EndedAt, StringFormat='{}{0:HH:mm}'}" />
+            <TextBlock Text="{Binding Description}" />
+
+          </StackPanel>
+
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+
+    </ListBox>
+
+  </DockPanel>
+
+</UserControl>

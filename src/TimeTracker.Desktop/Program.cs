@@ -4,6 +4,7 @@ using TimeTracker.Application;
 using TimeTracker.Domain;
 using TimeTracker.Infrastructure;
 using TimeTracker.Presentation;
+using TimeTracker.Presentation.Shell;
 using TimeTracker.Presentation.ViewModels;
 using TimeTracker.Presentation.Views;
 
@@ -37,13 +38,12 @@ internal static class Program
     }
 
     /// <summary>
-    /// Создает приложение: хранилище, порты и ViewModel собираются в одном месте.
+    /// Создает приложение: хранилище, порты, экраны и управления собираются в одном месте.
     /// </summary>
     private static App CreateApp()
     {
         var timeProvider = TimeProvider.System;
         var paths = new AppDataPaths();
-
         var context = CreateContext(paths);
         context.Database.Migrate();
 
@@ -55,9 +55,19 @@ internal static class Program
         ITimerControl timerControl = new TimerControl(session, timeProvider, repository, unitOfWork);
         ITimeEntryList entryList = new TimeEntryList(repository, timeProvider);
 
+        var themeManager = new ThemeManager();
+        var localizationManager = new LocalizationManager();
+
+        var timerViewModel = new TimerViewModel(timerControl, localizationManager);
+        var entriesViewModel = new EntriesViewModel(entryList);
+        var shellViewModel = new MainWindowViewModel(timerViewModel, entriesViewModel, themeManager, localizationManager);
+
         timerControl.RestoreAsync().GetAwaiter().GetResult();
 
-        return new App(() => new MainWindow(new MainWindowViewModel(timerControl, entryList)));
+        return new App(
+            () => new MainWindow(shellViewModel),
+            themeManager,
+            localizationManager);
     }
 
     /// <summary>

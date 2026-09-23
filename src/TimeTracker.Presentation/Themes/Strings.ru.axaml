@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <x:String x:Key="App.Title">TimeTracker</x:String>
+  <x:String x:Key="Nav.Timer">Таймер</x:String>
+  <x:String x:Key="Nav.Entries">Записи за сегодня</x:String>
+  <x:String x:Key="Entries.Title">Записи за сегодня</x:String>
+  <x:String x:Key="Timer.Start">Старт</x:String>
+  <x:String x:Key="Timer.Pause">Пауза</x:String>
+  <x:String x:Key="Timer.Resume">Продолжить</x:String>
+  <x:String x:Key="Timer.Stop">Завершить</x:String>
+
+</ResourceDictionary>
