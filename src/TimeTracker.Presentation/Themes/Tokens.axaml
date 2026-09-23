@@ -1,0 +1,59 @@
+<!--Словарь значений. Отвечает на вопрос «как выглядит»-->
+<!--словарь стилей — «кто и когда это применяет»-->
+
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="BrushBackground" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="BrushSurface" Color="#F5F6F8" />
+      <SolidColorBrush x:Key="BrushBorder" Color="#E1E4E8" />
+      <SolidColorBrush x:Key="BrushTextPrimary" Color="#1A1D21" />
+      <SolidColorBrush x:Key="BrushTextSecondary" Color="#5C6570" />
+      <SolidColorBrush x:Key="BrushAccent" Color="#2F6FED" />
+      <SolidColorBrush x:Key="BrushError" Color="#C62828" />
+      <SolidColorBrush x:Key="BrushWarning" Color="#B26A00" />
+      <SolidColorBrush x:Key="BrushSuccess" Color="#2E7D32" />
+      <SolidColorBrush x:Key="BrushOnAccent" Color="#FFFFFF" />
+    </ResourceDictionary>
+
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="BrushBackground" Color="#1A1D21" />
+      <SolidColorBrush x:Key="BrushSurface" Color="#23272C" />
+      <SolidColorBrush x:Key="BrushBorder" Color="#343A40" />
+      <SolidColorBrush x:Key="BrushTextPrimary" Color="#E8EAED" />
+      <SolidColorBrush x:Key="BrushTextSecondary" Color="#9AA4AE" />
+      <SolidColorBrush x:Key="BrushAccent" Color="#5B93F5" />
+      <SolidColorBrush x:Key="BrushError" Color="#EF5350" />
+      <SolidColorBrush x:Key="BrushWarning" Color="#FFA726" />
+      <SolidColorBrush x:Key="BrushSuccess" Color="#66BB6A" />
+      <SolidColorBrush x:Key="BrushOnAccent" Color="#1A1D21" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+
+  <x:Double x:Key="FontSizeSmall">12</x:Double>
+  <x:Double x:Key="FontSizeBody">14</x:Double>
+  <x:Double x:Key="FontSizeField">16</x:Double>
+  <x:Double x:Key="FontSizeSubtitle">20</x:Double>
+  <x:Double x:Key="FontSizeTitle">24</x:Double>
+  <x:Double x:Key="FontSizeCounter">32</x:Double>
+
+  <FontWeight x:Key="FontWeightRegular">400</FontWeight>
+  <FontWeight x:Key="FontWeightAccent">600</FontWeight>
+
+  <x:Double x:Key="SpacingXs">4</x:Double>
+  <x:Double x:Key="SpacingSm">8</x:Double>
+  <x:Double x:Key="SpacingMd">12</x:Double>
+  <x:Double x:Key="SpacingLg">16</x:Double>
+  <x:Double x:Key="SpacingXl">24</x:Double>
+  <x:Double x:Key="SpacingXxl">32</x:Double>
+
+  <CornerRadius x:Key="RadiusControl">4</CornerRadius>
+  <CornerRadius x:Key="RadiusCard">8</CornerRadius>
+
+  <Thickness x:Key="PaddingControl">16,8</Thickness>
+  <Thickness x:Key="PaddingCard">16</Thickness>
+  <Thickness x:Key="MarginPage">24</Thickness>
+
+</ResourceDictionary>
