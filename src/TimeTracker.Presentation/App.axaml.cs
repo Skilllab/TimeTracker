@@ -1,7 +1,10 @@
+using System;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using TimeTracker.Presentation.Views;
+using Avalonia.Styling;
+using TimeTracker.Presentation.Shell;
 using AvaloniaApplication = Avalonia.Application;
 
 namespace TimeTracker.Presentation;
@@ -11,24 +14,36 @@ namespace TimeTracker.Presentation;
 /// </summary>
 public partial class App : AvaloniaApplication
 {
-    private readonly Func<MainWindow> _mainWindowFactory;
+    private readonly Func<Window> _mainWindowFactory;
+    private readonly ThemeManager _themeManager;
+    private readonly LocalizationManager _localizationManager;
 
     /// <summary>
     /// Создает приложение.
     /// </summary>
-    /// <param name="mainWindowFactory">Фабрика главного окна; реализацию подставляет composition root.</param>
-    public App(Func<MainWindow> mainWindowFactory)
+    /// <param name="mainWindowFactory">Фабрика главного окна.</param>
+    /// <param name="themeManager">Управление темой.</param>
+    /// <param name="localizationManager">Управление языком.</param>
+    public App(Func<Window> mainWindowFactory, ThemeManager themeManager, LocalizationManager localizationManager)
     {
         _mainWindowFactory = mainWindowFactory ?? throw new ArgumentNullException(nameof(mainWindowFactory));
+        _themeManager = themeManager ?? throw new ArgumentNullException(nameof(themeManager));
+        _localizationManager = localizationManager ?? throw new ArgumentNullException(nameof(localizationManager));
+
+        _themeManager.Changed += OnThemeChanged;
+        _localizationManager.Changed += OnLanguageChanged;
     }
 
     /// <summary>
-    /// Загружает XAML приложения и в Debug-сборке подключает инспектор Avalonia
-    /// (без этого вызова пакет AvaloniaUI.DiagnosticsSupport не активируется).
+    /// Загружает XAML приложения, применяет выбранную тему и язык.
     /// </summary>
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+
+        ApplyTheme(_themeManager.Current);
+        ApplyLanguage(_localizationManager.Language);
+
 #if DEBUG
         this.AttachDeveloperTools();
 #endif
@@ -45,5 +60,52 @@ public partial class App : AvaloniaApplication
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    /// <summary>
+    /// Применяет тему к приложению после ее смены.
+    /// </summary>
+    private void OnThemeChanged(object? sender, EventArgs e) => ApplyTheme(_themeManager.Current);
+
+    /// <summary>
+    /// Подменяет словарь строк после смены языка.
+    /// </summary>
+    private void OnLanguageChanged(object? sender, EventArgs e) => ApplyLanguage(_localizationManager.Language);
+
+    /// <summary>
+    /// Задает вариант темы приложения.
+    /// </summary>
+    /// <param name="theme">Выбранная тема.</param>
+    private void ApplyTheme(AppTheme theme)
+    {
+        RequestedThemeVariant = theme switch
+        {
+            AppTheme.Light => ThemeVariant.Light,
+            AppTheme.Dark => ThemeVariant.Dark,
+            _ => ThemeVariant.Default
+        };
+    }
+
+    /// <summary>
+    /// Подключает словарь строк выбранного языка.
+    /// </summary>
+    /// <param name="language">Выбранный язык.</param>
+    private void ApplyLanguage(AppLanguage language)
+    {
+        var source = language == AppLanguage.English
+            ? "avares://TimeTracker.Presentation/Themes/Strings.en.axaml"
+            : "avares://TimeTracker.Presentation/Themes/Strings.ru.axaml";
+
+        var dictionary = (ResourceDictionary)AvaloniaXamlLoader.Load(new Uri(source));
+
+        var strings = Resources.MergedDictionaries
+            .OfType<ResourceDictionary>()
+            .FirstOrDefault(item => item.TryGetResource("App.Title", null, out _));
+
+        if (strings is not null)
+        {
+            var index = Resources.MergedDictionaries.IndexOf(strings);
+            Resources.MergedDictionaries[index] = dictionary;
+        }
     }
 }

@@ -80,7 +80,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// </summary>
     public AppLanguage Language
     {
-        get => _localizationManager.Current;
+        get => _localizationManager.Language;
         set
         {
             _localizationManager.Select(value);
@@ -109,7 +109,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         foreach (var item in Items)
         {
-            item.OnPropertyChanged(nameof(NavigationItem.Title));
+            item.RefreshTitle();
         }
     }
 

@@ -6,29 +6,39 @@
 
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Light">
-      <SolidColorBrush x:Key="BrushBackground" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="BrushSurface" Color="#F5F6F8" />
-      <SolidColorBrush x:Key="BrushBorder" Color="#E1E4E8" />
-      <SolidColorBrush x:Key="BrushTextPrimary" Color="#1A1D21" />
-      <SolidColorBrush x:Key="BrushTextSecondary" Color="#5C6570" />
-      <SolidColorBrush x:Key="BrushAccent" Color="#2F6FED" />
-      <SolidColorBrush x:Key="BrushError" Color="#C62828" />
-      <SolidColorBrush x:Key="BrushWarning" Color="#B26A00" />
-      <SolidColorBrush x:Key="BrushSuccess" Color="#2E7D32" />
+      <SolidColorBrush x:Key="BrushBackground" Color="#FAFAFA" />
+      <SolidColorBrush x:Key="BrushSurface" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="BrushBorder" Color="#E0E0E0" />
+      <SolidColorBrush x:Key="BrushTextPrimary" Color="#1F2937" />
+      <SolidColorBrush x:Key="BrushTextSecondary" Color="#6B7280" />
+      <SolidColorBrush x:Key="BrushAccent" Color="#3B82F6" />
+      <SolidColorBrush x:Key="BrushError" Color="#EF4444" />
+      <SolidColorBrush x:Key="BrushWarning" Color="#F59E0B" />
+      <SolidColorBrush x:Key="BrushSuccess" Color="#10B981" />
       <SolidColorBrush x:Key="BrushOnAccent" Color="#FFFFFF" />
+  
+      <!-- Новые цвета для hover и выделения -->
+      <SolidColorBrush x:Key="BrushHover" Color="#F3F4F6" />
+      <SolidColorBrush x:Key="BrushSelected" Color="#DBEAFE" />
+      <SolidColorBrush x:Key="BrushSelectedBorder" Color="#3B82F6" />
     </ResourceDictionary>
 
     <ResourceDictionary x:Key="Dark">
-      <SolidColorBrush x:Key="BrushBackground" Color="#1A1D21" />
-      <SolidColorBrush x:Key="BrushSurface" Color="#23272C" />
-      <SolidColorBrush x:Key="BrushBorder" Color="#343A40" />
-      <SolidColorBrush x:Key="BrushTextPrimary" Color="#E8EAED" />
-      <SolidColorBrush x:Key="BrushTextSecondary" Color="#9AA4AE" />
-      <SolidColorBrush x:Key="BrushAccent" Color="#5B93F5" />
-      <SolidColorBrush x:Key="BrushError" Color="#EF5350" />
-      <SolidColorBrush x:Key="BrushWarning" Color="#FFA726" />
-      <SolidColorBrush x:Key="BrushSuccess" Color="#66BB6A" />
-      <SolidColorBrush x:Key="BrushOnAccent" Color="#1A1D21" />
+      <SolidColorBrush x:Key="BrushBackground" Color="#111827" />
+      <SolidColorBrush x:Key="BrushSurface" Color="#1F2937" />
+      <SolidColorBrush x:Key="BrushBorder" Color="#374151" />
+      <SolidColorBrush x:Key="BrushTextPrimary" Color="#F9FAFB" />
+      <SolidColorBrush x:Key="BrushTextSecondary" Color="#9CA3AF" />
+      <SolidColorBrush x:Key="BrushAccent" Color="#60A5FA" />
+      <SolidColorBrush x:Key="BrushError" Color="#F87171" />
+      <SolidColorBrush x:Key="BrushWarning" Color="#FBBF24" />
+      <SolidColorBrush x:Key="BrushSuccess" Color="#34D399" />
+      <SolidColorBrush x:Key="BrushOnAccent" Color="#111827" />
+  
+      <!-- Новые цвета для hover и выделения -->
+      <SolidColorBrush x:Key="BrushHover" Color="#374151" />
+      <SolidColorBrush x:Key="BrushSelected" Color="#1E3A5F" />
+      <SolidColorBrush x:Key="BrushSelectedBorder" Color="#60A5FA" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 

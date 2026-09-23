@@ -37,7 +37,9 @@
   </Style>
 
   <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource BrushBorder}" />
+    <Setter Property="Background" Value="{DynamicResource BrushAccent}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushOnAccent}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}" />
   </Style>
 
   <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
@@ -79,13 +81,20 @@
     <Setter Property="Padding" Value="{DynamicResource PaddingCard}" />
   </Style>
 
-  <Style Selector="ListBoxItem">
-    <Setter Property="Padding" Value="{DynamicResource SpacingMd}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}" />
-  </Style>
+ <Style Selector="ListBoxItem">
+  <Setter Property="Padding" Value="{DynamicResource PaddingCard}" />
+  <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}" />
+  <Setter Property="Background" Value="Transparent" />
+</Style>
 
-  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
-  </Style>
+<Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+  <Setter Property="Background" Value="{DynamicResource BrushHover}" />
+</Style>
+
+<Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+  <Setter Property="Background" Value="{DynamicResource BrushSelected}" />
+  <Setter Property="BorderBrush" Value="{DynamicResource BrushSelectedBorder}" />
+  <Setter Property="BorderThickness" Value="1" />
+</Style>
 
 </Styles>

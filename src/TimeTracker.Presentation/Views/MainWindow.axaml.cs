@@ -1,26 +1,27 @@
 using Avalonia.Controls;
 using TimeTracker.Presentation.Design;
+using TimeTracker.Presentation.Shell;
 using TimeTracker.Presentation.ViewModels;
 
 namespace TimeTracker.Presentation.Views;
 
 /// <summary>
-/// Главное окно приложения: показывает счетчик и управляет записью.
+/// Главное окно приложения: оболочка с навигацией и переключателями темы и языка.
 /// </summary>
 public partial class MainWindow : Window
 {
     /// <summary>
-    /// Создает главное окно для дизайнера XAML: DataContext заполняется образцом данных.
+    /// Создает главное окно для дизайнера XAML: DataContext заполняется образцами данных.
     /// </summary>
     public MainWindow()
-        : this(new MainWindowViewModel(new DesignTimerControl(), new DesignTimeEntryList()))
+        : this(CreateDesignViewModel())
     {
     }
 
     /// <summary>
     /// Создает главное окно.
     /// </summary>
-    /// <param name="viewModel">ViewModel окна.</param>
+    /// <param name="viewModel">ViewModel оболочки.</param>
     public MainWindow(MainWindowViewModel viewModel)
     {
         if (viewModel is null)
@@ -32,5 +33,17 @@ public partial class MainWindow : Window
         DataContext = viewModel;
     }
 
+    /// <summary>
+    /// Собирает ViewModel для предпросмотра: экраны заполняются заглушками.
+    /// </summary>
+    private static MainWindowViewModel CreateDesignViewModel()
+    {
+        var themeManager = new ThemeManager();
+        var localizationManager = new LocalizationManager();
 
+        var timer = new TimerViewModel(new DesignTimerControl(), localizationManager);
+        var entries = new EntriesViewModel(new DesignTimeEntryList());
+
+        return new MainWindowViewModel(timer, entries, themeManager, localizationManager);
+    }
 }
