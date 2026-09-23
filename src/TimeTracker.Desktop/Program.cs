@@ -1,8 +1,11 @@
+using System.Runtime.InteropServices;
 using Avalonia;
 using Microsoft.EntityFrameworkCore;
 using TimeTracker.Application;
 using TimeTracker.Domain;
 using TimeTracker.Infrastructure;
+using TimeTracker.Infrastructure.Linux;
+using TimeTracker.Infrastructure.Mac;
 using TimeTracker.Infrastructure.Windows;
 using TimeTracker.Presentation;
 using TimeTracker.Presentation.Shell;
@@ -85,7 +88,9 @@ internal static class Program
 
         var timerViewModel = new TimerViewModel(timerControl, localizationManager);
         var entriesViewModel = new EntriesViewModel(entryList);
-        var settingsViewModel = new SettingsViewModel(idleSettings, hotKeySettings, localizationManager);
+        var autoStartService = CreateAutoStartService();
+        var settingsViewModel = new SettingsViewModel(idleSettings, hotKeySettings, localizationManager, autoStartService);
+
         var shellViewModel = new MainWindowViewModel(
             timerViewModel,
             entriesViewModel,
@@ -131,5 +136,25 @@ internal static class Program
             .Options;
 
         return new TimeTrackerDbContext(options);
+    }
+
+    private static IAutoStartService CreateAutoStartService()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new WindowsAutoStartService();
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return new LinuxAutoStartService();
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return new MacAutoStartService();
+        }
+
+        throw new PlatformNotSupportedException("Автозапуск не поддерживается на данной платформе.");
     }
 }

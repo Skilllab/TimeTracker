@@ -19,4 +19,7 @@
   <x:String x:Key="Tray.Show">Show window</x:String>
   <x:String x:Key="Tray.Exit">Exit</x:String>
 
+  <x:String x:Key="Settings.AutoStart">Start with system</x:String>
+
+
 </ResourceDictionary>
