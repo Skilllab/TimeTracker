@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\TimeTracker.Infrastructure\TimeTracker.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\TimeTracker.Presentation\TimeTracker.Presentation.csproj" />
   </ItemGroup>
 </Project>

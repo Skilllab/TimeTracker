@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using TimeTracker.Application;
 using TimeTracker.Presentation.Shell;
 using AvaloniaApplication = Avalonia.Application;
 
@@ -17,6 +18,8 @@ public partial class App : AvaloniaApplication
     private readonly Func<Window> _mainWindowFactory;
     private readonly ThemeManager _themeManager;
     private readonly LocalizationManager _localizationManager;
+    private readonly TrayPresenter _trayPresenter;
+    private readonly IdleWatcher _idleWatcher;
 
     /// <summary>
     /// Создает приложение.
@@ -24,11 +27,15 @@ public partial class App : AvaloniaApplication
     /// <param name="mainWindowFactory">Фабрика главного окна.</param>
     /// <param name="themeManager">Управление темой.</param>
     /// <param name="localizationManager">Управление языком.</param>
-    public App(Func<Window> mainWindowFactory, ThemeManager themeManager, LocalizationManager localizationManager)
+    /// <param name="trayPresenter">Представитель трей-иконки.</param>
+    /// <param name="idleWatcher">Наблюдение за простоем.</param>
+    public App(Func<Window> mainWindowFactory, ThemeManager themeManager, LocalizationManager localizationManager, TrayPresenter trayPresenter, IdleWatcher idleWatcher)
     {
         _mainWindowFactory = mainWindowFactory ?? throw new ArgumentNullException(nameof(mainWindowFactory));
         _themeManager = themeManager ?? throw new ArgumentNullException(nameof(themeManager));
         _localizationManager = localizationManager ?? throw new ArgumentNullException(nameof(localizationManager));
+        _trayPresenter = trayPresenter ?? throw new ArgumentNullException(nameof(trayPresenter));
+        _idleWatcher = idleWatcher ?? throw new ArgumentNullException(nameof(idleWatcher));
 
         _themeManager.Changed += OnThemeChanged;
         _localizationManager.Changed += OnLanguageChanged;
@@ -47,19 +54,6 @@ public partial class App : AvaloniaApplication
 #if DEBUG
         this.AttachDeveloperTools();
 #endif
-    }
-
-    /// <summary>
-    /// Создает главное окно после инициализации платформы.
-    /// </summary>
-    public override void OnFrameworkInitializationCompleted()
-    {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.MainWindow = _mainWindowFactory();
-        }
-
-        base.OnFrameworkInitializationCompleted();
     }
 
     /// <summary>
@@ -108,4 +102,43 @@ public partial class App : AvaloniaApplication
             Resources.MergedDictionaries[index] = dictionary;
         }
     }
+
+    /// <summary>
+    /// Создает главное окно после инициализации платформы.
+    /// </summary>
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var window = _mainWindowFactory();
+
+            window.Closing += OnWindowClosing;
+            desktop.MainWindow = window;
+            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            _trayPresenter.Attach(window);
+            _trayPresenter.ExitRequested += (_, _) =>
+            {
+                _idleWatcher.Dispose();
+                _trayPresenter.Dispose();
+                desktop.Shutdown();
+            };
+        }
+
+        base.OnFrameworkInitializationCompleted();
+    }
+
+    /// <summary>
+    /// Сворачивает окно в трей вместо завершения приложения.
+    /// </summary>
+    private static void OnWindowClosing(object? sender, WindowClosingEventArgs e)
+    {
+        e.Cancel = true;
+
+        if (sender is Window window)
+        {
+            window.Hide();
+        }
+    }
+
 }

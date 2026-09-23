@@ -10,4 +10,14 @@
   <x:String x:Key="Timer.Resume">Продолжить</x:String>
   <x:String x:Key="Timer.Stop">Завершить</x:String>
 
+  <x:String x:Key="Nav.Settings">Настройки</x:String>
+  <x:String x:Key="Settings.Title">Настройки</x:String>
+  <x:String x:Key="Settings.Idle">Считать простоем</x:String>
+  <x:String x:Key="Settings.IdleMinutes">минут</x:String>
+  <x:String x:Key="Settings.HotKey">Горячая клавиша</x:String>
+  <x:String x:Key="Settings.HotKeyBusy">Сочетание занято другой программой</x:String>
+  <x:String x:Key="Tray.Show">Показать окно</x:String>
+  <x:String x:Key="Tray.Exit">Выход</x:String>
+
+
 </ResourceDictionary>

@@ -10,4 +10,13 @@
   <x:String x:Key="Timer.Resume">Resume</x:String>
   <x:String x:Key="Timer.Stop">Stop</x:String>
 
+  <x:String x:Key="Nav.Settings">Settings</x:String>
+  <x:String x:Key="Settings.Title">Settings</x:String>
+  <x:String x:Key="Settings.Idle">Count as idle after</x:String>
+  <x:String x:Key="Settings.IdleMinutes">minutes</x:String>
+  <x:String x:Key="Settings.HotKey">Hot key</x:String>
+  <x:String x:Key="Settings.HotKeyBusy">The combination is used by another program</x:String>
+  <x:String x:Key="Tray.Show">Show window</x:String>
+  <x:String x:Key="Tray.Exit">Exit</x:String>
+
 </ResourceDictionary>
