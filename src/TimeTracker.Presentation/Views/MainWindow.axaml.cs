@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using TimeTracker.Application;
 using TimeTracker.Presentation.Design;
 using TimeTracker.Presentation.Shell;
 using TimeTracker.Presentation.ViewModels;
@@ -43,7 +44,8 @@ public partial class MainWindow : Window
 
         var timer = new TimerViewModel(new DesignTimerControl(), localizationManager);
         var entries = new EntriesViewModel(new DesignTimeEntryList());
+        var settings = new SettingsViewModel(new IdleSettings(), new HotKeySettings(new DesignHotKeyService()), localizationManager);
 
-        return new MainWindowViewModel(timer, entries, themeManager, localizationManager);
+        return new MainWindowViewModel(timer, entries, settings, themeManager, localizationManager);
     }
 }

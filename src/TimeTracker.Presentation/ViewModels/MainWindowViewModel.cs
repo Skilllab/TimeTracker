@@ -19,11 +19,13 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// </summary>
     /// <param name="timerViewModel">Экран таймера.</param>
     /// <param name="entriesViewModel">Экран записей за сегодня.</param>
+    /// <param name="settingsViewModel">Экран настроек.</param>
     /// <param name="themeManager">Управление темой.</param>
     /// <param name="localizationManager">Управление языком.</param>
     public MainWindowViewModel(
         TimerViewModel timerViewModel,
         EntriesViewModel entriesViewModel,
+        SettingsViewModel settingsViewModel,
         ThemeManager themeManager,
         LocalizationManager localizationManager)
     {
@@ -32,6 +34,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         Items.Add(new NavigationItem("Nav.Timer", timerViewModel));
         Items.Add(new NavigationItem("Nav.Entries", entriesViewModel));
+        Items.Add(new NavigationItem("Nav.Settings", settingsViewModel));
 
         SelectedItem = Items[0];
     }

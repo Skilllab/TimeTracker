@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TimeTracker.Application;
 using TimeTracker.Domain;
 using TimeTracker.Infrastructure;
+using TimeTracker.Infrastructure.Windows;
 using TimeTracker.Presentation;
 using TimeTracker.Presentation.Shell;
 using TimeTracker.Presentation.ViewModels;
@@ -22,6 +23,13 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        using var guard = new SingleInstanceGuard();
+
+        if (!guard.TryAcquire("TimeTracker.SingleInstance"))
+        {
+            return;
+        }
+
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
@@ -55,19 +63,58 @@ internal static class Program
         ITimerControl timerControl = new TimerControl(session, timeProvider, repository, unitOfWork);
         ITimeEntryList entryList = new TimeEntryList(repository, timeProvider);
 
+        IHotKeyService hotKeyService;
+        IIdleDetector idleDetector;
+
+        if (OperatingSystem.IsWindows())
+        {
+            hotKeyService = new WindowsHotKeyService(timeProvider);
+            idleDetector = new WindowsIdleDetector();
+        }
+        else
+        {
+            hotKeyService = new NoopHotKeyService();
+            idleDetector = new NoopIdleDetector();
+        }
+
+        var idleSettings = new IdleSettings();
+        var hotKeySettings = new HotKeySettings(hotKeyService);
+
         var themeManager = new ThemeManager();
         var localizationManager = new LocalizationManager();
 
         var timerViewModel = new TimerViewModel(timerControl, localizationManager);
         var entriesViewModel = new EntriesViewModel(entryList);
-        var shellViewModel = new MainWindowViewModel(timerViewModel, entriesViewModel, themeManager, localizationManager);
+        var settingsViewModel = new SettingsViewModel(idleSettings, hotKeySettings, localizationManager);
+        var shellViewModel = new MainWindowViewModel(
+            timerViewModel,
+            entriesViewModel,
+            settingsViewModel,
+            themeManager,
+            localizationManager);
 
         timerControl.RestoreAsync().GetAwaiter().GetResult();
+
+        hotKeySettings.RegisterDefault();
+        hotKeyService.Pressed += async (_, _) => await timerViewModel.ToggleCommand.ExecuteAsync(null);
+
+        var idleWatcher = new IdleWatcher(
+            idleDetector,
+            timerControl,
+            idleSettings,
+            timeProvider,
+            TimeSpan.FromSeconds(30));
+
+        idleWatcher.Start();
+
+        var trayPresenter = new TrayPresenter(localizationManager);
 
         return new App(
             () => new MainWindow(shellViewModel),
             themeManager,
-            localizationManager);
+            localizationManager,
+            trayPresenter,
+            idleWatcher);
     }
 
     /// <summary>

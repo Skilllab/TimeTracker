@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+             x:Class="TimeTracker.Presentation.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+  <StackPanel Margin="{DynamicResource MarginPage}"
+              Spacing="{DynamicResource SpacingLg}">
+
+    <TextBlock Classes="title"
+               Text="{DynamicResource Settings.Title}" />
+
+    <StackPanel Spacing="{DynamicResource SpacingSm}">
+
+      <TextBlock Text="{DynamicResource Settings.Idle}" />
+
+      <NumericUpDown Value="{Binding IdleMinutes}"
+                     Minimum="1"
+                     Maximum="120"
+                     Increment="1"
+                     FormatString="0" />
+
+    </StackPanel>
+
+    <StackPanel Spacing="{DynamicResource SpacingSm}">
+
+      <TextBlock Text="{DynamicResource Settings.HotKey}" />
+
+      <TextBlock Text="{Binding HotKeyCaption}" />
+
+      <TextBlock Classes="secondary"
+                 Text="{DynamicResource Settings.HotKeyBusy}"
+                 IsVisible="{Binding IsHotKeyBusy}" />
+
+    </StackPanel>
+
+  </StackPanel>
+
+</UserControl>
