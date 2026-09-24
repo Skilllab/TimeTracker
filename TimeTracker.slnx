@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TimeTracker.Domain.Tests/TimeTracker.Domain.Tests.csproj" />
+    <Project Path="tests/TimeTracker.Infrastructure.Tests/TimeTracker.Infrastructure.Tests.csproj" />
     <Project Path="tests/TimeTracker.UI.Tests/TimeTracker.UI.Tests.csproj" />
   </Folder>
   <Folder Name="/Элементы решения/">

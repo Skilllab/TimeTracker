@@ -2,34 +2,34 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <Style Selector="TextBlock">
-    <Setter Property="FontSize" Value="{DynamicResource FontSizeBody}" />
-    <Setter Property="FontWeight" Value="{DynamicResource FontWeightRegular}" />
+    <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+    <Setter Property="FontWeight" Value="{StaticResource FontWeightRegular}" />
     <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
   </Style>
 
-  <Style Selector="TextBlock.counter">
-    <Setter Property="FontSize" Value="{DynamicResource FontSizeCounter}" />
-    <Setter Property="FontWeight" Value="{DynamicResource FontWeightAccent}" />
+  <Style Selector="TextBlock.counter">  
+    <Setter Property="FontSize" Value="{StaticResource FontSizeCounter}" />
+    <Setter Property="FontWeight" Value="{StaticResource FontWeightAccent}" />
   </Style>
 
   <Style Selector="TextBlock.title">
-    <Setter Property="FontSize" Value="{DynamicResource FontSizeTitle}" />
-    <Setter Property="FontWeight" Value="{DynamicResource FontWeightAccent}" />
+    <Setter Property="FontSize" Value="{StaticResource FontSizeTitle}" />
+    <Setter Property="FontWeight" Value="{StaticResource FontWeightAccent}" />
   </Style>
 
   <Style Selector="TextBlock.subtitle">
-    <Setter Property="FontSize" Value="{DynamicResource FontSizeSubtitle}" />
-    <Setter Property="FontWeight" Value="{DynamicResource FontWeightAccent}" />
+    <Setter Property="FontSize" Value="{StaticResource FontSizeSubtitle}" />
+    <Setter Property="FontWeight" Value="{StaticResource FontWeightAccent}" />
   </Style>
 
   <Style Selector="TextBlock.secondary">
-    <Setter Property="FontSize" Value="{DynamicResource FontSizeSmall}" />
+    <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}" />
     <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
   </Style>
 
   <Style Selector="Button">
     <Setter Property="Padding" Value="16,8" />
-    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
     <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
     <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
@@ -77,13 +77,13 @@
     <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="{DynamicResource RadiusCard}" />
-    <Setter Property="Padding" Value="{DynamicResource PaddingCard}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RadiusCard}" />
+    <Setter Property="Padding" Value="{StaticResource PaddingCard}" />
   </Style>
 
  <Style Selector="ListBoxItem">
-  <Setter Property="Padding" Value="{DynamicResource PaddingCard}" />
-  <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}" />
+  <Setter Property="Padding" Value="{StaticResource PaddingCard}" />
+  <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
   <Setter Property="Background" Value="Transparent" />
 </Style>
 
