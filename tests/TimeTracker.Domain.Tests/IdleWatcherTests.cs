@@ -79,7 +79,11 @@ public sealed class IdleWatcherTests
 
         public int PauseCount { get; private set; }
 
-        public Task Start()
+        /// <summary>
+        /// Запускает запись с указанным проектом.
+        /// </summary>
+        /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
+        public Task Start(Guid? projectId)
         {
             IsRunning = true;
 

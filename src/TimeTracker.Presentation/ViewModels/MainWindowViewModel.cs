@@ -19,12 +19,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// </summary>
     /// <param name="timerViewModel">Экран таймера.</param>
     /// <param name="entriesViewModel">Экран записей за сегодня.</param>
+    /// <param name="projectsViewModel">Экран проектов.</param>
     /// <param name="settingsViewModel">Экран настроек.</param>
     /// <param name="themeManager">Управление темой.</param>
     /// <param name="localizationManager">Управление языком.</param>
     public MainWindowViewModel(
         TimerViewModel timerViewModel,
         EntriesViewModel entriesViewModel,
+        ProjectsViewModel projectsViewModel,
         SettingsViewModel settingsViewModel,
         ThemeManager themeManager,
         LocalizationManager localizationManager)
@@ -34,6 +36,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         Items.Add(new NavigationItem("Nav.Timer", timerViewModel));
         Items.Add(new NavigationItem("Nav.Entries", entriesViewModel));
+        Items.Add(new NavigationItem("Nav.Projects", projectsViewModel));
         Items.Add(new NavigationItem("Nav.Settings", settingsViewModel));
 
         SelectedItem = Items[0];
@@ -123,6 +126,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
         if (value?.Page is EntriesViewModel entries)
         {
             _ = entries.RefreshAsync();
+        }
+
+        if (value?.Page is ProjectsViewModel projects)
+        {
+            _ = projects.RefreshAsync();
         }
     }
 }

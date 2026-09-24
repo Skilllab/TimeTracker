@@ -2,35 +2,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TimeTracker.Presentation.ViewModels"
              xmlns:domain="using:TimeTracker.Domain"
-             x:Class="TimeTracker.Presentation.Views.EntriesView"
-             x:DataType="vm:EntriesViewModel">
+             x:Class="TimeTracker.Presentation.Views.ProjectsView"
+             x:DataType="vm:ProjectsViewModel">
 
   <DockPanel Margin="{DynamicResource MarginPage}"
              LastChildFill="True">
 
     <TextBlock DockPanel.Dock="Top"
                Classes="title"
-               Text="{DynamicResource Entries.Title}" />
+               Text="{DynamicResource Projects.Title}" />
 
     <ListBox Margin="{DynamicResource PaddingCard}"
-             ItemsSource="{Binding Entries}">
+             ItemsSource="{Binding Projects}">
 
       <ListBox.ItemTemplate>
-        <DataTemplate x:DataType="vm:EntryRowViewModel">
+        <DataTemplate x:DataType="domain:Project">
 
           <StackPanel Orientation="Horizontal"
                       Spacing="{DynamicResource SpacingMd}">
 
-            <TextBlock Text="{Binding Entry.StartedAt, StringFormat='{}{0:HH:mm}'}" />
-            <TextBlock Classes="secondary"
-                       Text="{Binding Entry.EndedAt, StringFormat='{}{0:HH:mm}'}" />
-            <TextBlock Text="{Binding Entry.Description}" />
-
             <Border Classes="marker"
-                    Background="{Binding ProjectColor, Converter={StaticResource HexColorToBrush}}" />
+                    Background="{Binding Color, Converter={StaticResource HexColorToBrush}}" />
 
-            <TextBlock Classes="secondary"
-                       Text="{Binding ProjectName}" />
+            <TextBlock Text="{Binding Name}" />
 
           </StackPanel>
 

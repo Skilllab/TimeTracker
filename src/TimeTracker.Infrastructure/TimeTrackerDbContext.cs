@@ -22,6 +22,11 @@ public sealed class TimeTrackerDbContext : DbContext
     public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
 
     /// <summary>
+    /// Проекты.
+    /// </summary>
+    public DbSet<Project> Projects => Set<Project>();
+
+    /// <summary>
     /// Подключает конфигурации сущностей из этой сборки.
     /// </summary>
     /// <param name="modelBuilder">Построитель модели.</param>

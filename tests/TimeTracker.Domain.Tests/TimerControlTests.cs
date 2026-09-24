@@ -35,7 +35,7 @@ public sealed class TimerControlTests
     {
         var (control, time, _, _) = CreateControl();
 
-        control.Start();
+        control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(65));
 
         control.IsRunning.Should().BeTrue();
@@ -46,7 +46,7 @@ public sealed class TimerControlTests
     public void Pause_FreezesElapsed()
     {
         var (control, time, _, _) = CreateControl();
-        control.Start();
+        control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         control.Pause();
@@ -60,7 +60,7 @@ public sealed class TimerControlTests
     public void Resume_ContinuesFromSameValue()
     {
         var (control, time, _, _) = CreateControl();
-        control.Start();
+        control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
         control.Pause();
         time.Advance(TimeSpan.FromMinutes(1));
@@ -76,7 +76,7 @@ public sealed class TimerControlTests
     public async Task Stop_SavesEntryWithPauseSeconds()
     {
         var (control, time, repository, unitOfWork) = CreateControl();
-        await control.Start();
+        await control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
         await control.Pause();
         time.Advance(TimeSpan.FromMinutes(1));
@@ -122,7 +122,7 @@ public sealed class TimerControlTests
     {
         var (control, _, repository, unitOfWork) = CreateControl();
 
-        await control.Start();
+        await control.Start(projectId: null);
 
         repository.Added.Should().HaveCount(1);
         repository.Added[0].IsOpen.Should().BeTrue();
@@ -134,7 +134,7 @@ public sealed class TimerControlTests
     public async Task Pause_SavesPauseMoment()
     {
         var (control, time, repository, _) = CreateControl();
-        await control.Start();
+        await control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         await control.Pause();
@@ -147,7 +147,7 @@ public sealed class TimerControlTests
     public async Task Stop_ClosesSavedEntry()
     {
         var (control, time, repository, _) = CreateControl();
-        await control.Start();
+        await control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         await control.Stop();

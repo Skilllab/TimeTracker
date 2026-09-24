@@ -44,10 +44,15 @@ public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
 
         builder.Property(entry => entry.PausedSeconds).IsRequired();
         builder.Property(entry => entry.IsBillable).IsRequired();
-        builder.Property(entry => entry.ProjectId);
+
+        builder.HasOne<Project>()
+            .WithMany()
+            .HasForeignKey(entry => entry.ProjectId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Ignore(entry => entry.IsOpen);
 
         builder.HasIndex(entry => entry.StartedAt);
+        builder.HasIndex(entry => entry.ProjectId);
     }
 }

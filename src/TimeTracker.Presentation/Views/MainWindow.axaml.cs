@@ -41,15 +41,17 @@ public partial class MainWindow : Window
     {
         var themeManager = new ThemeManager();
         var localizationManager = new LocalizationManager();
+        var projectList = new DesignProjectList();
 
-        var timer = new TimerViewModel(new DesignTimerControl(), localizationManager);
-        var entries = new EntriesViewModel(new DesignTimeEntryList());
+        var timer = new TimerViewModel(new DesignTimerControl(), projectList, localizationManager);
+        var entries = new EntriesViewModel(new DesignTimeEntryList(), projectList);
+        var projects = new ProjectsViewModel(projectList);
         var settings = new SettingsViewModel(
             new IdleSettings(),
             new HotKeySettings(new DesignHotKeyService()),
             localizationManager,
             new DesignAutoStartService());
 
-        return new MainWindowViewModel(timer, entries, settings, themeManager, localizationManager);
+        return new MainWindowViewModel(timer, entries, projects, settings, themeManager, localizationManager);
     }
 }
