@@ -22,6 +22,10 @@
     <ProjectReference Include="..\..\src\TimeTracker.Infrastructure\TimeTracker.Infrastructure.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <NoWarn>CA1416</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
