@@ -75,10 +75,10 @@ public sealed class MacAutoStartService : IAutoStartService
                "<plist version=\"1.0\">" +
                "<dict>" +
                "    <key>Label</key>" +
-               "    <string>{BundleId}</string>" +
+               "    <string>" + BundleId + "</string>" +
                "    <key>ProgramArguments</key>" +
                "    <array>" +
-               "		<string>{executablePath}</string>" +
+               "		<string>" + executablePath + "</string>" +
                "    </array>" +
                "    <key>RunAtLoad</key>" +
                "    <true/>" +
