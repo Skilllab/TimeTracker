@@ -49,6 +49,9 @@
     <ContentControl Grid.Row="1"
                     Content="{Binding CurrentPage}">
       <ContentControl.DataTemplates>
+        <DataTemplate DataType="vm:TimerViewModel">
+          <views:TimerView />
+        </DataTemplate>
         <DataTemplate DataType="vm:EntriesViewModel">
           <views:EntriesView />
         </DataTemplate>

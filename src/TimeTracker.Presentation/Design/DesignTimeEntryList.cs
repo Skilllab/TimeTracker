@@ -26,7 +26,7 @@ internal sealed class DesignTimeEntryList : ITimeEntryList
                 pausedSeconds: 10,
                 pausedAt: null,
                 isBillable: false,
-                projectId: null),
+                projectId: DesignProjectList.SampleProjectId),
 
             new TimeEntry(
                 id: Guid.NewGuid(),

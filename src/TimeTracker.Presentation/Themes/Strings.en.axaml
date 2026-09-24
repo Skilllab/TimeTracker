@@ -21,5 +21,9 @@
 
   <x:String x:Key="Settings.AutoStart">Start with system</x:String>
 
+  <x:String x:Key="Nav.Projects">Projects</x:String>
+  <x:String x:Key="Projects.Title">Projects</x:String>
+  <x:String x:Key="Timer.Project">No project selected</x:String>
+
 
 </ResourceDictionary>
