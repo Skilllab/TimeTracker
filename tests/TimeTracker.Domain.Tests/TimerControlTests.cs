@@ -20,6 +20,30 @@ public sealed class TimerControlTests
     }
 
     [Fact]
+    public async Task Start_WithProject_SavesProjectId()
+    {
+        var (control, _, repository, _) = CreateControl();
+        var projectId = Guid.NewGuid();
+
+        await control.Start(projectId);
+
+        repository.Added.Should().HaveCount(1);
+        repository.Added[0].ProjectId.Should().Be(projectId);
+    }
+
+    [Fact]
+    public async Task Start_WithoutProject_SavesEmptyLink()
+    {
+        var (control, _, repository, _) = CreateControl();
+
+        await control.Start(projectId: null);
+
+        repository.Added.Should().HaveCount(1);
+        repository.Added[0].ProjectId.Should().BeNull();
+    }
+
+
+    [Fact]
     public void BeforeStart_ElapsedIsZero()
     {
         var (control, _, _, _) = CreateControl();
