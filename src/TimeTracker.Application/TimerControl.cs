@@ -48,9 +48,10 @@ public sealed class TimerControl : ITimerControl
     public bool IsFinished => _session.State == TimerState.Finished;
 
     /// <summary>
-    /// Запускает запись.
+    /// Запускает запись с указанным проектом.
     /// </summary>
-    public async Task Start()
+    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
+    public async Task Start(Guid? projectId)
     {
         var now = _timeProvider.GetUtcNow();
         _session.Start(now);
@@ -63,7 +64,7 @@ public sealed class TimerControl : ITimerControl
             0,
             null,
             false,
-            null);
+            projectId);
 
         await _repository.AddAsync(_active);
         await _unitOfWork.SaveChangesAsync();

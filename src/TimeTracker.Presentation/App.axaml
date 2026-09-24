@@ -1,5 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:TimeTracker.Presentation.Converters"
              x:Class="TimeTracker.Presentation.App"
              RequestedThemeVariant="Default">
 
@@ -9,6 +10,8 @@
         <ResourceInclude Source="avares://TimeTracker.Presentation/Themes/Tokens.axaml" />
         <ResourceInclude Source="avares://TimeTracker.Presentation/Themes/Strings.ru.axaml" />
       </ResourceDictionary.MergedDictionaries>
+
+      <converters:HexColorToBrushConverter x:Key="HexColorToBrush" />
     </ResourceDictionary>
   </Application.Resources>
 

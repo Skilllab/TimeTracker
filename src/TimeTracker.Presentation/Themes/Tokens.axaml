@@ -66,4 +66,6 @@
   <Thickness x:Key="PaddingCard">16</Thickness>
   <Thickness x:Key="MarginPage">24</Thickness>
 
+  <x:Double x:Key="MarkerSize">12</x:Double>
+
 </ResourceDictionary>

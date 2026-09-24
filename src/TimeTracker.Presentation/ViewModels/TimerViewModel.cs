@@ -1,32 +1,42 @@
-using System.Diagnostics.Metrics;
+using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TimeTracker.Application;
+using TimeTracker.Domain;
 using TimeTracker.Presentation.Shell;
 
 namespace TimeTracker.Presentation.ViewModels;
 
 /// <summary>
-/// ViewModel экрана таймера: управляет записью и показывает счетчик.
+/// ViewModel экрана таймера: управляет записью, показывает счетчик и выбор проекта.
 /// </summary>
 public sealed partial class TimerViewModel : ObservableObject
 {
     private readonly ITimerControl _timerControl;
+    private readonly IProjectList _projectList;
     private readonly LocalizationManager _localizationManager;
     private readonly DispatcherTimer _ticker = new() { Interval = TimeSpan.FromSeconds(1) };
 
     [ObservableProperty]
     private string _counter = "00:00";
 
+    [ObservableProperty]
+    private Project? _selectedProject;
+
     /// <summary>
     /// Создает экран таймера.
     /// </summary>
     /// <param name="timerControl">Входящий порт управления записью.</param>
+    /// <param name="projectList">Входящий порт списка проектов.</param>
     /// <param name="localizationManager">Управление языком.</param>
-    public TimerViewModel(ITimerControl timerControl, LocalizationManager localizationManager)
+    public TimerViewModel(
+        ITimerControl timerControl,
+        IProjectList projectList,
+        LocalizationManager localizationManager)
     {
         _timerControl = timerControl ?? throw new ArgumentNullException(nameof(timerControl));
+        _projectList = projectList ?? throw new ArgumentNullException(nameof(projectList));
         _localizationManager = localizationManager ?? throw new ArgumentNullException(nameof(localizationManager));
 
         _localizationManager.Changed += OnLanguageChanged;
@@ -35,7 +45,19 @@ public sealed partial class TimerViewModel : ObservableObject
         _ticker.Start();
 
         RefreshCounter();
+
+        _ = LoadProjectsAsync();
     }
+
+    /// <summary>
+    /// Проекты, доступные для выбора.
+    /// </summary>
+    public ObservableCollection<Project> Projects { get; } = new();
+
+    /// <summary>
+    /// Признак того, что проект можно выбрать: во время записи выбор зафиксирован.
+    /// </summary>
+    public bool CanSelectProject => !_timerControl.IsRunning && !_timerControl.IsPaused;
 
     /// <summary>
     /// Надпись на кнопке переключения: называет действие, доступное в текущем состоянии.
@@ -62,7 +84,7 @@ public sealed partial class TimerViewModel : ObservableObject
         }
         else
         {
-            await _timerControl.Start();
+            await _timerControl.Start(SelectedProject?.Id);
         }
 
         RefreshState();
@@ -108,8 +130,24 @@ public sealed partial class TimerViewModel : ObservableObject
         FinishCommand.NotifyCanExecuteChanged();
 
         OnPropertyChanged(nameof(ToggleCaption));
+        OnPropertyChanged(nameof(CanSelectProject));
 
         RefreshCounter();
+    }
+
+    /// <summary>
+    /// Перечитывает проекты, доступные для выбора.
+    /// </summary>
+    private async Task LoadProjectsAsync()
+    {
+        var projects = await _projectList.GetAvailableAsync();
+
+        Projects.Clear();
+
+        foreach (var project in projects)
+        {
+            Projects.Add(project);
+        }
     }
 
     /// <summary>

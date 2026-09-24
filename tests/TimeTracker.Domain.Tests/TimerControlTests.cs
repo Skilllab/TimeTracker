@@ -20,6 +20,30 @@ public sealed class TimerControlTests
     }
 
     [Fact]
+    public async Task Start_WithProject_SavesProjectId()
+    {
+        var (control, _, repository, _) = CreateControl();
+        var projectId = Guid.NewGuid();
+
+        await control.Start(projectId);
+
+        repository.Added.Should().HaveCount(1);
+        repository.Added[0].ProjectId.Should().Be(projectId);
+    }
+
+    [Fact]
+    public async Task Start_WithoutProject_SavesEmptyLink()
+    {
+        var (control, _, repository, _) = CreateControl();
+
+        await control.Start(projectId: null);
+
+        repository.Added.Should().HaveCount(1);
+        repository.Added[0].ProjectId.Should().BeNull();
+    }
+
+
+    [Fact]
     public void BeforeStart_ElapsedIsZero()
     {
         var (control, _, _, _) = CreateControl();
@@ -35,7 +59,7 @@ public sealed class TimerControlTests
     {
         var (control, time, _, _) = CreateControl();
 
-        control.Start();
+        control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(65));
 
         control.IsRunning.Should().BeTrue();
@@ -46,7 +70,7 @@ public sealed class TimerControlTests
     public void Pause_FreezesElapsed()
     {
         var (control, time, _, _) = CreateControl();
-        control.Start();
+        control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         control.Pause();
@@ -60,7 +84,7 @@ public sealed class TimerControlTests
     public void Resume_ContinuesFromSameValue()
     {
         var (control, time, _, _) = CreateControl();
-        control.Start();
+        control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
         control.Pause();
         time.Advance(TimeSpan.FromMinutes(1));
@@ -76,7 +100,7 @@ public sealed class TimerControlTests
     public async Task Stop_SavesEntryWithPauseSeconds()
     {
         var (control, time, repository, unitOfWork) = CreateControl();
-        await control.Start();
+        await control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
         await control.Pause();
         time.Advance(TimeSpan.FromMinutes(1));
@@ -122,7 +146,7 @@ public sealed class TimerControlTests
     {
         var (control, _, repository, unitOfWork) = CreateControl();
 
-        await control.Start();
+        await control.Start(projectId: null);
 
         repository.Added.Should().HaveCount(1);
         repository.Added[0].IsOpen.Should().BeTrue();
@@ -134,7 +158,7 @@ public sealed class TimerControlTests
     public async Task Pause_SavesPauseMoment()
     {
         var (control, time, repository, _) = CreateControl();
-        await control.Start();
+        await control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         await control.Pause();
@@ -147,7 +171,7 @@ public sealed class TimerControlTests
     public async Task Stop_ClosesSavedEntry()
     {
         var (control, time, repository, _) = CreateControl();
-        await control.Start();
+        await control.Start(projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         await control.Stop();

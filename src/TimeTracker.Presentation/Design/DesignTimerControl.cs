@@ -27,9 +27,10 @@ internal sealed class DesignTimerControl : ITimerControl
     public bool IsFinished => false;
 
     /// <summary>
-    /// Запускает запись.
+    /// Запускает запись с указанным проектом.
     /// </summary>
-    public Task Start() => Task.CompletedTask;
+    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
+    public Task Start(Guid? projectId) => Task.CompletedTask;
 
     /// <summary>
     /// Приостанавливает идущую запись.

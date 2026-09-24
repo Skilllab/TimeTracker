@@ -23,9 +23,10 @@ public interface ITimerControl
     bool IsFinished { get; }
 
     /// <summary>
-    /// Запускает запись.
+    /// Запускает запись с указанным проектом.
     /// </summary>
-    Task Start();
+    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
+    Task Start(Guid? projectId);
 
     /// <summary>
     /// Приостанавливает идущую запись.

@@ -2,6 +2,19 @@
   <img src="resources/logo.png" alt="TimeTracker" width="180">
 </p>
 
+<p align="center">
+  <a href="https://github.com/Skilllab/TimeTracker/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Skilllab/TimeTracker/ci.yml?label=Build&branch=main" alt="Build">
+  </a>
+  <img src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" alt=".NET 10">
+  <img src="https://img.shields.io/badge/Avalonia-12.1.2-8B44AC?logo=avalonia&logoColor=white" alt="Avalonia">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-2F6FED" alt="Platform">
+  <a href="https://github.com/Skilllab/TimeTracker/commits/main">
+    <img src="https://img.shields.io/github/last-commit/Skilllab/TimeTracker" alt="Last commit">
+  </a>
+  <img src="https://img.shields.io/badge/architecture-Clean%20Architecture-2E7D32" alt="Clean Architecture">
+</p>
+
 # TimeTracker
 
 Кроссплатформенное настольное приложение для учета рабочего времени (Windows / macOS / Linux).

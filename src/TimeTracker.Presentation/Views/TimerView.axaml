@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+             xmlns:domain="using:TimeTracker.Domain"
              x:Class="TimeTracker.Presentation.Views.TimerView"
              x:DataType="vm:TimerViewModel">
 
@@ -11,6 +12,28 @@
     <TextBlock Classes="counter"
                Text="{Binding Path=Counter}"
                HorizontalAlignment="Center" />
+
+    <ComboBox HorizontalAlignment="Center"
+              PlaceholderText="{DynamicResource Timer.Project}"
+              ItemsSource="{Binding Projects}"
+              SelectedItem="{Binding SelectedProject}"
+              IsEnabled="{Binding CanSelectProject}">
+      <ComboBox.ItemTemplate>
+        <DataTemplate x:DataType="domain:Project">
+
+          <StackPanel Orientation="Horizontal"
+                      Spacing="{DynamicResource SpacingSm}">
+
+            <Border Classes="marker"
+                    Background="{Binding Color, Converter={StaticResource HexColorToBrush}}" />
+
+            <TextBlock Text="{Binding Name}" />
+
+          </StackPanel>
+
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
 
     <StackPanel Orientation="Horizontal"
                 Spacing="{DynamicResource SpacingMd}"
