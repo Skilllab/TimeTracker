@@ -14,7 +14,8 @@ public sealed class TimerControlTests
         var time = new FakeTimeProvider(Start);
         var repository = new FakeRepository();
         var unitOfWork = new FakeUnitOfWork();
-        ITimerControl control = new TimerControl(new TimerSession(), time, repository, unitOfWork);
+        var projectRepository = new FakeProjectRepository();
+        ITimerControl control = new TimerControl(new TimerSession(), time, repository, unitOfWork, projectRepository);
 
         return (control, time, repository, unitOfWork);
     }
@@ -212,6 +213,21 @@ public sealed class TimerControlTests
         control.IsRunning.Should().BeFalse();
         control.IsPaused.Should().BeFalse();
         control.IsFinished.Should().BeFalse();
+    }
+
+    private sealed class FakeProjectRepository : IProjectRepository
+    {
+        public Task<IReadOnlyList<Project>> GetAllAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<Project>>(Array.Empty<Project>());
+
+        public Task<Project?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+            => Task.FromResult<Project?>(null);
+
+        public Task AddAsync(Project project, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task UpdateAsync(Project project, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 
     private sealed class FakeRepository : ITimeEntryRepository

@@ -25,5 +25,16 @@
   <x:String x:Key="Projects.Title">Projects</x:String>
   <x:String x:Key="Timer.Project">No project selected</x:String>
 
+  <x:String x:Key="Projects.Create">Create</x:String>
+  <x:String x:Key="Projects.Edit">Rename</x:String>
+  <x:String x:Key="Projects.Archive">Archive</x:String>
+  <x:String x:Key="Projects.Unarchive">Restore</x:String>
+  <x:String x:Key="Projects.Archived">archived</x:String>
+  <x:String x:Key="Projects.ShowArchived">Show archived</x:String>
+  <x:String x:Key="Projects.Name">Project name</x:String>
+  <x:String x:Key="Projects.Color">Marker color</x:String>
+  <x:String x:Key="Projects.Save">Save</x:String>
+  <x:String x:Key="Projects.Cancel">Cancel</x:String>
+
 
 </ResourceDictionary>

@@ -37,4 +37,11 @@ public sealed class EntryRowViewModel
     /// Цвет маркера проекта; пустая строка, если категория не задана.
     /// </summary>
     public string ProjectColor => Project?.Color ?? string.Empty;
+
+    /// <summary>
+    /// Признак того, что проект записи архивный.
+    /// Архивный проект показывается приглушенно: он остается в старых записях,
+    /// но выбрать его для новой записи нельзя.
+    /// </summary>
+    public bool IsProjectArchived => Project?.IsArchived ?? false;
 }

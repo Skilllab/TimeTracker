@@ -45,7 +45,7 @@ public partial class MainWindow : Window
 
         var timer = new TimerViewModel(new DesignTimerControl(), projectList, localizationManager);
         var entries = new EntriesViewModel(new DesignTimeEntryList(), projectList);
-        var projects = new ProjectsViewModel(projectList);
+        var projects = new ProjectsViewModel(projectList, new DesignProjectEditor());
         var settings = new SettingsViewModel(
             new IdleSettings(),
             new HotKeySettings(new DesignHotKeyService()),

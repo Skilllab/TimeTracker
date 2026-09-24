@@ -111,4 +111,47 @@ public sealed class ProjectRepositoryTests
 
         return context;
     }
+
+    [Fact]
+    public async Task UpdateAsync_AfterArchive_KeepsArchivedFlag()
+    {
+        using var connection = CreateConnection();
+
+        var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
+
+        await using (var context = CreateContext(connection))
+        {
+            await new ProjectRepository(context).AddAsync(project, TestContext.Current.CancellationToken);
+            await new EfUnitOfWork(context).SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        await using (var context = CreateContext(connection))
+        {
+            var stored = await new ProjectRepository(context).GetByIdAsync(project.Id, TestContext.Current.CancellationToken);
+            stored.Should().NotBeNull();
+
+            await new ProjectRepository(context).UpdateAsync(stored!.Archive(), TestContext.Current.CancellationToken);
+            await new EfUnitOfWork(context).SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        await using (var context = CreateContext(connection))
+        {
+            var stored = await new ProjectRepository(context).GetByIdAsync(project.Id, TestContext.Current.CancellationToken);
+
+            stored.Should().NotBeNull();
+            stored!.IsArchived.Should().BeTrue();
+            stored.Name.Should().Be("Работа");
+        }
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_UnknownProject_ReturnsNull()
+    {
+        using var connection = CreateConnection();
+        await using var context = CreateContext(connection);
+
+        var stored = await new ProjectRepository(context).GetByIdAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+
+        stored.Should().BeNull();
+    }
 }

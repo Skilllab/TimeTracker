@@ -33,12 +33,14 @@ public sealed partial class EntriesViewModel
 
     /// <summary>
     /// Перечитывает записи за сегодня.
+    /// Проекты читаются вместе с архивными: старая запись может ссылаться
+    /// на архивный проект, и без него у строки исчезли бы имя и маркер.
     /// </summary>
     [RelayCommand]
     public async Task RefreshAsync()
     {
         var entries = await _entryList.GetTodayAsync();
-        var projects = await _projectList.GetAvailableAsync();
+        var projects = await _projectList.GetAllAsync(includeArchived: true);
 
         var projectsById = projects.ToDictionary(project => project.Id);
 
