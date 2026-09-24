@@ -8,9 +8,25 @@
   <DockPanel Margin="{DynamicResource MarginPage}"
              LastChildFill="True">
 
-    <TextBlock DockPanel.Dock="Top"
-               Classes="title"
-               Text="{DynamicResource Projects.Title}" />
+    <StackPanel DockPanel.Dock="Top"
+                Spacing="{DynamicResource SpacingMd}">
+
+      <TextBlock Classes="title"
+                 Text="{DynamicResource Projects.Title}" />
+
+      <StackPanel Orientation="Horizontal"
+                  Spacing="{DynamicResource SpacingMd}">
+
+        <Button Content="{DynamicResource Projects.Create}"
+                Command="{Binding CreateCommand}"
+                Classes="accent" />
+
+        <CheckBox Content="{DynamicResource Projects.ShowArchived}"
+                  IsChecked="{Binding ShowArchived}" />
+
+      </StackPanel>
+
+    </StackPanel>
 
     <ListBox Margin="{DynamicResource PaddingCard}"
              ItemsSource="{Binding Projects}">
@@ -18,15 +34,44 @@
       <ListBox.ItemTemplate>
         <DataTemplate x:DataType="domain:Project">
 
-          <StackPanel Orientation="Horizontal"
-                      Spacing="{DynamicResource SpacingMd}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
 
-            <Border Classes="marker"
-                    Background="{Binding Color, Converter={StaticResource HexColorToBrush}}" />
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource SpacingMd}">
 
-            <TextBlock Text="{Binding Name}" />
+              <Border Classes="marker"
+                      Background="{Binding Color, Converter={StaticResource HexColorToBrush}}" />
 
-          </StackPanel>
+              <TextBlock Text="{Binding Name}" />
+
+              <TextBlock Classes="secondary"
+                         Text="{DynamicResource Projects.Archived}"
+                         IsVisible="{Binding IsArchived}" />
+
+            </StackPanel>
+
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource SpacingSm}">
+
+              <Button Content="{DynamicResource Projects.Edit}"
+                      Command="{Binding $parent[ItemsControl].((vm:ProjectsViewModel)DataContext).EditCommand}"
+                      CommandParameter="{Binding}" />
+
+              <Button Content="{DynamicResource Projects.Archive}"
+                      Command="{Binding $parent[ItemsControl].((vm:ProjectsViewModel)DataContext).ArchiveCommand}"
+                      CommandParameter="{Binding}"
+                      IsVisible="{Binding !IsArchived}" />
+
+              <Button Content="{DynamicResource Projects.Unarchive}"
+                      Command="{Binding $parent[ItemsControl].((vm:ProjectsViewModel)DataContext).UnarchiveCommand}"
+                      CommandParameter="{Binding}"
+                      IsVisible="{Binding IsArchived}" />
+
+            </StackPanel>
+
+          </Grid>
 
         </DataTemplate>
       </ListBox.ItemTemplate>

@@ -62,11 +62,12 @@ internal static class Program
         IUnitOfWork unitOfWork = new EfUnitOfWork(context);
 
         IProjectRepository projectRepository = new ProjectRepository(context);
-        IProjectList projectList = new ProjectList(projectRepository);
+        IProjectList projectList = new ProjectList(projectRepository, repository);
+        IProjectEditor projectEditor = new ProjectEditor(projectRepository, repository, unitOfWork);
 
         var session = new TimerSession();
 
-        ITimerControl timerControl = new TimerControl(session, timeProvider, repository, unitOfWork);
+        ITimerControl timerControl = new TimerControl(session, timeProvider, repository, unitOfWork, projectRepository);
         ITimeEntryList entryList = new TimeEntryList(repository, timeProvider);
 
         IHotKeyService hotKeyService;
@@ -91,7 +92,7 @@ internal static class Program
 
         var timerViewModel = new TimerViewModel(timerControl, projectList, localizationManager);
         var entriesViewModel = new EntriesViewModel(entryList, projectList);
-        var projectsViewModel = new ProjectsViewModel(projectList);
+        var projectsViewModel = new ProjectsViewModel(projectList, projectEditor);
         var autoStartService = CreateAutoStartService();
         var settingsViewModel = new SettingsViewModel(idleSettings, hotKeySettings, localizationManager, autoStartService);
 

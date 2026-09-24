@@ -21,5 +21,8 @@ public sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(project => project.Id).ValueGeneratedNever();
         builder.Property(project => project.Name).IsRequired().HasMaxLength(100);
         builder.Property(project => project.Color).IsRequired().HasMaxLength(7);
+        builder.Property(project => project.IsArchived).IsRequired();
+
+        builder.HasIndex(project => project.IsArchived);
     }
 }

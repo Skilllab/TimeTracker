@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+        x:Class="TimeTracker.Presentation.Views.ProjectEditorWindow"
+        x:DataType="vm:ProjectsViewModel"
+        Title="{Binding EditorTitle}"
+        Width="420"
+        Height="460"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+  <Grid Margin="{DynamicResource MarginPage}"
+        RowDefinitions="Auto,Auto,*,Auto"
+        RowSpacing="{DynamicResource SpacingLg}">
+
+    <TextBlock Grid.Row="0"
+               Classes="title"
+               Text="{Binding EditorTitle}" />
+
+    <StackPanel Grid.Row="1"
+                Spacing="{DynamicResource SpacingSm}">
+
+      <TextBlock Text="{DynamicResource Projects.Name}" />
+
+      <TextBox Text="{Binding EditorName}" />
+
+    </StackPanel>
+
+    <DockPanel Grid.Row="2"
+               LastChildFill="True">
+
+      <TextBlock DockPanel.Dock="Top"
+                 Text="{DynamicResource Projects.Color}" />
+
+      <ListBox Margin="0,8,0,0"
+               ItemsSource="{Binding Palette}"
+               SelectedItem="{Binding EditorColor}">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+
+            <StackPanel Orientation="Horizontal"
+                        Spacing="{DynamicResource SpacingMd}">
+
+              <Border Classes="marker"
+                      Background="{Binding Converter={StaticResource HexColorToBrush}}" />
+
+              <TextBlock Text="{Binding}" />
+
+            </StackPanel>
+
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+    </DockPanel>
+
+    <StackPanel Grid.Row="3"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource SpacingMd}"
+                HorizontalAlignment="Right">
+
+      <Button Content="{DynamicResource Projects.Save}"
+              Command="{Binding SaveCommand}"
+              Classes="accent" />
+
+      <Button Content="{DynamicResource Projects.Cancel}"
+              Command="{Binding CancelCommand}" />
+
+    </StackPanel>
+
+  </Grid>
+
+</Window>

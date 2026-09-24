@@ -132,5 +132,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             _ = projects.RefreshAsync();
         }
+
+        if (value?.Page is TimerViewModel timer)
+        {
+            _ = timer.RefreshProjectsAsync();
+        }
     }
 }

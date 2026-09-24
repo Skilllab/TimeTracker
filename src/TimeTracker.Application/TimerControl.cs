@@ -12,6 +12,8 @@ public sealed class TimerControl : ITimerControl
     private readonly ITimeEntryRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private TimeEntry? _active;
+    private readonly IProjectRepository _projectRepository;
+
 
     /// <summary>
     /// Создает сценарий.
@@ -20,16 +22,19 @@ public sealed class TimerControl : ITimerControl
     /// <param name="timeProvider">Источник времени.</param>
     /// <param name="repository">Исходящий порт хранилища записей.</param>
     /// <param name="unitOfWork">Исходящий порт фиксации изменений.</param>
+    /// <param name="projectRepository">Исходящий порт хранилища проектов.</param>
     public TimerControl(
         TimerSession session,
         TimeProvider timeProvider,
         ITimeEntryRepository repository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IProjectRepository projectRepository)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
     }
 
     /// <summary>
@@ -49,10 +54,14 @@ public sealed class TimerControl : ITimerControl
 
     /// <summary>
     /// Запускает запись с указанным проектом.
+    /// Архивный проект для новой записи недопустим: он скрыт из выбора,
+    /// поэтому такой идентификатор считается устаревшим.
     /// </summary>
     /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
     public async Task Start(Guid? projectId)
     {
+        await EnsureProjectIsActiveAsync(projectId);
+
         var now = _timeProvider.GetUtcNow();
         _session.Start(now);
 
@@ -68,6 +77,27 @@ public sealed class TimerControl : ITimerControl
 
         await _repository.AddAsync(_active);
         await _unitOfWork.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Проверяет, что проект не архивный.
+    /// Отсутствие проекта проверкой не считается: ссылка могла быть удалена
+    /// вместе с базой, и запись без проекта допустима.
+    /// </summary>
+    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
+    private async Task EnsureProjectIsActiveAsync(Guid? projectId)
+    {
+        if (projectId is not Guid id)
+        {
+            return;
+        }
+
+        var project = await _projectRepository.GetByIdAsync(id);
+
+        if (project is { IsArchived: true })
+        {
+            throw new InvalidProjectException("Нельзя начать запись на архивном проекте.");
+        }
     }
 
     /// <summary>

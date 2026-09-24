@@ -1,6 +1,5 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:system="clr-namespace:System;assembly=System.Runtime">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <x:String x:Key="App.Title">TimeTracker</x:String>
   <x:String x:Key="Nav.Timer">Таймер</x:String>
@@ -25,6 +24,17 @@
   <x:String x:Key="Nav.Projects">Проекты</x:String>
   <x:String x:Key="Projects.Title">Проекты</x:String>
   <x:String x:Key="Timer.Project">Проект не выбран</x:String>
+
+  <x:String x:Key="Projects.Create">Создать</x:String>
+  <x:String x:Key="Projects.Edit">Переименовать</x:String>
+  <x:String x:Key="Projects.Archive">В архив</x:String>
+  <x:String x:Key="Projects.Unarchive">Из архива</x:String>
+  <x:String x:Key="Projects.Archived">архивный</x:String>
+  <x:String x:Key="Projects.ShowArchived">Показать архивные</x:String>
+  <x:String x:Key="Projects.Name">Имя проекта</x:String>
+  <x:String x:Key="Projects.Color">Цвет маркера</x:String>
+  <x:String x:Key="Projects.Save">Сохранить</x:String>
+  <x:String x:Key="Projects.Cancel">Отмена</x:String>
 
 
 </ResourceDictionary>

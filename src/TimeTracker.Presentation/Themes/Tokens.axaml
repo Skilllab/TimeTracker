@@ -68,4 +68,6 @@
 
   <x:Double x:Key="MarkerSize">12</x:Double>
 
+  <x:Double x:Key="ArchivedMarkerOpacity">0.4</x:Double>
+
 </ResourceDictionary>

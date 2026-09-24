@@ -46,7 +46,7 @@ public sealed partial class TimerViewModel : ObservableObject
 
         RefreshCounter();
 
-        _ = LoadProjectsAsync();
+        _ = RefreshProjectsAsync();
     }
 
     /// <summary>
@@ -137,9 +137,13 @@ public sealed partial class TimerViewModel : ObservableObject
 
     /// <summary>
     /// Перечитывает проекты, доступные для выбора.
+    /// Выбранный проект сохраняется: обновление списка не должно сбрасывать
+    /// выбор пользователя. Если проект исчез из списка, например ушел в архив,
+    /// выбор очищается.
     /// </summary>
-    private async Task LoadProjectsAsync()
+    public async Task RefreshProjectsAsync()
     {
+        var selectedId = SelectedProject?.Id;
         var projects = await _projectList.GetAvailableAsync();
 
         Projects.Clear();
@@ -147,6 +151,11 @@ public sealed partial class TimerViewModel : ObservableObject
         foreach (var project in projects)
         {
             Projects.Add(project);
+        }
+
+        if (selectedId is Guid id)
+        {
+            SelectedProject = Projects.FirstOrDefault(project => project.Id == id);
         }
     }
 

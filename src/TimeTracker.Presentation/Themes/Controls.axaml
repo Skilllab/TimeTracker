@@ -104,4 +104,8 @@
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
 
+  <Style Selector="Border.marker.archived">
+    <Setter Property="Opacity" Value="{StaticResource ArchivedMarkerOpacity}" />
+  </Style>
+
 </Styles>
