@@ -66,6 +66,23 @@ public sealed class TimeEntry
         ProjectId = projectId;
     }
 
+    /// <summary>
+    /// Создает новую запись с указанным именем задачи.
+    /// Имя обязательно: пустое значение и значение из одних пробелов отвергаются.
+    /// Идущая запись не имеет окончания и накопленных пауз,
+    /// признак биллингуемости не задан.
+    /// </summary>
+    /// <param name="id">Идентификатор записи.</param>
+    /// <param name="name">Имя задачи; обрезается по краям.</param>
+    /// <param name="startedAt">Момент начала записи.</param>
+    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
+    public static TimeEntry Start(Guid id, string name, DateTimeOffset startedAt, Guid? projectId)
+    {
+        var normalized = NormalizeName(name);
+
+        return new TimeEntry(id, normalized, startedAt, null, 0, null, false, projectId);
+    }
+
     /// <summary>Предельная длина описания.</summary>
     private const int MaxDescriptionLength = 500;
 
@@ -156,6 +173,7 @@ public sealed class TimeEntry
         {
             throw new InvalidTimeEntryException("Возобновить можно только приостановленную запись.");
         }
+
         if (now < PausedAt.Value)
         {
             throw new InvalidTimeEntryException("Момент возобновления не может быть раньше начала паузы.");
@@ -167,15 +185,14 @@ public sealed class TimeEntry
     }
 
     /// <summary>
-    /// Возвращает запись, возобновленную с указанного момента.
-    /// Время от начала паузы прибавляется к накопленному времени пауз и округляется
-    /// вниз до целых секунд, поэтому простой перестает учитываться в длительности.
-    /// Момент начала паузы снимается, а окончание не меняется: запись снова считается идущей.
-    /// Возобновить можно только приостановленную запись, и момент возобновления
-    /// не может быть раньше начала паузы: в обоих случаях бросается
+    /// Возвращает завершенную запись.
+    /// Незакрытая пауза при завершении закрывается: ее время прибавляется
+    /// к накопленному, поэтому простой не попадает в длительность.
+    /// Момент начала паузы снимается, окончание становится равным переданному моменту.
+    /// Завершить можно только идущую запись: для уже завершенной бросается
     /// <c>InvalidTimeEntryException</c>.
     /// </summary>
-    /// <param name="now">Момент возобновления; не раньше момента начала паузы.</param>
+    /// <param name="now">Момент завершения.</param>
     public TimeEntry Close(DateTimeOffset now)
     {
         if (!IsOpen)
@@ -186,5 +203,35 @@ public sealed class TimeEntry
         var paused = PausedAt is null ? 0 : (int)(now - PausedAt.Value).TotalSeconds;
 
         return new TimeEntry(Id, Description, StartedAt, now, PausedSeconds + paused, null, IsBillable, ProjectId);
+    }
+
+    /// <summary>
+    /// Возвращает запись с новым именем задачи.
+    /// Имя обязательно: пустое значение и значение из одних пробелов отвергаются.
+    /// Начало, окончание, накопленные паузы, момент паузы и признаки
+    /// переносятся без изменений, идентификатор сохраняется.
+    /// </summary>
+    /// <param name="name">Новое имя задачи; обрезается по краям.</param>
+    public TimeEntry Rename(string name)
+    {
+        var normalized = NormalizeName(name);
+
+        return new TimeEntry(Id, normalized, StartedAt, EndedAt, PausedSeconds, PausedAt, IsBillable, ProjectId);
+    }
+
+    /// <summary>
+    /// Обрезает имя задачи по краям и проверяет, что оно не пустое.
+    /// </summary>
+    /// <param name="name">Проверяемое имя задачи.</param>
+    private static string NormalizeName(string name)
+    {
+        var normalized = (name ?? string.Empty).Trim();
+
+        if (normalized.Length == 0)
+        {
+            throw new InvalidTimeEntryException("Имя задачи не может быть пустым.");
+        }
+
+        return normalized;
     }
 }

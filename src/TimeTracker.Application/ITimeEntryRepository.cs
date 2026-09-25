@@ -21,6 +21,13 @@ public interface ITimeEntryRepository
     Task<TimeEntry?> GetActiveAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Возвращает запись по идентификатору; <c>null</c>, если записи нет.
+    /// </summary>
+    /// <param name="id">Идентификатор записи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Возвращает записи, начавшиеся в указанном интервале, в порядке начала.
     /// </summary>
     /// <param name="from">Начало интервала выборки.</param>

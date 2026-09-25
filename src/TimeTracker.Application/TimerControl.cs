@@ -11,9 +11,8 @@ public sealed class TimerControl : ITimerControl
     private readonly TimeProvider _timeProvider;
     private readonly ITimeEntryRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
-    private TimeEntry? _active;
     private readonly IProjectRepository _projectRepository;
-
+    private TimeEntry? _active;
 
     /// <summary>
     /// Создает сценарий.
@@ -53,51 +52,23 @@ public sealed class TimerControl : ITimerControl
     public bool IsFinished => _session.State == TimerState.Finished;
 
     /// <summary>
-    /// Запускает запись с указанным проектом.
+    /// Запускает запись с указанным именем задачи и проектом.
     /// Архивный проект для новой записи недопустим: он скрыт из выбора,
     /// поэтому такой идентификатор считается устаревшим.
     /// </summary>
+    /// <param name="name">Имя задачи; обязательно.</param>
     /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
-    public async Task Start(Guid? projectId)
+    public async Task Start(string name, Guid? projectId)
     {
         await EnsureProjectIsActiveAsync(projectId);
 
         var now = _timeProvider.GetUtcNow();
         _session.Start(now);
 
-        _active = new TimeEntry(
-            Guid.NewGuid(),
-            string.Empty,
-            now,
-            null,
-            0,
-            null,
-            false,
-            projectId);
+        _active = TimeEntry.Start(Guid.NewGuid(), name, now, projectId);
 
         await _repository.AddAsync(_active);
         await _unitOfWork.SaveChangesAsync();
-    }
-
-    /// <summary>
-    /// Проверяет, что проект не архивный.
-    /// Отсутствие проекта проверкой не считается: ссылка могла быть удалена
-    /// вместе с базой, и запись без проекта допустима.
-    /// </summary>
-    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
-    private async Task EnsureProjectIsActiveAsync(Guid? projectId)
-    {
-        if (projectId is not Guid id)
-        {
-            return;
-        }
-
-        var project = await _projectRepository.GetByIdAsync(id);
-
-        if (project is { IsArchived: true })
-        {
-            throw new InvalidProjectException("Нельзя начать запись на архивном проекте.");
-        }
     }
 
     /// <summary>
@@ -143,6 +114,25 @@ public sealed class TimerControl : ITimerControl
     }
 
     /// <summary>
+    /// Переименовывает идущую или приостановленную запись.
+    /// Имя меняется и в сохраненной строке, и в копии, которой владеет сценарий:
+    /// иначе следующий переход состояния записал бы прежнее имя.
+    /// </summary>
+    /// <param name="name">Новое имя задачи; обязательно.</param>
+    public async Task Rename(string name)
+    {
+        if (_active is null)
+        {
+            throw new InvalidTimeEntryException("Нельзя переименовать запись, которая не начата.");
+        }
+
+        _active = _active.Rename(name);
+
+        await _repository.UpdateAsync(_active);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    /// <summary>
     /// Восстанавливает незавершенную сессию из хранилища.
     /// </summary>
     /// <param name="cancellationToken">Признак отмены операции.</param>
@@ -164,4 +154,24 @@ public sealed class TimerControl : ITimerControl
     /// </summary>
     public Duration GetElapsed() => _session.ElapsedAt(_timeProvider.GetUtcNow());
 
+    /// <summary>
+    /// Проверяет, что проект не архивный.
+    /// Отсутствие проекта проверкой не считается: ссылка могла быть удалена
+    /// вместе с базой, и запись без проекта допустима.
+    /// </summary>
+    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
+    private async Task EnsureProjectIsActiveAsync(Guid? projectId)
+    {
+        if (projectId is not Guid id)
+        {
+            return;
+        }
+
+        var project = await _projectRepository.GetByIdAsync(id);
+
+        if (project is { IsArchived: true })
+        {
+            throw new InvalidProjectException("Нельзя начать запись на архивном проекте.");
+        }
+    }
 }
