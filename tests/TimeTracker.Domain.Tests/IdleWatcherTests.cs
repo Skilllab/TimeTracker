@@ -79,16 +79,14 @@ public sealed class IdleWatcherTests
 
         public int PauseCount { get; private set; }
 
-        /// <summary>
-        /// Запускает запись с указанным проектом.
-        /// </summary>
-        /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
-        public Task Start(Guid? projectId)
+        public Task Start(string name, Guid? projectId)
         {
             IsRunning = true;
 
             return Task.CompletedTask;
         }
+
+        public Task Rename(string name) => Task.CompletedTask;
 
         public Task Pause()
         {
@@ -114,6 +112,11 @@ public sealed class IdleWatcherTests
 
             return Task.CompletedTask;
         }
+
+        /// <summary>
+        /// Переводит таймер в исходное состояние для следующей задачи.
+        /// </summary>
+        public Task NewTask() => Task.CompletedTask;
 
         public Task RestoreAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 

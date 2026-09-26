@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TimeTracker.Application;
 using TimeTracker.Domain;
 using TimeTracker.Presentation.Shell;
+using TimeTracker.Presentation.Views;
 
 namespace TimeTracker.Presentation.ViewModels;
 
@@ -16,6 +18,8 @@ public sealed partial class TimerViewModel : ObservableObject
     private readonly ITimerControl _timerControl;
     private readonly IProjectList _projectList;
     private readonly LocalizationManager _localizationManager;
+    private Func<string, EntryNameWindow> _nameWindowFactory = null!;
+    private Control _owner = null!;
     private readonly DispatcherTimer _ticker = new() { Interval = TimeSpan.FromSeconds(1) };
 
     [ObservableProperty]
@@ -47,6 +51,19 @@ public sealed partial class TimerViewModel : ObservableObject
         RefreshCounter();
 
         _ = RefreshProjectsAsync();
+    }
+
+    /// <summary>
+    /// Передает модели фабрику окна имени и владельца окна.
+    /// Окно создается кодом разметки: показ окна — задача представления,
+    /// а владелец берется из визуального дерева, поэтому окно открывается модально.
+    /// </summary>
+    /// <param name="factory">Фабрика окна имени задачи.</param>
+    /// <param name="owner">Элемент управления, по которому ищется владелец окна.</param>
+    public void AttachNameWindowFactory(Func<string, EntryNameWindow> factory, Control owner)
+    {
+        _nameWindowFactory = factory ?? throw new ArgumentNullException(nameof(factory));
+        _owner = owner ?? throw new ArgumentNullException(nameof(owner));
     }
 
     /// <summary>
@@ -84,8 +101,76 @@ public sealed partial class TimerViewModel : ObservableObject
         }
         else
         {
-            await _timerControl.Start(SelectedProject?.Id);
+            await StartAsync();
+
+            return;
         }
+
+        RefreshState();
+    }
+
+    /// <summary>
+    /// Переименовывает идущую запись.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanRename))]
+    private async Task Rename()
+    {
+        var name = await RequestNameAsync(TaskName);
+
+        if (name is null)
+        {
+            return;
+        }
+
+        await _timerControl.Rename(name);
+
+        TaskName = name;
+    }
+
+    /// <summary>
+    /// Разрешает переименование, пока запись идет или стоит на паузе.
+    /// </summary>
+    private bool CanRename() => _timerControl.IsRunning || _timerControl.IsPaused;
+
+    /// <summary>
+    /// Запрашивает имя задачи в отдельном окне; <c>null</c>, если пользователь отказался.
+    /// </summary>
+    /// <param name="current">Текущее имя задачи.</param>
+    private async Task<string?> RequestNameAsync(string current)
+    {
+        var window = _nameWindowFactory(current);
+
+        if (TopLevel.GetTopLevel(_owner) is Window owner)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+
+        return window.DataContext is EntryNameViewModel model && model.IsConfirmed
+            ? model.TrimmedName
+            : null;
+    }
+
+
+    /// <summary>
+    /// Открывает окно имени задачи и запускает запись.
+    /// Запись начинается только после подтверждения имени.
+    /// </summary>
+    private async Task StartAsync()
+    {
+        var name = await RequestNameAsync(TaskName);
+
+        if (name is null)
+        {
+            return;
+        }
+
+        await _timerControl.Start(name, SelectedProject?.Id);
+
+        TaskName = name;
 
         RefreshState();
     }
@@ -100,6 +185,31 @@ public sealed partial class TimerViewModel : ObservableObject
 
         RefreshState();
     }
+
+    /// <summary>
+    /// Признак того, что задача завершена и можно начать следующую.
+    /// </summary>
+    public bool CanStartNewTask => _timerControl.IsFinished;
+
+    /// <summary>
+    /// Возвращает таймер в исходное состояние, чтобы начать следующую задачу.
+    /// Завершенная запись при этом не меняется: она остается в списке за сегодня.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(IsFinishedState))]
+    private async Task NewTask()
+    {
+        await _timerControl.NewTask();
+
+        RefreshState();
+    }
+
+    /// <summary>
+    /// Разрешает переход к следующей задаче только после завершения текущей.
+    /// </summary>
+    private bool IsFinishedState() => CanStartNewTask;
+
+    [ObservableProperty]
+    private string _taskName = string.Empty;
 
     /// <summary>
     /// Разрешает переключение, пока запись не завершена.
@@ -128,9 +238,12 @@ public sealed partial class TimerViewModel : ObservableObject
     {
         ToggleCommand.NotifyCanExecuteChanged();
         FinishCommand.NotifyCanExecuteChanged();
+        RenameCommand.NotifyCanExecuteChanged();
+        NewTaskCommand.NotifyCanExecuteChanged();
 
         OnPropertyChanged(nameof(ToggleCaption));
         OnPropertyChanged(nameof(CanSelectProject));
+        OnPropertyChanged(nameof(CanStartNewTask));
 
         RefreshCounter();
     }

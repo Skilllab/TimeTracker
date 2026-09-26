@@ -9,6 +9,10 @@
               VerticalAlignment="Center"
               Spacing="{DynamicResource SpacingLg}">
 
+    <TextBlock Classes="subtitle"
+               Text="{Binding TaskName}"
+               HorizontalAlignment="Center" />
+
     <TextBlock Classes="counter"
                Text="{Binding Path=Counter}"
                HorizontalAlignment="Center" />
@@ -42,6 +46,13 @@
       <Button Classes="accent"
               Content="{Binding ToggleCaption}"
               Command="{Binding ToggleCommand}" />
+
+      <Button Content="{DynamicResource Entries.Rename}"
+              Command="{Binding RenameCommand}" />
+
+      <Button Content="{DynamicResource Timer.NewTask}"
+              Command="{Binding NewTaskCommand}"
+              IsVisible="{Binding CanStartNewTask}" />
 
       <Button Content="{DynamicResource Timer.Stop}"
               Command="{Binding FinishCommand}" />

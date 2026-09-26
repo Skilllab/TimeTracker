@@ -17,26 +17,37 @@
       <ListBox.ItemTemplate>
         <DataTemplate x:DataType="vm:EntryRowViewModel">
 
-          <StackPanel Orientation="Horizontal"
-                      Spacing="{DynamicResource SpacingMd}">
+          <Grid ColumnDefinitions="*,Auto">
 
-            <TextBlock Text="{Binding Entry.StartedAt, StringFormat='{}{0:HH:mm}'}" />
-            <TextBlock Classes="secondary"
-                       Text="{Binding Entry.EndedAt, StringFormat='{}{0:HH:mm}'}" />
-            <TextBlock Text="{Binding Entry.Description}" />
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource SpacingMd}">
 
-            <Border Classes="marker"
-                    Classes.archived="{Binding IsProjectArchived}"
-                    Background="{Binding ProjectColor, Converter={StaticResource HexColorToBrush}}" />
+              <TextBlock Text="{Binding Entry.StartedAt, StringFormat='{}{0:HH:mm}'}" />
+              <TextBlock Classes="secondary"
+                         Text="{Binding Entry.EndedAt, StringFormat='{}{0:HH:mm}'}" />
+              <TextBlock Text="{Binding TaskName}" />
 
-            <TextBlock Classes="secondary"
-                       Text="{Binding ProjectName}" />
+              <Border Classes="marker"
+                      Classes.archived="{Binding IsProjectArchived}"
+                      Background="{Binding ProjectColor, Converter={StaticResource HexColorToBrush}}" />
 
-            <TextBlock Classes="secondary"
-                       Text="{DynamicResource Projects.Archived}"
-                       IsVisible="{Binding IsProjectArchived}" />
+              <TextBlock Classes="secondary"
+                         Text="{Binding ProjectName}" />
 
-          </StackPanel>
+              <TextBlock Classes="secondary"
+                         Text="{DynamicResource Projects.Archived}"
+                         IsVisible="{Binding IsProjectArchived}" />
+
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Content="{DynamicResource Entries.Rename}"
+                    Command="{Binding $parent[ItemsControl].((vm:EntriesViewModel)DataContext).RenameCommand}"
+                    CommandParameter="{Binding}"
+                    IsVisible="{Binding CanRename}" />
+
+          </Grid>
 
         </DataTemplate>
       </ListBox.ItemTemplate>

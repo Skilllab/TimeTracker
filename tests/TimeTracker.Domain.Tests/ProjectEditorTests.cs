@@ -185,6 +185,9 @@ public sealed class ProjectEditorTests
         public Task<TimeEntry?> GetActiveAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(Active);
 
+        public Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+            => Task.FromResult<TimeEntry?>(null);
+
         public Task<IReadOnlyList<TimeEntry>> GetRangeAsync(DateTimeOffset from, DateTimeOffset to, CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<TimeEntry>>(Array.Empty<TimeEntry>());
 

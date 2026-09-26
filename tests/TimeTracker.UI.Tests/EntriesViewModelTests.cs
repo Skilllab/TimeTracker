@@ -16,7 +16,8 @@ public sealed class EntriesViewModelTests
         var project = new Project(Guid.NewGuid(), "Учебный курс", "#2E7D32");
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(project.Id)),
-            new FakeProjectList(project));
+            new FakeProjectList(project),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -30,7 +31,8 @@ public sealed class EntriesViewModelTests
     {
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(null)),
-            new FakeProjectList());
+            new FakeProjectList(),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -44,7 +46,8 @@ public sealed class EntriesViewModelTests
     {
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(Guid.NewGuid())),
-            new FakeProjectList());
+            new FakeProjectList(),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -59,7 +62,8 @@ public sealed class EntriesViewModelTests
         var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(project.Id), CreateEntry(null)),
-            new FakeProjectList(project));
+            new FakeProjectList(project),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -125,7 +129,8 @@ public sealed class EntriesViewModelTests
         var project = new Project(Guid.NewGuid(), "Учебный курс", "#2E7D32", isArchived: true);
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(project.Id)),
-            new FakeProjectList(project));
+            new FakeProjectList(project),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -139,10 +144,16 @@ public sealed class EntriesViewModelTests
     public async Task RefreshAsync_ProjectListRequestedWithArchived()
     {
         var projectList = new FakeProjectList();
-        var viewModel = new EntriesViewModel(new FakeEntryList(), projectList);
+        var viewModel = new EntriesViewModel(new FakeEntryList(), projectList, new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
         projectList.LastIncludeArchived.Should().BeTrue();
+    }
+
+    private sealed class FakeTimeEntryEditor : ITimeEntryEditor
+    {
+        public Task RenameAsync(Guid entryId, string name, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 }

@@ -61,6 +61,9 @@ internal static class Program
         ITimeEntryRepository repository = new TimeEntryRepository(context);
         IUnitOfWork unitOfWork = new EfUnitOfWork(context);
 
+        ITimeEntryEditor entryEditor = new TimeEntryEditor(repository, unitOfWork);
+
+
         IProjectRepository projectRepository = new ProjectRepository(context);
         IProjectList projectList = new ProjectList(projectRepository, repository);
         IProjectEditor projectEditor = new ProjectEditor(projectRepository, repository, unitOfWork);
@@ -90,8 +93,11 @@ internal static class Program
         var themeManager = new ThemeManager();
         var localizationManager = new LocalizationManager();
 
-        var timerViewModel = new TimerViewModel(timerControl, projectList, localizationManager);
-        var entriesViewModel = new EntriesViewModel(entryList, projectList);
+        var timerViewModel = new TimerViewModel(
+            timerControl,
+            projectList,
+            localizationManager);
+        var entriesViewModel = new EntriesViewModel(entryList, projectList, entryEditor);
         var projectsViewModel = new ProjectsViewModel(projectList, projectEditor);
         var autoStartService = CreateAutoStartService();
         var settingsViewModel = new SettingsViewModel(idleSettings, hotKeySettings, localizationManager, autoStartService);

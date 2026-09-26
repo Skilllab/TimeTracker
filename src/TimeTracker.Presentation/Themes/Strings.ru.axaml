@@ -9,6 +9,7 @@
   <x:String x:Key="Timer.Pause">Пауза</x:String>
   <x:String x:Key="Timer.Resume">Продолжить</x:String>
   <x:String x:Key="Timer.Stop">Завершить</x:String>
+  <x:String x:Key="Timer.NewTask">Новая задача</x:String>
 
   <x:String x:Key="Nav.Settings">Настройки</x:String>
   <x:String x:Key="Settings.Title">Настройки</x:String>
@@ -36,5 +37,11 @@
   <x:String x:Key="Projects.Save">Сохранить</x:String>
   <x:String x:Key="Projects.Cancel">Отмена</x:String>
 
+  <x:String x:Key="Entries.Name">Имя задачи</x:String>
+  <x:String x:Key="Entries.NewName">Новая задача</x:String>
+  <x:String x:Key="Entries.EditName">Имя задачи</x:String>
+  <x:String x:Key="Entries.Rename">Переименовать</x:String>
+  <x:String x:Key="Entries.Save">Сохранить</x:String>
+  <x:String x:Key="Entries.Cancel">Отмена</x:String>
 
 </ResourceDictionary>

@@ -21,12 +21,47 @@ public sealed class TimerControlTests
     }
 
     [Fact]
+    public async Task NewTask_AfterStop_AllowsStartAgain()
+    {
+        var (control, time, repository, _) = CreateControl();
+        await control.Start("Работа", projectId: null);
+        time.Advance(TimeSpan.FromSeconds(10));
+        await control.Stop();
+
+        await control.NewTask();
+        await control.Start("Следующая задача", projectId: null);
+
+        control.IsRunning.Should().BeTrue();
+        control.IsFinished.Should().BeFalse();
+        repository.Added.Should().HaveCount(2);
+        repository.Added[1].Description.Should().Be("Следующая задача");
+        repository.Added[1].Id.Should().NotBe(repository.Added[0].Id);
+    }
+
+    [Fact]
+    public async Task NewTask_AfterStop_RenameBeforeStart_Throws()
+    {
+        var (control, time, repository, _) = CreateControl();
+        await control.Start("Работа", projectId: null);
+        time.Advance(TimeSpan.FromSeconds(10));
+        await control.Stop();
+
+        await control.NewTask();
+
+        var act = async () => await control.Rename("Другое");
+
+        await act.Should().ThrowAsync<InvalidTimeEntryException>()
+            .WithMessage("Нельзя переименовать запись, которая не начата.");
+        repository.Updated.Should().HaveCount(1);
+    }
+
+    [Fact]
     public async Task Start_WithProject_SavesProjectId()
     {
         var (control, _, repository, _) = CreateControl();
         var projectId = Guid.NewGuid();
 
-        await control.Start(projectId);
+        await control.Start("test", projectId);
 
         repository.Added.Should().HaveCount(1);
         repository.Added[0].ProjectId.Should().Be(projectId);
@@ -37,7 +72,7 @@ public sealed class TimerControlTests
     {
         var (control, _, repository, _) = CreateControl();
 
-        await control.Start(projectId: null);
+        await control.Start("test", projectId: null);
 
         repository.Added.Should().HaveCount(1);
         repository.Added[0].ProjectId.Should().BeNull();
@@ -60,7 +95,7 @@ public sealed class TimerControlTests
     {
         var (control, time, _, _) = CreateControl();
 
-        control.Start(projectId: null);
+        control.Start("test", projectId: null);
         time.Advance(TimeSpan.FromSeconds(65));
 
         control.IsRunning.Should().BeTrue();
@@ -71,7 +106,7 @@ public sealed class TimerControlTests
     public void Pause_FreezesElapsed()
     {
         var (control, time, _, _) = CreateControl();
-        control.Start(projectId: null);
+        control.Start("test", projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         control.Pause();
@@ -85,7 +120,7 @@ public sealed class TimerControlTests
     public void Resume_ContinuesFromSameValue()
     {
         var (control, time, _, _) = CreateControl();
-        control.Start(projectId: null);
+        control.Start("test", projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
         control.Pause();
         time.Advance(TimeSpan.FromMinutes(1));
@@ -101,7 +136,7 @@ public sealed class TimerControlTests
     public async Task Stop_SavesEntryWithPauseSeconds()
     {
         var (control, time, repository, unitOfWork) = CreateControl();
-        await control.Start(projectId: null);
+        await control.Start("test", projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
         await control.Pause();
         time.Advance(TimeSpan.FromMinutes(1));
@@ -147,7 +182,7 @@ public sealed class TimerControlTests
     {
         var (control, _, repository, unitOfWork) = CreateControl();
 
-        await control.Start(projectId: null);
+        await control.Start("test", projectId: null);
 
         repository.Added.Should().HaveCount(1);
         repository.Added[0].IsOpen.Should().BeTrue();
@@ -159,7 +194,7 @@ public sealed class TimerControlTests
     public async Task Pause_SavesPauseMoment()
     {
         var (control, time, repository, _) = CreateControl();
-        await control.Start(projectId: null);
+        await control.Start("test", projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         await control.Pause();
@@ -172,7 +207,7 @@ public sealed class TimerControlTests
     public async Task Stop_ClosesSavedEntry()
     {
         var (control, time, repository, _) = CreateControl();
-        await control.Start(projectId: null);
+        await control.Start("test", projectId: null);
         time.Advance(TimeSpan.FromSeconds(10));
 
         await control.Stop();
@@ -254,6 +289,9 @@ public sealed class TimerControlTests
         {
             return Task.FromResult(Active);
         }
+
+        public Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+            => Task.FromResult<TimeEntry?>(null);
 
         public Task<IReadOnlyList<TimeEntry>> GetRangeAsync(
             DateTimeOffset from,

@@ -115,6 +115,34 @@ public sealed class TimerSessionTests
     }
 
     [Fact]
+    public void Reset_AfterFinish_AllowsStartAgain()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+        session.Stop(Start.AddSeconds(10));
+
+        session.Reset();
+
+        session.State.Should().Be(TimerState.Idle);
+        session.Start(Start.AddMinutes(1));
+        session.State.Should().Be(TimerState.Running);
+    }
+
+    [Fact]
+    public void Reset_AfterFinish_ClearsAccumulatedPauses()
+    {
+        var session = new TimerSession();
+        session.Start(Start);
+        session.Pause(Start.AddSeconds(10));
+        session.Stop(Start.AddMinutes(1));
+
+        session.Reset();
+
+        session.PausedSeconds.Should().Be(0);
+        session.Current.Should().BeNull();
+    }
+
+    [Fact]
     public void ElapsedAt_WhilePaused_DoesNotGrow()
     {
         var session = new TimerSession();

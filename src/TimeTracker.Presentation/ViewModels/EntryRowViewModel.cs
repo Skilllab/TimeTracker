@@ -17,6 +17,16 @@ public sealed class EntryRowViewModel
         Entry = entry ?? throw new ArgumentNullException(nameof(entry));
         Project = project;
     }
+    /// <summary>
+    /// Имя задачи записи.
+    /// </summary>
+    public string TaskName => Entry.Description;
+
+    /// <summary>
+    /// Признак того, что запись завершена и ее имя можно править из списка.
+    /// Идущая запись правится на экране таймера: ее состоянием владеет сценарий таймера.
+    /// </summary>
+    public bool CanRename => !Entry.IsOpen;
 
     /// <summary>
     /// Запись времени.

@@ -42,6 +42,18 @@ public sealed class TimeEntryRepository : ITimeEntryRepository
     }
 
     /// <summary>
+    /// Возвращает запись по идентификатору; <c>null</c>, если записи нет.
+    /// </summary>
+    /// <param name="id">Идентификатор записи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return _context.TimeEntries
+            .AsNoTracking()
+            .FirstOrDefaultAsync(entry => entry.Id == id, cancellationToken);
+    }
+
+    /// <summary>
     /// Возвращает записи, начавшиеся в указанном интервале, в порядке начала.
     /// </summary>
     /// <param name="from">Начало интервала выборки.</param>

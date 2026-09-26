@@ -9,6 +9,7 @@
   <x:String x:Key="Timer.Pause">Pause</x:String>
   <x:String x:Key="Timer.Resume">Resume</x:String>
   <x:String x:Key="Timer.Stop">Stop</x:String>
+  <x:String x:Key="Timer.NewTask">New task</x:String>
 
   <x:String x:Key="Nav.Settings">Settings</x:String>
   <x:String x:Key="Settings.Title">Settings</x:String>
@@ -36,5 +37,11 @@
   <x:String x:Key="Projects.Save">Save</x:String>
   <x:String x:Key="Projects.Cancel">Cancel</x:String>
 
+  <x:String x:Key="Entries.Name">Task name</x:String>
+  <x:String x:Key="Entries.NewName">New task</x:String>
+  <x:String x:Key="Entries.EditName">Task name</x:String>
+  <x:String x:Key="Entries.Rename">Rename</x:String>
+  <x:String x:Key="Entries.Save">Save</x:String>
+  <x:String x:Key="Entries.Cancel">Cancel</x:String>
 
 </ResourceDictionary>

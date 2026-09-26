@@ -43,8 +43,11 @@ public partial class MainWindow : Window
         var localizationManager = new LocalizationManager();
         var projectList = new DesignProjectList();
 
-        var timer = new TimerViewModel(new DesignTimerControl(), projectList, localizationManager);
-        var entries = new EntriesViewModel(new DesignTimeEntryList(), projectList);
+        var timer = new TimerViewModel(
+            new DesignTimerControl(),
+            projectList,
+            localizationManager);
+        var entries = new EntriesViewModel(new DesignTimeEntryList(), projectList, new DesignTimeEntryEditor());
         var projects = new ProjectsViewModel(projectList, new DesignProjectEditor());
         var settings = new SettingsViewModel(
             new IdleSettings(),

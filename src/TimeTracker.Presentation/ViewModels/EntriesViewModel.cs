@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
 using TimeTracker.Application;
 using TimeTracker.Domain;
+using TimeTracker.Presentation.Views;
 
 namespace TimeTracker.Presentation.ViewModels;
 
@@ -12,16 +14,21 @@ public sealed partial class EntriesViewModel
 {
     private readonly ITimeEntryList _entryList;
     private readonly IProjectList _projectList;
+    private readonly ITimeEntryEditor _entryEditor;
+    private Func<string, EntryNameWindow> _nameWindowFactory = null!;
+    private Control _owner = null!;
 
     /// <summary>
     /// Создает экран записей.
     /// </summary>
     /// <param name="entryList">Входящий порт списка записей.</param>
     /// <param name="projectList">Входящий порт списка проектов.</param>
-    public EntriesViewModel(ITimeEntryList entryList, IProjectList projectList)
+    /// <param name="entryEditor">Входящий порт управления записью.</param>
+    public EntriesViewModel(ITimeEntryList entryList, IProjectList projectList, ITimeEntryEditor entryEditor)
     {
         _entryList = entryList ?? throw new ArgumentNullException(nameof(entryList));
         _projectList = projectList ?? throw new ArgumentNullException(nameof(projectList));
+        _entryEditor = entryEditor ?? throw new ArgumentNullException(nameof(entryEditor));
 
         _ = RefreshAsync();
     }
@@ -67,5 +74,68 @@ public sealed partial class EntriesViewModel
         projectsById.TryGetValue(id, out var project);
 
         return project;
+    }
+
+    /// <summary>
+    /// Открывает окно правки имени записи.
+    /// </summary>
+    /// <param name="row">Строка списка.</param>
+    [RelayCommand(CanExecute = nameof(CanRename))]
+    private async Task Rename(EntryRowViewModel? row)
+    {
+        if (row is null)
+        {
+            return;
+        }
+
+        var name = await RequestNameAsync(row.TaskName);
+
+        if (name is null)
+        {
+            return;
+        }
+
+        await _entryEditor.RenameAsync(row.Entry.Id, name);
+
+        await RefreshAsync();
+    }
+
+    /// <summary>
+    /// Передает модели фабрику окна имени и владельца окна.
+    /// </summary>
+    /// <param name="factory">Фабрика окна имени задачи.</param>
+    /// <param name="owner">Элемент управления, по которому ищется владелец окна.</param>
+    public void AttachNameWindowFactory(Func<string, EntryNameWindow> factory, Control owner)
+    {
+        _nameWindowFactory = factory ?? throw new ArgumentNullException(nameof(factory));
+        _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+    }
+
+    /// <summary>
+    /// Разрешает правку имени только у завершенной записи.
+    /// </summary>
+    /// <param name="row">Проверяемая строка списка.</param>
+    private bool CanRename(EntryRowViewModel? row) => row is { CanRename: true };
+
+    /// <summary>
+    /// Запрашивает имя задачи в отдельном окне; <c>null</c>, если пользователь отказался.
+    /// </summary>
+    /// <param name="current">Текущее имя задачи.</param>
+    private async Task<string?> RequestNameAsync(string current)
+    {
+        var window = _nameWindowFactory(current);
+
+        if (TopLevel.GetTopLevel(_owner) is Window owner)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+
+        return window.DataContext is EntryNameViewModel model && model.IsConfirmed
+            ? model.TrimmedName
+            : null;
     }
 }
