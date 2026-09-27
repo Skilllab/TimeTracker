@@ -22,6 +22,7 @@ namespace TimeTracker.Application;
 /// <param name="LastStartedAt">Момент последнего запуска; <c>null</c>, если задача не начиналась.</param>
 /// <param name="FinishedAt">Момент завершения; <c>null</c>, если задача не завершена.</param>
 /// <param name="Tags">Имена тегов задачи одной строкой через разделитель.</param>
+/// <param name="IsDeleted">Признак того, что задача помечена удаленной.</param>
 public sealed record TaskListItem(
     Guid Id,
     string Description,
@@ -34,7 +35,8 @@ public sealed record TaskListItem(
     DateTimeOffset? StartedAt,
     DateTimeOffset? LastStartedAt,
     DateTimeOffset? FinishedAt,
-    string Tags)
+    string Tags,
+    bool IsDeleted)
 {
     /// <summary>Разделитель имен тегов в строке задачи.</summary>
     private const char TagSeparator = '|';

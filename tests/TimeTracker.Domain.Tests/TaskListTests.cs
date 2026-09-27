@@ -230,6 +230,61 @@ public sealed class TaskListTests
         item.CanFinish.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task GetAsync_WithoutIncludeDeleted_HidesDeletedTasks()
+    {
+        var deleted = WorkTask.Create(Guid.NewGuid(), "Удаленная", null, Start).Delete();
+        var active = WorkTask.Create(Guid.NewGuid(), "Действующая", null, Start);
+        var list = CreateList(new[] { deleted, active });
+
+        var items = await list.GetAsync(null, null, null, TestContext.Current.CancellationToken);
+
+        items.Should().ContainSingle();
+        items[0].Description.Should().Be("Действующая");
+    }
+
+    [Fact]
+    public async Task GetAsync_WithIncludeDeleted_PlacesDeletedLast()
+    {
+        var finished = WorkTask.Create(Guid.NewGuid(), "Завершенная", null, Start)
+            .Start(Start.AddMinutes(1))
+            .Finish(Start.AddMinutes(2));
+        var deleted = WorkTask.Create(Guid.NewGuid(), "Удаленная", null, Start).Delete();
+        var list = CreateList(new[] { deleted, finished });
+
+        var items = await list.GetAsync(null, null, null, TestContext.Current.CancellationToken, includeDeleted: true);
+
+        items.Select(item => item.Description)
+            .Should().ContainInOrder("Завершенная", "Удаленная");
+        items[1].IsDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetAsync_WithIncludeDeletedAndNameFilter_ShowsDeletedMatch()
+    {
+        var deleted = WorkTask.Create(Guid.NewGuid(), "Удаленная работа", null, Start).Delete();
+        var active = WorkTask.Create(Guid.NewGuid(), "Другая работа", null, Start);
+        var list = CreateList(new[] { deleted, active });
+
+        var items = await list.GetAsync("Удаленная", null, null, TestContext.Current.CancellationToken, includeDeleted: true);
+
+        items.Should().ContainSingle();
+        items[0].IsDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetAsync_WithTagFilterAndIncludeDeleted_PlacesDeletedLast()
+    {
+        var active = WorkTask.Create(Guid.NewGuid(), "Действующая", null, Start).AddTag("Отчеты");
+        var deleted = WorkTask.Create(Guid.NewGuid(), "Удаленная", null, Start).AddTag("Отчеты").Delete();
+        var list = CreateList(new[] { deleted, active });
+
+        var items = await list.GetAsync(null, "Отчеты", null, TestContext.Current.CancellationToken, includeDeleted: true);
+
+        items.Select(item => item.Description)
+            .Should().ContainInOrder("Действующая", "Удаленная");
+    }
+
     private static TaskList CreateList(IEnumerable<WorkTask> tasks)
         => CreateList(new FakeTaskRepository(tasks));
 
@@ -252,8 +307,9 @@ public sealed class TaskListTests
             return Task.CompletedTask;
         }
 
-        public Task<IReadOnlyList<WorkTask>> GetAllAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<WorkTask>>(_tasks.ToList());
+        public Task<IReadOnlyList<WorkTask>> GetAllAsync(bool includeDeleted = false, CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<WorkTask>>(
+                _tasks.Where(task => includeDeleted || !task.IsDeleted).ToList());
 
         public Task<WorkTask?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
             => Task.FromResult(_tasks.FirstOrDefault(task => task.Id == id));
@@ -279,6 +335,13 @@ public sealed class TaskListTests
             CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<WorkTask>>(
                 _tasks.Where(task => task.CreatedAt >= from && task.CreatedAt <= to).ToList());
+
+        public Task DeletePermanentlyAsync(WorkTask task, CancellationToken cancellationToken = default)
+        {
+            _tasks.RemoveAll(existing => existing.Id == task.Id);
+
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeProjectRepository : IProjectRepository
@@ -311,6 +374,13 @@ public sealed class TaskListTests
             {
                 _projects[index] = project;
             }
+
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteAsync(Project project, CancellationToken cancellationToken = default)
+        {
+            _projects.RemoveAll(existing => existing.Id == project.Id);
 
             return Task.CompletedTask;
         }

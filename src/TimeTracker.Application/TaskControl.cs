@@ -204,6 +204,52 @@ public sealed class TaskControl : ITaskControl
     }
 
     /// <summary>
+    /// Помечает задачу удаленной.
+    /// Пометка не отвязывает задачу от проекта и не исключает ее из отчетов:
+    /// задача остается в хранилище вместе со своими записями времени.
+    /// Пометить можно только задачу, которая не выполняется сейчас.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public async Task DeleteTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
+    {
+        var task = await RequireTaskAsync(taskId, cancellationToken);
+
+        await _taskRepository.UpdateAsync(task.Delete(), cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Снимает с задачи пометку удаления.
+    /// Состояние, моменты, проект и теги сохраняются, поэтому восстановление
+    /// не влияет на ход работы и на отчеты.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public async Task RestoreTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
+    {
+        var task = await RequireTaskAsync(taskId, cancellationToken);
+
+        await _taskRepository.UpdateAsync(task.Restore(), cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Удаляет задачу из хранилища вместе с ее записями времени.
+    /// Записи времени уходят по связи задачи и записи, поэтому отдельных вызовов не требуется.
+    /// Действие необратимо.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public async Task DeletePermanentlyAsync(Guid taskId, CancellationToken cancellationToken = default)
+    {
+        var task = await RequireTaskAsync(taskId, cancellationToken);
+
+        await _taskRepository.DeletePermanentlyAsync(task, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// Приводит задачи к согласованному состоянию после запуска приложения:
     /// задача, оставшаяся выполняемой, переводится в паузу моментом последнего запуска.
     /// Так время закрытого приложения не попадает в длительность,

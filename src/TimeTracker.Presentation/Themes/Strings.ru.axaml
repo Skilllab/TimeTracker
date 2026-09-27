@@ -29,6 +29,7 @@
 
   <x:String x:Key="Projects.Create">Создать</x:String>
   <x:String x:Key="Projects.Edit">Переименовать</x:String>
+  <x:String x:Key="Projects.Delete">Удалить проект</x:String>
   <x:String x:Key="Projects.Archive">В архив</x:String>
   <x:String x:Key="Projects.Unarchive">Из архива</x:String>
   <x:String x:Key="Projects.Archived">архивный</x:String>
@@ -58,6 +59,7 @@
   <x:String x:Key="Tasks.Project">Проект задачи</x:String>
   <x:String x:Key="Tasks.ProjectBusy">Нельзя сменить проект у выполняемой задачи.</x:String>
   <x:String x:Key="Tasks.New">Новая задача</x:String>
+  <x:String x:Key="Tasks.Rename">Переименовать</x:String>
   <x:String x:Key="Tasks.Start">Старт</x:String>
   <x:String x:Key="Tasks.Resume">Продолжить</x:String>
   <x:String x:Key="Tasks.Pause">Пауза</x:String>
@@ -73,6 +75,15 @@
   <x:String x:Key="Tasks.Created">Создана</x:String>
   <x:String x:Key="Tasks.Started">Начата</x:String>
   <x:String x:Key="Tasks.Empty">Задач пока нет</x:String>
+  <x:String x:Key="Tasks.ShowDeleted">Показывать удаленные задачи</x:String>
+  <x:String x:Key="Tasks.Delete">Удалить задачу</x:String>
+  <x:String x:Key="Tasks.Restore">Восстановить</x:String>
+  <x:String x:Key="Tasks.DeletePermanently">Удалить полностью</x:String>
+  <x:String x:Key="Tasks.DeletedLabel">Удалена</x:String>
+  <x:String x:Key="Tasks.DeletePermanentlyTitle">Удаление задачи</x:String>
+  <x:String x:Key="Tasks.DeletePermanentlyQuestion">Задача и все ее записи времени будут удалены безвозвратно. Продолжить?</x:String>
+  <x:String x:Key="Tasks.ConfirmYes">Подтвердить</x:String>
+  <x:String x:Key="Tasks.ConfirmNo">Отмена</x:String>
 
   <x:String x:Key="Reports.Title">Отчеты</x:String>
   <x:String x:Key="Reports.ByProject">По проектам</x:String>

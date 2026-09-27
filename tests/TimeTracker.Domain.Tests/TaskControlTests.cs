@@ -283,6 +283,54 @@ public sealed class TaskControlTests
         unitOfWork.SaveCount.Should().Be(1);
     }
 
+    [Fact]
+    public async Task DeleteTaskAsync_ForNotStartedTask_MarksDeleted()
+    {
+        var (control, _, tasks, _, unitOfWork) = CreateControl();
+        var taskId = await control.CreateTaskAsync("Работа", null, TestContext.Current.CancellationToken);
+
+        await control.DeleteTaskAsync(taskId, TestContext.Current.CancellationToken);
+
+        tasks.Tasks.Single().IsDeleted.Should().BeTrue();
+        unitOfWork.SaveCount.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task DeleteTaskAsync_ForRunningTask_Throws()
+    {
+        var (control, _, _, _, _) = CreateControl();
+        var taskId = await control.CreateTaskAsync("Работа", null, TestContext.Current.CancellationToken);
+        await control.StartTaskAsync(taskId, TestContext.Current.CancellationToken);
+
+        var act = () => control.DeleteTaskAsync(taskId, TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<InvalidTaskStateException>();
+    }
+
+    [Fact]
+    public async Task RestoreTaskAsync_AfterDelete_ClearsFlag()
+    {
+        var (control, _, tasks, _, _) = CreateControl();
+        var taskId = await control.CreateTaskAsync("Работа", null, TestContext.Current.CancellationToken);
+        await control.DeleteTaskAsync(taskId, TestContext.Current.CancellationToken);
+
+        await control.RestoreTaskAsync(taskId, TestContext.Current.CancellationToken);
+
+        tasks.Tasks.Single().IsDeleted.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task DeletePermanentlyAsync_AfterDelete_RemovesTask()
+    {
+        var (control, _, tasks, _, _) = CreateControl();
+        var taskId = await control.CreateTaskAsync("Работа", null, TestContext.Current.CancellationToken);
+        await control.DeleteTaskAsync(taskId, TestContext.Current.CancellationToken);
+
+        await control.DeletePermanentlyAsync(taskId, TestContext.Current.CancellationToken);
+
+        tasks.Tasks.Should().BeEmpty();
+    }
+
     private sealed class FakeTaskRepository : IWorkTaskRepository
     {
         private readonly List<WorkTask> _tasks = new();
@@ -296,8 +344,9 @@ public sealed class TaskControlTests
             return Task.CompletedTask;
         }
 
-        public Task<IReadOnlyList<WorkTask>> GetAllAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<WorkTask>>(_tasks.ToList());
+        public Task<IReadOnlyList<WorkTask>> GetAllAsync(bool includeDeleted = false, CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<WorkTask>>(
+                _tasks.Where(task => includeDeleted || !task.IsDeleted).ToList());
 
         public Task<WorkTask?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
             => Task.FromResult(_tasks.FirstOrDefault(task => task.Id == id));
@@ -323,6 +372,13 @@ public sealed class TaskControlTests
             CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<WorkTask>>(
                 _tasks.Where(task => task.CreatedAt >= from && task.CreatedAt <= to).ToList());
+
+        public Task DeletePermanentlyAsync(WorkTask task, CancellationToken cancellationToken = default)
+        {
+            _tasks.RemoveAll(existing => existing.Id == task.Id);
+
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeEntryRepository : ITimeEntryRepository

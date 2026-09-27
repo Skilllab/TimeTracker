@@ -29,6 +29,7 @@
 
   <x:String x:Key="Projects.Create">Create</x:String>
   <x:String x:Key="Projects.Edit">Rename</x:String>
+  <x:String x:Key="Projects.Delete">Delete project</x:String>
   <x:String x:Key="Projects.Archive">Archive</x:String>
   <x:String x:Key="Projects.Unarchive">Restore</x:String>
   <x:String x:Key="Projects.Archived">archived</x:String>
@@ -58,6 +59,7 @@
   <x:String x:Key="Tasks.Project">Task project</x:String>
   <x:String x:Key="Tasks.ProjectBusy">The project of a running task cannot be changed.</x:String>
   <x:String x:Key="Tasks.New">New task</x:String>
+  <x:String x:Key="Tasks.Rename">Rename</x:String>
   <x:String x:Key="Tasks.Start">Start</x:String>
   <x:String x:Key="Tasks.Resume">Resume</x:String>
   <x:String x:Key="Tasks.Pause">Pause</x:String>
@@ -73,6 +75,15 @@
   <x:String x:Key="Tasks.Created">Created</x:String>
   <x:String x:Key="Tasks.Started">Started</x:String>
   <x:String x:Key="Tasks.Empty">No tasks yet</x:String>
+  <x:String x:Key="Tasks.ShowDeleted">Show deleted tasks</x:String>
+  <x:String x:Key="Tasks.Delete">Delete task</x:String>
+  <x:String x:Key="Tasks.Restore">Restore</x:String>
+  <x:String x:Key="Tasks.DeletePermanently">Delete permanently</x:String>
+  <x:String x:Key="Tasks.DeletedLabel">Deleted</x:String>
+  <x:String x:Key="Tasks.DeletePermanentlyTitle">Delete task</x:String>
+  <x:String x:Key="Tasks.DeletePermanentlyQuestion">The task and all its time records will be deleted permanently. Continue?</x:String>
+  <x:String x:Key="Tasks.ConfirmYes">Confirm</x:String>
+  <x:String x:Key="Tasks.ConfirmNo">Cancel</x:String>
 
   <x:String x:Key="Reports.Title">Reports</x:String>
   <x:String x:Key="Reports.ByProject">By project</x:String>

@@ -263,6 +263,9 @@ public sealed class TimerControlTests
 
         public Task UpdateAsync(Project project, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
+
+        public Task DeleteAsync(Project project, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 
     private sealed class FakeRepository : ITimeEntryRepository

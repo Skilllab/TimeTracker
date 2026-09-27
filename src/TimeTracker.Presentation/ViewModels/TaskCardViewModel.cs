@@ -101,22 +101,58 @@ public sealed class TaskCardViewModel : ObservableObject
     /// <summary>Признак того, что задача выполняется.</summary>
     public bool IsRunning => _item.IsRunning;
 
-    /// <summary>Признак того, что задачу можно завершить.</summary>
-    public bool CanFinish => _item.CanFinish;
+    /// <summary>
+    /// Признак того, что задачу можно завершить.
+    /// Удаленная задача ждет восстановления или полного удаления, поэтому не завершается.
+    /// </summary>
+    public bool CanFinish => !IsDeleted && _item.CanFinish;
 
-    /// <summary>Признак того, что завершенную задачу можно вернуть в работу.</summary>
-    public bool CanReopen => _item.CanReopen;
+    /// <summary>
+    /// Признак того, что завершенную задачу можно вернуть в работу.
+    /// Удаленная задача ждет восстановления или полного удаления, поэтому в работу не возвращается.
+    /// </summary>
+    public bool CanReopen => !IsDeleted && _item.CanReopen;
+
+    /// <summary>Признак того, что задача помечена удаленной.</summary>
+    public bool IsDeleted => _item.IsDeleted;
+
+    /// <summary>
+    /// Признак того, что задачу можно пометить удаленной.
+    /// Идущую задачу не удаляют: сначала ее нужно приостановить или завершить.
+    /// </summary>
+    public bool CanDelete => !IsDeleted && !IsRunning;
+
+    /// <summary>Признак того, что удаленную задачу можно вернуть в список.</summary>
+    public bool CanRestore => IsDeleted;
+
+    /// <summary>Признак того, что удаленную задачу можно удалить из хранилища.</summary>
+    public bool CanDeletePermanently => IsDeleted;
+
+    /// <summary>
+    /// Признак того, что теги задачи можно править.
+    /// Удаленная задача ждет восстановления или полного удаления, поэтому теги у нее не меняют.
+    /// </summary>
+    public bool CanEditTags => !IsDeleted;
+
+    /// <summary>
+    /// Признак того, что задачу можно переименовать.
+    /// Удаленная задача ждет восстановления или полного удаления, поэтому имя у нее не меняют.
+    /// Идущую задачу переименовывать можно: имя не влияет на отсчет времени.
+    /// </summary>
+    public bool CanRename => !IsDeleted;
 
     /// <summary>
     /// Признак того, что задачу можно запустить, приостановить или продолжить.
+    /// Удаленная задача ждет восстановления или полного удаления, поэтому отсчет у нее не идет.
     /// </summary>
-    public bool CanToggle => IsNotStarted || IsRunning || IsPaused;
+    public bool CanToggle => !IsDeleted && (IsNotStarted || IsRunning || IsPaused);
 
     /// <summary>
     /// Признак того, что проект задачи можно сменить.
     /// У выполняемой задачи проект не меняют: запись о работе уже открыта с прежним проектом.
+    /// Удаленная задача проект тоже не меняет.
     /// </summary>
-    public bool CanChangeProject => !IsRunning;
+    public bool CanChangeProject => !IsDeleted && !IsRunning;
 
     /// <summary>
     /// Надпись на кнопке переключения: называет действие, доступное задаче сейчас.

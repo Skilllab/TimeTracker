@@ -48,12 +48,12 @@ public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
         builder.HasOne<Project>()
             .WithMany()
             .HasForeignKey(entry => entry.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne<WorkTask>()
             .WithMany()
             .HasForeignKey(entry => entry.TaskId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Ignore(entry => entry.IsOpen);
 

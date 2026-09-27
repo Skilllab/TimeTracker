@@ -88,6 +88,31 @@ public interface ITaskControl
     Task RemoveTagAsync(Guid taskId, string tag, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Помечает задачу удаленной.
+    /// Пометка не отвязывает задачу от проекта и не исключает ее из отчетов:
+    /// задача остается в хранилище.
+    /// Пометить можно только задачу, которая не выполняется сейчас.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task DeleteTaskAsync(Guid taskId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Снимает с задачи пометку удаления.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task RestoreTaskAsync(Guid taskId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Удаляет задачу из хранилища вместе с ее записями времени.
+    /// Действие необратимо, поэтому выполняется только по явному выбору пользователя.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task DeletePermanentlyAsync(Guid taskId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Приводит задачи к согласованному состоянию после запуска приложения:
     /// задача, оставшаяся выполняемой, переводится в паузу моментом последнего запуска,
     /// поэтому время работы закрытого приложения в длительность не попадает.

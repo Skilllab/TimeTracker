@@ -25,9 +25,10 @@ public sealed partial class TasksViewModel : ObservableObject
     private readonly LocalizationManager _localizationManager;
     private readonly DispatcherTimer _ticker = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly Dictionary<Guid, TaskCardViewModel> _cards = new();
-    private Func<string, EntryNameWindow> _nameWindowFactory = null!;
+    private Func<string, string, EntryNameWindow> _nameWindowFactory = null!;
     private Func<string, IReadOnlyList<Project>, Guid?, Guid, ProjectPickerWindow> _projectWindowFactory = null!;
     private Func<string, string, Guid, IReadOnlyList<string>, TaskTagsWindow> _tagsWindowFactory = null!;
+    private Func<string, string, ConfirmWindow> _confirmWindowFactory = null!;
     private Control _owner = null!;
     private List<Guid> _order = new();
     private bool _updatingFilters;
@@ -84,6 +85,13 @@ public sealed partial class TasksViewModel : ObservableObject
     private string _tagSearchText = string.Empty;
 
     /// <summary>
+    /// Признак того, что в списке показываются и удаленные задачи.
+    /// По умолчанию удаленные скрыты, поэтому список показывает только действующие задачи.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showDeleted;
+
+    /// <summary>
     /// Выбранный отбор по проекту; пункт «Все проекты» означает отсутствие отбора.
     /// </summary>
     [ObservableProperty]
@@ -129,19 +137,22 @@ public sealed partial class TasksViewModel : ObservableObject
     /// Окна создает код разметки: показ окна — работа представления,
     /// а владелец берется из визуального дерева, поэтому окна открываются модально.
     /// </summary>
-    /// <param name="nameWindowFactory">Фабрика окна имени задачи.</param>
+    /// <param name="nameWindowFactory">Фабрика окна имени задачи: заголовок и текущее имя.</param>
     /// <param name="projectWindowFactory">Фабрика окна выбора проекта задачи.</param>
     /// <param name="tagsWindowFactory">Фабрика окна тегов задачи.</param>
+    /// <param name="confirmWindowFactory">Фабрика окна подтверждения.</param>
     /// <param name="owner">Элемент управления, по которому ищется владелец окна.</param>
     public void AttachWindowFactories(
-        Func<string, EntryNameWindow> nameWindowFactory,
+        Func<string, string, EntryNameWindow> nameWindowFactory,
         Func<string, IReadOnlyList<Project>, Guid?, Guid, ProjectPickerWindow> projectWindowFactory,
         Func<string, string, Guid, IReadOnlyList<string>, TaskTagsWindow> tagsWindowFactory,
+        Func<string, string, ConfirmWindow> confirmWindowFactory,
         Control owner)
     {
         _nameWindowFactory = nameWindowFactory ?? throw new ArgumentNullException(nameof(nameWindowFactory));
         _projectWindowFactory = projectWindowFactory ?? throw new ArgumentNullException(nameof(projectWindowFactory));
         _tagsWindowFactory = tagsWindowFactory ?? throw new ArgumentNullException(nameof(tagsWindowFactory));
+        _confirmWindowFactory = confirmWindowFactory ?? throw new ArgumentNullException(nameof(confirmWindowFactory));
         _owner = owner ?? throw new ArgumentNullException(nameof(owner));
     }
 
@@ -185,7 +196,7 @@ public sealed partial class TasksViewModel : ObservableObject
     /// </summary>
     public async Task RefreshAsync()
     {
-        var items = await _taskList.GetAsync(SearchText, TagSearchText, SelectedProjectFilter?.Id);
+        var items = await _taskList.GetAsync(SearchText, TagSearchText, SelectedProjectFilter?.Id, includeDeleted: ShowDeleted);
         var cards = new List<TaskCardViewModel>(items.Count);
 
         foreach (var item in items)
@@ -227,7 +238,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task CreateTask()
     {
-        var name = await RequestNameAsync(string.Empty);
+        var name = await RequestNameAsync(_localizationManager["Tasks.New"], string.Empty);
 
         if (name is null)
         {
@@ -247,7 +258,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task ToggleTask(TaskCardViewModel? card)
     {
-        if (card is null)
+        if (card is null || card.IsDeleted)
         {
             return;
         }
@@ -276,7 +287,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task ChangeProjectTask(TaskCardViewModel? card)
     {
-        if (card is null || card.IsRunning)
+        if (card is null || card.IsDeleted || card.IsRunning)
         {
             return;
         }
@@ -311,7 +322,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenTaskTags(TaskCardViewModel? card)
     {
-        if (card is null)
+        if (card is null || card.IsDeleted)
         {
             return;
         }
@@ -336,15 +347,15 @@ public sealed partial class TasksViewModel : ObservableObject
 
     /// <summary>
     /// Проверяет, можно ли сменить проект задачи.
-    /// Состояние читается заново: пока окно открыто, задача могла начаться.
+    /// Состояние читается заново: пока окно открыто, задача могла начаться или быть удалена.
     /// </summary>
     /// <param name="taskId">Идентификатор задачи.</param>
     private async Task<bool> CanChangeProjectAsync(Guid taskId)
     {
-        var items = await _taskList.GetAsync(null, null, null);
+        var items = await _taskList.GetAsync(null, null, null, includeDeleted: ShowDeleted);
         var item = items.FirstOrDefault(candidate => candidate.Id == taskId);
 
-        return item is not null && !item.IsRunning;
+        return item is not null && !item.IsRunning && !item.IsDeleted;
     }
 
     /// <summary>
@@ -354,7 +365,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task FinishTask(TaskCardViewModel? card)
     {
-        if (card is null)
+        if (card is null || card.IsDeleted)
         {
             return;
         }
@@ -371,7 +382,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task ReopenTask(TaskCardViewModel? card)
     {
-        if (card is null)
+        if (card is null || card.IsDeleted)
         {
             return;
         }
@@ -382,12 +393,118 @@ public sealed partial class TasksViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Запрашивает имя задачи в отдельном окне; <c>null</c>, если пользователь отказался.
+    /// Переименовывает задачу через окно ввода имени.
+    /// Удаленную задачу не переименовывают: она ждет восстановления или полного удаления.
+    /// Идущую задачу переименовывать можно: имя не влияет на отсчет времени.
+    /// Порт вызывается только когда имя подтверждено и отличается от текущего.
     /// </summary>
-    /// <param name="current">Текущее имя задачи.</param>
-    private async Task<string?> RequestNameAsync(string current)
+    /// <param name="card">Плашка задачи.</param>
+    [RelayCommand]
+    private async Task RenameTask(TaskCardViewModel? card)
     {
-        var window = _nameWindowFactory(current);
+        if (card is null || card.IsDeleted)
+        {
+            return;
+        }
+
+        var name = await RequestNameAsync(_localizationManager["Tasks.Rename"], card.Title);
+
+        if (name is null || string.Equals(name, card.Title, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        await _taskControl.RenameAsync(card.Id, name);
+
+        await RefreshAsync();
+    }
+
+    /// <summary>
+    /// Перечитывает список при включении или выключении показа удаленных задач.
+    /// </summary>
+    /// <param name="value">Признак того, что удаленные задачи показываются.</param>
+    partial void OnShowDeletedChanged(bool value) => _ = RefreshAsync();
+
+    /// <summary>
+    /// Помечает задачу удаленной.
+    /// Идущую задачу удалить нельзя: кнопка у нее не показывается.
+    /// </summary>
+    /// <param name="card">Плашка задачи.</param>
+    [RelayCommand]
+    private async Task DeleteTask(TaskCardViewModel? card)
+    {
+        if (card is null)
+        {
+            return;
+        }
+
+        await _taskControl.DeleteTaskAsync(card.Id);
+
+        await RefreshAsync();
+    }
+
+    /// <summary>
+    /// Снимает с задачи пометку удаления.
+    /// </summary>
+    /// <param name="card">Плашка задачи.</param>
+    [RelayCommand]
+    private async Task RestoreTask(TaskCardViewModel? card)
+    {
+        if (card is null)
+        {
+            return;
+        }
+
+        await _taskControl.RestoreTaskAsync(card.Id);
+
+        await RefreshAsync();
+    }
+
+    /// <summary>
+    /// Удаляет задачу из хранилища вместе с ее записями времени.
+    /// Действие необратимо, поэтому перед ним запрашивается подтверждение.
+    /// </summary>
+    /// <param name="card">Плашка задачи.</param>
+    [RelayCommand]
+    private async Task DeletePermanently(TaskCardViewModel? card)
+    {
+        if (card is null)
+        {
+            return;
+        }
+
+        var title = _localizationManager["Tasks.DeletePermanentlyTitle"];
+        var question = _localizationManager["Tasks.DeletePermanentlyQuestion"];
+        var window = _confirmWindowFactory(title, question);
+
+        if (TopLevel.GetTopLevel(_owner) is Window owner)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+
+        if (window.DataContext is not ConfirmViewModel model || !model.IsConfirmed)
+        {
+            return;
+        }
+
+        await _taskControl.DeletePermanentlyAsync(card.Id);
+
+        await RefreshAsync();
+    }
+
+    /// <summary>
+    /// Запрашивает имя задачи в отдельном окне; <c>null</c>, если пользователь отказался.
+    /// Заголовок передается вызывающим: при создании и при переименовании он разный.
+    /// </summary>
+    /// <param name="title">Заголовок окна.</param>
+    /// <param name="current">Текущее имя задачи.</param>
+    private async Task<string?> RequestNameAsync(string title, string current)
+    {
+        var window = _nameWindowFactory(title, current);
 
         if (TopLevel.GetTopLevel(_owner) is Window owner)
         {

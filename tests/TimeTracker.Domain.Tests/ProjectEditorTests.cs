@@ -91,6 +91,8 @@ public sealed class ProjectEditorTests
 
         public List<Project> Updated { get; } = new();
 
+        public List<Project> Deleted { get; } = new();
+
         public Task<IReadOnlyList<Project>> GetAllAsync(CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<Project>>(_projects);
 
@@ -108,6 +110,14 @@ public sealed class ProjectEditorTests
         public Task UpdateAsync(Project project, CancellationToken cancellationToken = default)
         {
             Updated.Add(project);
+
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteAsync(Project project, CancellationToken cancellationToken = default)
+        {
+            Deleted.Add(project);
+            _projects.RemoveAll(existing => existing.Id == project.Id);
 
             return Task.CompletedTask;
         }

@@ -26,6 +26,7 @@ public sealed class WorkTaskConfiguration : IEntityTypeConfiguration<WorkTask>
         builder.Property(task => task.Status).IsRequired();
         builder.Property(task => task.PausedSeconds).IsRequired();
         builder.Property(task => task.IsBillable).IsRequired();
+        builder.Property(task => task.IsDeleted).IsRequired().HasDefaultValue(false);
 
         builder.Property(task => task.CreatedAt)
             .IsRequired()
@@ -64,7 +65,7 @@ public sealed class WorkTaskConfiguration : IEntityTypeConfiguration<WorkTask>
         builder.HasOne<Project>()
             .WithMany()
             .HasForeignKey(task => task.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.Property(task => task.Tags).IsRequired().HasMaxLength(500);
 
@@ -74,5 +75,6 @@ public sealed class WorkTaskConfiguration : IEntityTypeConfiguration<WorkTask>
         builder.HasIndex(task => task.LastStartedAt);
         builder.HasIndex(task => task.Status);
         builder.HasIndex(task => task.ProjectId);
+        builder.HasIndex(task => task.IsDeleted);
     }
 }

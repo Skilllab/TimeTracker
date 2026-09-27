@@ -90,6 +90,15 @@ public sealed class IdleWatcherTests
         public Task RemoveTagAsync(Guid taskId, string tag, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
 
+        public Task DeleteTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task RestoreTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task DeletePermanentlyAsync(Guid taskId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
         public Task RestoreAsync(CancellationToken cancellationToken = default)
             => Task.CompletedTask;
 

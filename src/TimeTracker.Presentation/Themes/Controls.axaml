@@ -1,4 +1,4 @@
-<Styles xmlns="https://github.com/avaloniaui"
+﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <Style Selector="TextBlock">
@@ -105,6 +105,10 @@
   </Style>
 
   <Style Selector="Border.marker.archived">
+    <Setter Property="Opacity" Value="{StaticResource ArchivedMarkerOpacity}" />
+  </Style>
+
+  <Style Selector="Border.card.deleted">
     <Setter Property="Opacity" Value="{StaticResource ArchivedMarkerOpacity}" />
   </Style>
 
