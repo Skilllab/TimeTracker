@@ -107,26 +107,20 @@ public sealed class EntriesViewModelTests
             _projects = projects;
         }
 
-        public bool LastIncludeArchived { get; private set; }
-
         public Task<IReadOnlyList<Project>> GetAvailableAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(_projects);
 
-        public Task<IReadOnlyList<Project>> GetAllAsync(bool includeArchived, CancellationToken cancellationToken = default)
-        {
-            LastIncludeArchived = includeArchived;
-
-            return Task.FromResult(_projects);
-        }
+        public Task<IReadOnlyList<Project>> GetAllAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(_projects);
 
         public Task<Guid?> GetActiveProjectIdAsync(CancellationToken cancellationToken = default)
             => Task.FromResult<Guid?>(null);
     }
 
     [Fact]
-    public async Task RefreshAsync_ArchivedProject_KeepsNameAndMarksArchive()
+    public async Task RefreshAsync_EntryWithProject_KeepsNameAndColor()
     {
-        var project = new Project(Guid.NewGuid(), "Учебный курс", "#2E7D32", isArchived: true);
+        var project = new Project(Guid.NewGuid(), "Учебный курс", "#2E7D32");
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(project.Id)),
             new FakeProjectList(project),
@@ -137,18 +131,6 @@ public sealed class EntriesViewModelTests
         viewModel.Entries.Should().HaveCount(1);
         viewModel.Entries[0].ProjectName.Should().Be("Учебный курс");
         viewModel.Entries[0].ProjectColor.Should().Be("#2E7D32");
-        viewModel.Entries[0].IsProjectArchived.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task RefreshAsync_ProjectListRequestedWithArchived()
-    {
-        var projectList = new FakeProjectList();
-        var viewModel = new EntriesViewModel(new FakeEntryList(), projectList, new FakeTimeEntryEditor());
-
-        await viewModel.RefreshAsync();
-
-        projectList.LastIncludeArchived.Should().BeTrue();
     }
 
     private sealed class FakeTimeEntryEditor : ITimeEntryEditor

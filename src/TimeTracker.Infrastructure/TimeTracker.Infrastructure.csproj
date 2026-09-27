@@ -14,4 +14,19 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Справочник тегов убран: файлы оставлены на диске, но исключены из сборки -->
+  <ItemGroup>
+    <Compile Remove="EfTagRepository.cs" />
+    <Compile Remove="WorkTaskTag.cs" />
+    <Compile Remove="Configurations\TagConfiguration.cs" />
+    <Compile Remove="Configurations\WorkTaskTagConfiguration.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="EfTagRepository.cs" />
+    <None Include="WorkTaskTag.cs" />
+    <None Include="Configurations\TagConfiguration.cs" />
+    <None Include="Configurations\WorkTaskTagConfiguration.cs" />
+  </ItemGroup>
+
 </Project>

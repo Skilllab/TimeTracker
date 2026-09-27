@@ -9,6 +9,7 @@
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
 
@@ -27,6 +28,18 @@
     <Compile Update="Views\ProjectEditorWindow.axaml.cs">
       <DependentUpon>ProjectEditorWindow.axaml</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <!-- Справочник тегов убран: файлы оставлены на диске, но исключены из сборки -->
+  <ItemGroup>
+    <Compile Remove="ViewModels\TagEditorViewModel.cs" />
+    <Compile Remove="ViewModels\TagRowViewModel.cs" />
+    <Compile Remove="Views\TagEditorWindow.axaml.cs" />
+    <AvaloniaXaml Remove="Views\TagEditorWindow.axaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\TagEditorWindow.axaml" />
   </ItemGroup>
 
 </Project>

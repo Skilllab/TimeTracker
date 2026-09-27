@@ -1,13 +1,15 @@
 namespace TimeTracker.Domain;
 
 /// <summary>
-/// Фиксированный набор цветов маркеров проектов, взятый из палитры токенов.
-/// Значения совпадают с ролями светлой темы: акцент, успех, предупреждение, ошибка.
+/// Набор цветов маркеров, предлагаемый для выбора, и проверка записи цвета.
+/// Значения взяты из палитры токенов и совпадают с ролями светлой темы:
+/// акцент, успех, предупреждение, ошибка.
 /// </summary>
 public static class ProjectPalette
 {
     /// <summary>
-    /// Допустимые цвета маркеров в виде #RRGGBB.
+    /// Предлагаемые цвета маркеров в виде #RRGGBB.
+    /// Набор не ограничивает выбор: цвет можно задать любой.
     /// </summary>
     public static IReadOnlyList<string> Colors { get; } = new[]
     {
@@ -18,12 +20,25 @@ public static class ProjectPalette
     };
 
     /// <summary>
-    /// Проверяет, что цвет входит в набор.
-    /// Сравнение без учета регистра, потому что регистр букв в записи цвета не несет смысла.
+    /// Проверяет, что цвет записан в виде #RRGGBB.
+    /// Проверяется формат, а не вхождение в набор: палитра только предлагает готовые значения.
     /// </summary>
-    /// <param name="color">Проверяемый цвет в виде #RRGGBB.</param>
-    public static bool Contains(string? color)
+    /// <param name="color">Проверяемый цвет.</param>
+    public static bool IsValid(string? color)
     {
-        return color is not null && Colors.Contains(color, StringComparer.OrdinalIgnoreCase);
+        if (color is null || color.Length != 7 || color[0] != '#')
+        {
+            return false;
+        }
+
+        for (var index = 1; index < color.Length; index++)
+        {
+            if (!Uri.IsHexDigit(color[index]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

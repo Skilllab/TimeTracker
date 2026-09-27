@@ -1,0 +1,99 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+        x:Class="TimeTracker.Presentation.Views.TaskTagsWindow"
+        x:DataType="vm:TaskTagsViewModel"
+        Title="{Binding Title}"
+        Width="640"
+        Height="520"
+        MinWidth="520"
+        MinHeight="420"
+        WindowStartupLocation="CenterOwner">
+
+  <DockPanel Margin="{DynamicResource MarginPage}"
+             LastChildFill="True">
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="title"
+               Text="{Binding Title}" />
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="subtitle"
+               Text="{Binding TaskTitle}" />
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="secondary"
+               Text="{Binding ErrorText}"
+               IsVisible="{Binding HasError}" />
+
+    <StackPanel DockPanel.Dock="Bottom"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource SpacingMd}"
+                HorizontalAlignment="Right"
+                Margin="{DynamicResource MarginCard}">
+
+      <Button Content="{DynamicResource Settings.Close}"
+              Command="{Binding CloseCommand}"
+              Classes="accent" />
+
+    </StackPanel>
+
+    <Grid RowDefinitions="*,Auto"
+          RowSpacing="{DynamicResource SpacingLg}">
+
+      <Grid Grid.Row="0"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="{DynamicResource SpacingLg}">
+
+        <StackPanel Grid.Column="0"
+                    Spacing="{DynamicResource SpacingSm}">
+
+          <TextBlock Classes="subtitle"
+                     Text="{DynamicResource Tasks.AssignedTags}" />
+
+          <ListBox ItemsSource="{Binding AssignedTags}"
+                   SelectedItem="{Binding SelectedAssignedTag, Mode=TwoWay}"
+                   MinHeight="160" />
+
+          <Button Content="{DynamicResource Tasks.RemoveTag}"
+                  Command="{Binding RemoveCommand}"
+                  HorizontalAlignment="Left" />
+
+        </StackPanel>
+
+        <StackPanel Grid.Column="1"
+                    Spacing="{DynamicResource SpacingSm}">
+
+          <TextBlock Classes="subtitle"
+                     Text="{DynamicResource Tasks.AvailableTags}" />
+
+          <ListBox ItemsSource="{Binding AvailableTags}"
+                   SelectedItem="{Binding SelectedAvailableTag, Mode=TwoWay}"
+                   MinHeight="160" />
+
+          <Button Content="{DynamicResource Tasks.AddTag}"
+                  Command="{Binding AddCommand}"
+                  HorizontalAlignment="Left" />
+
+        </StackPanel>
+
+      </Grid>
+
+      <StackPanel Grid.Row="1"
+                  Orientation="Horizontal"
+                  Spacing="{DynamicResource SpacingMd}">
+
+        <TextBox Width="240"
+                 Text="{Binding NewTagName, Mode=TwoWay}"
+                 Watermark="{DynamicResource Tasks.AddTagHint}" />
+
+        <Button Content="{DynamicResource Tasks.CreateTag}"
+                Command="{Binding CreateCommand}" />
+
+      </StackPanel>
+
+    </Grid>
+
+  </DockPanel>
+
+</Window>

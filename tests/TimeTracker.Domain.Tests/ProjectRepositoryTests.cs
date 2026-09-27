@@ -113,7 +113,7 @@ public sealed class ProjectRepositoryTests
     }
 
     [Fact]
-    public async Task UpdateAsync_AfterArchive_KeepsArchivedFlag()
+    public async Task UpdateAsync_AfterRename_KeepsName()
     {
         using var connection = CreateConnection();
 
@@ -130,7 +130,7 @@ public sealed class ProjectRepositoryTests
             var stored = await new ProjectRepository(context).GetByIdAsync(project.Id, TestContext.Current.CancellationToken);
             stored.Should().NotBeNull();
 
-            await new ProjectRepository(context).UpdateAsync(stored!.Archive(), TestContext.Current.CancellationToken);
+            await new ProjectRepository(context).UpdateAsync(stored!.Rename("Учебный курс"), TestContext.Current.CancellationToken);
             await new EfUnitOfWork(context).SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
@@ -139,8 +139,8 @@ public sealed class ProjectRepositoryTests
             var stored = await new ProjectRepository(context).GetByIdAsync(project.Id, TestContext.Current.CancellationToken);
 
             stored.Should().NotBeNull();
-            stored!.IsArchived.Should().BeTrue();
-            stored.Name.Should().Be("Работа");
+            stored!.Name.Should().Be("Учебный курс");
+            stored.Color.Should().Be("#2F6FED");
         }
     }
 

@@ -22,7 +22,7 @@ public sealed class ProjectList : IProjectList
     }
 
     /// <summary>
-    /// Возвращает действующие проекты в порядке, пригодном для выбора.
+    /// Возвращает проекты в порядке, пригодном для выбора.
     /// Порядок задается здесь, а не в запросе: сравнение с учетом языка дает
     /// естественный алфавитный порядок для русских имен, тогда как сортировка
     /// средствами хранилища сравнивает строки побайтово.
@@ -32,25 +32,23 @@ public sealed class ProjectList : IProjectList
     {
         var projects = await _repository.GetAllAsync(cancellationToken);
 
-        return Order(projects.Where(project => !project.IsArchived));
+        return Order(projects);
     }
 
     /// <summary>
-    /// Возвращает проекты для показа на экране проектов.
+    /// Возвращает проекты для показа.
     /// </summary>
-    /// <param name="includeArchived">Признак того, что архивные проекты тоже нужны.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
-    public async Task<IReadOnlyList<Project>> GetAllAsync(bool includeArchived, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Project>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var projects = await _repository.GetAllAsync(cancellationToken);
 
-        return Order(includeArchived ? projects : projects.Where(project => !project.IsArchived));
+        return Order(projects);
     }
 
     /// <summary>
     /// Возвращает идентификатор проекта идущей записи.
-    /// Занятым считается проект незавершенной записи, в том числе стоящей на паузе:
-    /// архивация такого проекта запрещена, пока запись не завершена.
+    /// Занятым считается проект незавершенной записи, в том числе стоящей на паузе.
     /// </summary>
     /// <param name="cancellationToken">Признак отмены операции.</param>
     public async Task<Guid?> GetActiveProjectIdAsync(CancellationToken cancellationToken = default)

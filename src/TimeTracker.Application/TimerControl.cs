@@ -53,15 +53,11 @@ public sealed class TimerControl : ITimerControl
 
     /// <summary>
     /// Запускает запись с указанным именем задачи и проектом.
-    /// Архивный проект для новой записи недопустим: он скрыт из выбора,
-    /// поэтому такой идентификатор считается устаревшим.
     /// </summary>
     /// <param name="name">Имя задачи; обязательно.</param>
     /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
     public async Task Start(string name, Guid? projectId)
     {
-        await EnsureProjectIsActiveAsync(projectId);
-
         var now = _timeProvider.GetUtcNow();
         _session.Start(now);
 
@@ -167,24 +163,5 @@ public sealed class TimerControl : ITimerControl
     /// </summary>
     public Duration GetElapsed() => _session.ElapsedAt(_timeProvider.GetUtcNow());
 
-    /// <summary>
-    /// Проверяет, что проект не архивный.
-    /// Отсутствие проекта проверкой не считается: ссылка могла быть удалена
-    /// вместе с базой, и запись без проекта допустима.
-    /// </summary>
-    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
-    private async Task EnsureProjectIsActiveAsync(Guid? projectId)
-    {
-        if (projectId is not Guid id)
-        {
-            return;
-        }
-
-        var project = await _projectRepository.GetByIdAsync(id);
-
-        if (project is { IsArchived: true })
-        {
-            throw new InvalidProjectException("Нельзя начать запись на архивном проекте.");
-        }
-    }
 }
+

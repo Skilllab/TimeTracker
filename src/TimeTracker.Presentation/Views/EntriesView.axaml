@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TimeTracker.Presentation.ViewModels"
              x:Class="TimeTracker.Presentation.Views.EntriesView"
@@ -29,15 +29,10 @@
               <TextBlock Text="{Binding TaskName}" />
 
               <Border Classes="marker"
-                      Classes.archived="{Binding IsProjectArchived}"
                       Background="{Binding ProjectColor, Converter={StaticResource HexColorToBrush}}" />
 
               <TextBlock Classes="secondary"
                          Text="{Binding ProjectName}" />
-
-              <TextBlock Classes="secondary"
-                         Text="{DynamicResource Projects.Archived}"
-                         IsVisible="{Binding IsProjectArchived}" />
 
             </StackPanel>
 

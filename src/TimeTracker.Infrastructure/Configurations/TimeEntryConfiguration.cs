@@ -50,9 +50,15 @@ public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
             .HasForeignKey(entry => entry.ProjectId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne<WorkTask>()
+            .WithMany()
+            .HasForeignKey(entry => entry.TaskId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Ignore(entry => entry.IsOpen);
 
         builder.HasIndex(entry => entry.StartedAt);
         builder.HasIndex(entry => entry.ProjectId);
+        builder.HasIndex(entry => entry.TaskId);
     }
 }

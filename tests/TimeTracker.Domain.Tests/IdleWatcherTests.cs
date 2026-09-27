@@ -1,6 +1,5 @@
 using FluentAssertions;
 using TimeTracker.Application;
-using TimeTracker.Domain;
 using Xunit;
 
 namespace TimeTracker.Domain.Tests;
@@ -8,45 +7,33 @@ namespace TimeTracker.Domain.Tests;
 public sealed class IdleWatcherTests
 {
     [Fact]
-    public void Check_WhileRunningAndIdle_PausesRecord()
+    public void Check_IdleAboveThreshold_PausesRunningTask()
     {
-        var control = new FakeTimerControl { IsRunning = true };
+        var control = new FakeTaskControl();
         var detector = new FakeIdleDetector { IdleTime = TimeSpan.FromMinutes(6) };
         var watcher = Create(detector, control);
 
         watcher.Check();
 
-        control.PauseCount.Should().Be(1);
+        control.PauseRunningCount.Should().Be(1);
     }
 
     [Fact]
-    public void Check_IdleBelowThreshold_KeepsRecordRunning()
+    public void Check_IdleBelowThreshold_KeepsTaskRunning()
     {
-        var control = new FakeTimerControl { IsRunning = true };
+        var control = new FakeTaskControl();
         var detector = new FakeIdleDetector { IdleTime = TimeSpan.FromMinutes(1) };
         var watcher = Create(detector, control);
 
         watcher.Check();
 
-        control.PauseCount.Should().Be(0);
-    }
-
-    [Fact]
-    public void Check_IdleButNotRunning_DoesNotPause()
-    {
-        var control = new FakeTimerControl { IsRunning = false };
-        var detector = new FakeIdleDetector { IdleTime = TimeSpan.FromHours(1) };
-        var watcher = Create(detector, control);
-
-        watcher.Check();
-
-        control.PauseCount.Should().Be(0);
+        control.PauseRunningCount.Should().Be(0);
     }
 
     [Fact]
     public void Check_CustomThreshold_RespectsSetting()
     {
-        var control = new FakeTimerControl { IsRunning = true };
+        var control = new FakeTaskControl();
         var detector = new FakeIdleDetector { IdleTime = TimeSpan.FromMinutes(3) };
         var settings = new IdleSettings();
         settings.SetThreshold(TimeSpan.FromMinutes(2));
@@ -54,10 +41,10 @@ public sealed class IdleWatcherTests
 
         watcher.Check();
 
-        control.PauseCount.Should().Be(1);
+        control.PauseRunningCount.Should().Be(1);
     }
 
-    private static IdleWatcher Create(FakeIdleDetector detector, FakeTimerControl control)
+    private static IdleWatcher Create(FakeIdleDetector detector, FakeTaskControl control)
     {
         return new IdleWatcher(detector, control, new IdleSettings(), TimeProvider.System, TimeSpan.FromSeconds(30));
     }
@@ -69,57 +56,48 @@ public sealed class IdleWatcherTests
         public TimeSpan GetIdleTime() => IdleTime;
     }
 
-    private sealed class FakeTimerControl : ITimerControl
+    private sealed class FakeTaskControl : ITaskControl
     {
-        public bool IsRunning { get; set; }
+        public int PauseRunningCount { get; private set; }
 
-        public bool IsPaused { get; private set; }
+        public Task<Guid> CreateTaskAsync(string name, Guid? projectId, CancellationToken cancellationToken = default)
+            => Task.FromResult(Guid.NewGuid());
 
-        public bool IsFinished { get; private set; }
+        public Task StartTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
 
-        public int PauseCount { get; private set; }
+        public Task PauseAsync(Guid taskId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
 
-        public Task Start(string name, Guid? projectId)
+        public Task ResumeAsync(Guid taskId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task FinishAsync(Guid taskId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task ReopenAsync(Guid taskId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task RenameAsync(Guid taskId, string name, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task ChangeProjectAsync(Guid taskId, Guid? projectId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task AddTagAsync(Guid taskId, string tag, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task RemoveTagAsync(Guid taskId, string tag, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task RestoreAsync(CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task PauseRunningAsync(CancellationToken cancellationToken = default)
         {
-            IsRunning = true;
+            PauseRunningCount++;
 
             return Task.CompletedTask;
         }
-
-        public Task Rename(string name) => Task.CompletedTask;
-
-        public Task Pause()
-        {
-            PauseCount++;
-            IsPaused = true;
-            IsRunning = false;
-
-            return Task.CompletedTask;
-        }
-
-        public Task Resume()
-        {
-            IsPaused = false;
-            IsRunning = true;
-
-            return Task.CompletedTask;
-        }
-
-        public Task Stop()
-        {
-            IsRunning = false;
-            IsFinished = true;
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Переводит таймер в исходное состояние для следующей задачи.
-        /// </summary>
-        public Task NewTask() => Task.CompletedTask;
-
-        public Task RestoreAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
-
-        public Duration GetElapsed() => Duration.Zero;
     }
 }

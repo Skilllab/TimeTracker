@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TimeTracker.Application;
@@ -7,7 +8,8 @@ using TimeTracker.Domain;
 namespace TimeTracker.Presentation.ViewModels;
 
 /// <summary>
-/// ViewModel экрана проектов: показывает список, управляет фильтром и диалогом редактора.
+/// ViewModel экрана проектов: показывает список и открывает диалог редактора.
+/// Архивации нет: все проекты доступны для выбора.
 /// </summary>
 public sealed partial class ProjectsViewModel : ObservableObject
 {
@@ -31,17 +33,6 @@ public sealed partial class ProjectsViewModel : ObservableObject
     /// Проекты для показа.
     /// </summary>
     public ObservableCollection<Project> Projects { get; } = new();
-
-    /// <summary>
-    /// Цвета, доступные для выбора в редакторе.
-    /// </summary>
-    public IReadOnlyList<string> Palette { get; } = ProjectPalette.Colors;
-
-    /// <summary>
-    /// Признак того, что показываются и архивные проекты.
-    /// </summary>
-    [ObservableProperty]
-    private bool _showArchived;
 
     /// <summary>
     /// Признак того, что открыт редактор проекта.
@@ -68,23 +59,87 @@ public sealed partial class ProjectsViewModel : ObservableObject
     private string _editorColor = string.Empty;
 
     /// <summary>
+    /// Цвет, выбранный в пикере; синхронизирован со строкой цвета.
+    /// </summary>
+    [ObservableProperty]
+    private Color _pickerColor;
+
+    /// <summary>
+    /// Признак программного изменения цвета: защищает синхронизацию от повторного входа.
+    /// </summary>
+    private bool _syncingColor;
+
+    /// <summary>
+    /// Текст ошибки редактора; пустая строка, если ошибки нет.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasError))]
+    private string _editorError = string.Empty;
+
+    /// <summary>
+    /// Признак того, что есть текст ошибки редактора.
+    /// </summary>
+    public bool HasError => EditorError.Length > 0;
+
+    /// <summary>
     /// Проект, который правится; <c>null</c> при создании.
     /// </summary>
+    /// <summary>
+    /// Переносит введенную строку цвета в пикер.
+    /// Неверная запись оставляет пикер без изменений: сообщение покажет сохранение.
+    /// </summary>
+    /// <param name="value">Строка цвета в виде #RRGGBB.</param>
+    partial void OnEditorColorChanged(string value)
+    {
+        if (_syncingColor || !ProjectPalette.IsValid(value))
+        {
+            return;
+        }
+
+        _syncingColor = true;
+
+        try
+        {
+            PickerColor = Color.Parse(value);
+        }
+        finally
+        {
+            _syncingColor = false;
+        }
+    }
+
+    /// <summary>
+    /// Переносит выбранный в пикере цвет в строку цвета.
+    /// </summary>
+    /// <param name="value">Выбранный цвет.</param>
+    partial void OnPickerColorChanged(Color value)
+    {
+        if (_syncingColor)
+        {
+            return;
+        }
+
+        _syncingColor = true;
+
+        try
+        {
+            EditorColor = $"#{value.R:X2}{value.G:X2}{value.B:X2}";
+        }
+        finally
+        {
+            _syncingColor = false;
+        }
+    }
+
     private Project? _editedProject;
 
     /// <summary>
-    /// Идентификатор проекта незавершенной записи; <c>null</c>, если записи нет.
-    /// </summary>
-    private Guid? _activeProjectId;
-
-    /// <summary>
-    /// Перечитывает список проектов и сведения о занятом проекте.
+    /// Перечитывает список проектов.
     /// </summary>
     [RelayCommand]
     public async Task RefreshAsync()
     {
-        var projects = await _projectList.GetAllAsync(ShowArchived);
-        _activeProjectId = await _projectList.GetActiveProjectIdAsync();
+        var projects = await _projectList.GetAllAsync();
 
         Projects.Clear();
 
@@ -92,9 +147,6 @@ public sealed partial class ProjectsViewModel : ObservableObject
         {
             Projects.Add(project);
         }
-
-        ArchiveCommand.NotifyCanExecuteChanged();
-        UnarchiveCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>
@@ -108,7 +160,9 @@ public sealed partial class ProjectsViewModel : ObservableObject
 
         EditorTitle = "Создание проекта";
         EditorName = string.Empty;
-        EditorColor = Palette[0];
+        EditorColor = ProjectPalette.Colors[0];
+        PickerColor = Color.Parse(EditorColor);
+        EditorError = string.Empty;
         IsEditorOpen = true;
     }
 
@@ -129,15 +183,28 @@ public sealed partial class ProjectsViewModel : ObservableObject
         EditorTitle = "Правка проекта";
         EditorName = project.Name;
         EditorColor = project.Color;
+        PickerColor = Color.Parse(EditorColor);
+        EditorError = string.Empty;
         IsEditorOpen = true;
     }
 
     /// <summary>
     /// Сохраняет введенные значения и закрывает редактор.
+    /// Цвет проверяется до вызова портов: неверная запись не сохраняется,
+    /// а редактор остается открытым, поэтому значение можно исправить.
     /// </summary>
     [RelayCommand]
     private async Task Save()
     {
+        if (!ProjectPalette.IsValid(EditorColor))
+        {
+            EditorError = "Цвет проекта должен быть записан в виде #RRGGBB.";
+
+            return;
+        }
+
+        EditorError = string.Empty;
+
         if (_editedProject is null)
         {
             await _projectEditor.CreateAsync(EditorName, EditorColor);
@@ -165,57 +232,4 @@ public sealed partial class ProjectsViewModel : ObservableObject
     /// </summary>
     [RelayCommand]
     private void Cancel() => IsEditorOpen = false;
-
-    /// <summary>
-    /// Архивирует проект.
-    /// </summary>
-    /// <param name="project">Архивируемый проект.</param>
-    [RelayCommand(CanExecute = nameof(CanArchive))]
-    private async Task Archive(Project? project)
-    {
-        if (project is null)
-        {
-            return;
-        }
-
-        await _projectEditor.ArchiveAsync(project.Id);
-
-        await RefreshAsync();
-    }
-
-    /// <summary>
-    /// Возвращает проект из архива.
-    /// </summary>
-    /// <param name="project">Возвращаемый проект.</param>
-    [RelayCommand(CanExecute = nameof(CanUnarchive))]
-    private async Task Unarchive(Project? project)
-    {
-        if (project is null)
-        {
-            return;
-        }
-
-        await _projectEditor.UnarchiveAsync(project.Id);
-
-        await RefreshAsync();
-    }
-
-    /// <summary>
-    /// Разрешает архивацию действующего проекта, на котором не идет запись.
-    /// Занятый проект архивировать нельзя: сначала нужно завершить запись.
-    /// </summary>
-    /// <param name="project">Проверяемый проект.</param>
-    private bool CanArchive(Project? project) =>
-        project is not null && !project.IsArchived && project.Id != _activeProjectId;
-
-    /// <summary>
-    /// Разрешает возврат из архива только для архивного проекта.
-    /// </summary>
-    /// <param name="project">Проверяемый проект.</param>
-    private bool CanUnarchive(Project? project) => project is { IsArchived: true };
-
-    partial void OnShowArchivedChanged(bool value)
-    {
-        _ = RefreshAsync();
-    }
 }

@@ -23,15 +23,16 @@ public sealed class DurationTests
 
 
     [Theory]
-    [InlineData(0, "00:00")]
-    [InlineData(7, "00:07")]
-    [InlineData(59, "00:59")]
-    [InlineData(60, "01:00")]
-    [InlineData(61, "01:01")]
-    [InlineData(600, "10:00")]
-    [InlineData(3599, "59:59")]
-    [InlineData(3600, "60:00")]
-    public void ToClockString_FormatMinutesAndSeconds(int seconds, string expected)
+    [InlineData(0, "00:00:00")]
+    [InlineData(7, "00:00:07")]
+    [InlineData(59, "00:00:59")]
+    [InlineData(60, "00:01:00")]
+    [InlineData(61, "00:01:01")]
+    [InlineData(600, "00:10:00")]
+    [InlineData(3599, "00:59:59")]
+    [InlineData(3600, "01:00:00")]
+    [InlineData(3661, "01:01:01")]
+    public void ToClockString_FormatHoursMinutesAndSeconds(int seconds, string expected)
     {
         Duration.From(TimeSpan.FromSeconds(seconds)).ToClockString().Should().Be(expected);
     }
@@ -39,6 +40,6 @@ public sealed class DurationTests
     [Fact]
     public void ToClockString_WithoutMicroseconds()
     {
-        Duration.From(TimeSpan.FromMilliseconds(1900)).ToClockString().Should().Be("00:01");
+        Duration.From(TimeSpan.FromMilliseconds(1900)).ToClockString().Should().Be("00:00:01");
     }
 }

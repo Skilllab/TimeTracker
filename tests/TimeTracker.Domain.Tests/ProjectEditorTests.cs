@@ -19,7 +19,6 @@ public sealed class ProjectEditorTests
 
         repository.Added.Should().HaveCount(1);
         repository.Added[0].Name.Should().Be("Учебный курс");
-        repository.Added[0].IsArchived.Should().BeFalse();
     }
 
     [Fact]
@@ -50,67 +49,6 @@ public sealed class ProjectEditorTests
     }
 
     [Fact]
-    public async Task ArchiveAsync_WithoutRunningEntry_ArchivesProject()
-    {
-        var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
-        var repository = new FakeProjectRepository(project);
-        var editor = Create(repository, new FakeEntryRepository());
-
-        await editor.ArchiveAsync(project.Id, TestContext.Current.CancellationToken);
-
-        repository.Updated.Should().HaveCount(1);
-        repository.Updated[0].IsArchived.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task ArchiveAsync_WithRunningEntryOnProject_Throws()
-    {
-        var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
-        var repository = new FakeProjectRepository(project);
-        var entryRepository = new FakeEntryRepository
-        {
-            Active = CreateEntry(project.Id)
-        };
-        var editor = Create(repository, entryRepository);
-
-        var act = async () => await editor.ArchiveAsync(project.Id, TestContext.Current.CancellationToken);
-
-        await act.Should().ThrowAsync<InvalidProjectException>()
-            .WithMessage("Нельзя архивировать проект незавершенной записи.");
-        repository.Updated.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task ArchiveAsync_WithRunningEntryOnAnotherProject_ArchivesProject()
-    {
-        var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
-        var repository = new FakeProjectRepository(project);
-        var entryRepository = new FakeEntryRepository
-        {
-            Active = CreateEntry(Guid.NewGuid())
-        };
-        var editor = Create(repository, entryRepository);
-
-        await editor.ArchiveAsync(project.Id, TestContext.Current.CancellationToken);
-
-        repository.Updated.Should().HaveCount(1);
-        repository.Updated[0].IsArchived.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task UnarchiveAsync_ReturnsProjectFromArchive()
-    {
-        var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED", isArchived: true);
-        var repository = new FakeProjectRepository(project);
-        var editor = Create(repository, new FakeEntryRepository());
-
-        await editor.UnarchiveAsync(project.Id, TestContext.Current.CancellationToken);
-
-        repository.Updated.Should().HaveCount(1);
-        repository.Updated[0].IsArchived.Should().BeFalse();
-    }
-
-    [Fact]
     public async Task RenameAsync_UnknownProject_Throws()
     {
         var repository = new FakeProjectRepository();
@@ -124,7 +62,7 @@ public sealed class ProjectEditorTests
 
     private static ProjectEditor Create(FakeProjectRepository repository, FakeEntryRepository entryRepository)
     {
-        return new ProjectEditor(repository, entryRepository, new FakeUnitOfWork());
+        return new ProjectEditor(repository, new FakeUnitOfWork());
     }
 
     private static TimeEntry CreateEntry(Guid? projectId)

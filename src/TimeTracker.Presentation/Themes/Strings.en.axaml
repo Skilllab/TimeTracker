@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <x:String x:Key="App.Title">TimeTracker</x:String>
@@ -11,8 +11,10 @@
   <x:String x:Key="Timer.Stop">Stop</x:String>
   <x:String x:Key="Timer.NewTask">New task</x:String>
 
-  <x:String x:Key="Nav.Settings">Settings</x:String>
   <x:String x:Key="Settings.Title">Settings</x:String>
+  <x:String x:Key="Settings.Theme">Theme</x:String>
+  <x:String x:Key="Settings.Language">Language</x:String>
+  <x:String x:Key="Settings.Close">Close</x:String>
   <x:String x:Key="Settings.Idle">Count as idle after</x:String>
   <x:String x:Key="Settings.IdleMinutes">minutes</x:String>
   <x:String x:Key="Settings.HotKey">Hot key</x:String>
@@ -22,7 +24,6 @@
 
   <x:String x:Key="Settings.AutoStart">Start with system</x:String>
 
-  <x:String x:Key="Nav.Projects">Projects</x:String>
   <x:String x:Key="Projects.Title">Projects</x:String>
   <x:String x:Key="Timer.Project">No project selected</x:String>
 
@@ -34,6 +35,7 @@
   <x:String x:Key="Projects.ShowArchived">Show archived</x:String>
   <x:String x:Key="Projects.Name">Project name</x:String>
   <x:String x:Key="Projects.Color">Marker color</x:String>
+  <x:String x:Key="Projects.ColorHint">Enter a color as #RRGGBB</x:String>
   <x:String x:Key="Projects.Save">Save</x:String>
   <x:String x:Key="Projects.Cancel">Cancel</x:String>
 
@@ -43,5 +45,45 @@
   <x:String x:Key="Entries.Rename">Rename</x:String>
   <x:String x:Key="Entries.Save">Save</x:String>
   <x:String x:Key="Entries.Cancel">Cancel</x:String>
+
+  <x:String x:Key="Tasks.Title">Tasks</x:String>
+  <x:String x:Key="Tasks.Search">Search by name</x:String>
+  <x:String x:Key="Tasks.AllProjects">All projects</x:String>
+  <x:String x:Key="Tasks.TagSearch">Search by tags</x:String>
+  <x:String x:Key="Tasks.AddTagHint">Search or new tag</x:String>
+  <x:String x:Key="Tasks.LabelCreated">Created</x:String>
+  <x:String x:Key="Tasks.LabelStarted">Started</x:String>
+  <x:String x:Key="Tasks.LabelFinished">Finished</x:String>
+  <x:String x:Key="Tasks.WithoutProject">No project</x:String>
+  <x:String x:Key="Tasks.Project">Task project</x:String>
+  <x:String x:Key="Tasks.ProjectBusy">The project of a running task cannot be changed.</x:String>
+  <x:String x:Key="Tasks.New">New task</x:String>
+  <x:String x:Key="Tasks.Start">Start</x:String>
+  <x:String x:Key="Tasks.Resume">Resume</x:String>
+  <x:String x:Key="Tasks.Pause">Pause</x:String>
+  <x:String x:Key="Tasks.Finish">Stop</x:String>
+  <x:String x:Key="Tasks.Reopen">Back to work</x:String>
+  <x:String x:Key="Tasks.EditTags">Tags</x:String>
+  <x:String x:Key="Tasks.AssignedTags">Task tags</x:String>
+  <x:String x:Key="Tasks.AvailableTags">All tags</x:String>
+  <x:String x:Key="Tasks.AddTag">Add</x:String>
+  <x:String x:Key="Tasks.RemoveTag">Remove</x:String>
+  <x:String x:Key="Tasks.NewTag">New tag</x:String>
+  <x:String x:Key="Tasks.CreateTag">Create tag</x:String>
+  <x:String x:Key="Tasks.Created">Created</x:String>
+  <x:String x:Key="Tasks.Started">Started</x:String>
+  <x:String x:Key="Tasks.Empty">No tasks yet</x:String>
+
+  <x:String x:Key="Reports.Title">Reports</x:String>
+  <x:String x:Key="Reports.ByProject">By project</x:String>
+  <x:String x:Key="Reports.ByTag">By tag</x:String>
+  <x:String x:Key="Reports.ByDate">By date</x:String>
+  <x:String x:Key="Reports.From">From</x:String>
+  <x:String x:Key="Reports.To">To</x:String>
+  <x:String x:Key="Reports.Export">Export to CSV</x:String>
+  <x:String x:Key="Reports.Close">Close</x:String>
+  <x:String x:Key="Reports.Total">Total</x:String>
+  <x:String x:Key="Reports.Empty">No data for the period</x:String>
+  <x:String x:Key="Reports.Saved">File saved</x:String>
 
 </ResourceDictionary>

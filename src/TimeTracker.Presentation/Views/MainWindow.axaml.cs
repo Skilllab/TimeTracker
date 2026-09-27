@@ -7,7 +7,7 @@ using TimeTracker.Presentation.ViewModels;
 namespace TimeTracker.Presentation.Views;
 
 /// <summary>
-/// Главное окно приложения: оболочка с навигацией и переключателями темы и языка.
+/// Главное окно приложения: показывает список задач, настройки и отчеты открываются отдельными окнами.
 /// </summary>
 public partial class MainWindow : Window
 {
@@ -31,7 +31,13 @@ public partial class MainWindow : Window
         }
 
         InitializeComponent();
+
         DataContext = viewModel;
+
+        viewModel.AttachWindowFactories(
+            settings => new SettingsWindow { DataContext = settings },
+            reports => new ReportsWindow { DataContext = reports },
+            this);
     }
 
     /// <summary>
@@ -43,18 +49,26 @@ public partial class MainWindow : Window
         var localizationManager = new LocalizationManager();
         var projectList = new DesignProjectList();
 
-        var timer = new TimerViewModel(
-            new DesignTimerControl(),
+        var tasks = new TasksViewModel(
+            new DesignTaskList(),
+            new DesignTaskControl(),
             projectList,
-            localizationManager);
-        var entries = new EntriesViewModel(new DesignTimeEntryList(), projectList, new DesignTimeEntryEditor());
+            localizationManager,
+            new DesignTaskTagSuggestions());
         var projects = new ProjectsViewModel(projectList, new DesignProjectEditor());
         var settings = new SettingsViewModel(
             new IdleSettings(),
             new HotKeySettings(new DesignHotKeyService()),
             localizationManager,
-            new DesignAutoStartService());
+            new DesignAutoStartService(),
+            themeManager,
+            projects);
 
-        return new MainWindowViewModel(timer, entries, projects, settings, themeManager, localizationManager);
+        var reports = new ReportsViewModel(
+            new DesignReportService(),
+            new DesignReportExporter(),
+            TimeProvider.System);
+
+        return new MainWindowViewModel(tasks, settings, reports);
     }
 }

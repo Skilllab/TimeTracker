@@ -8,4 +8,11 @@
     <ProjectReference Include="..\TimeTracker.Domain\TimeTracker.Domain.csproj" />
   </ItemGroup>
 
+  <!-- Справочник тегов убран: файлы оставлены на диске, но исключены из сборки -->
+  <ItemGroup>
+    <Compile Remove="ITagEditor.cs" />
+    <Compile Remove="ITagRepository.cs" />
+    <Compile Remove="TagEditor.cs" />
+  </ItemGroup>
+
 </Project>

@@ -24,6 +24,7 @@ public sealed class TimeEntry
     /// <param name="pausedAt">Момент начала паузы; <c>null</c>, если запись не на паузе.</param>
     /// <param name="isBillable">Признак биллингуемости.</param>
     /// <param name="projectId">Идентификатор проекта; <c>null</c>, если категория не задана.</param>
+    /// <param name="taskId">Идентификатор задачи; <c>null</c>, если запись создана вне списка задач.</param>
     public TimeEntry(
         Guid id,
         string description,
@@ -32,7 +33,8 @@ public sealed class TimeEntry
         int pausedSeconds,
         DateTimeOffset? pausedAt,
         bool isBillable,
-        Guid? projectId)
+        Guid? projectId,
+        Guid? taskId = null)
     {
         if (endedAt < startedAt)
         {
@@ -64,6 +66,7 @@ public sealed class TimeEntry
         PausedAt = pausedAt;
         IsBillable = isBillable;
         ProjectId = projectId;
+        TaskId = taskId;
     }
 
     /// <summary>
@@ -76,11 +79,12 @@ public sealed class TimeEntry
     /// <param name="name">Имя задачи; обрезается по краям.</param>
     /// <param name="startedAt">Момент начала записи.</param>
     /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
-    public static TimeEntry Start(Guid id, string name, DateTimeOffset startedAt, Guid? projectId)
+    /// <param name="taskId">Идентификатор задачи; <c>null</c> — запись вне списка задач.</param>
+    public static TimeEntry Start(Guid id, string name, DateTimeOffset startedAt, Guid? projectId, Guid? taskId = null)
     {
         var normalized = NormalizeName(name);
 
-        return new TimeEntry(id, normalized, startedAt, null, 0, null, false, projectId);
+        return new TimeEntry(id, normalized, startedAt, null, 0, null, false, projectId, taskId);
     }
 
     /// <summary>Предельная длина описания.</summary>
@@ -106,6 +110,9 @@ public sealed class TimeEntry
 
     /// <summary>Идентификатор проекта; <c>null</c>, если категория не задана.</summary>
     public Guid? ProjectId { get; }
+
+    /// <summary>Идентификатор задачи; <c>null</c>, если запись создана вне списка задач.</summary>
+    public Guid? TaskId { get; }
 
     /// <summary>Момент начала паузы; <c>null</c>, если запись не на паузе.</summary>
     public DateTimeOffset? PausedAt { get; }
@@ -154,7 +161,7 @@ public sealed class TimeEntry
             throw new InvalidTimeEntryException("Приостановить можно только идущую запись.");
         }
 
-        return new TimeEntry(Id, Description, StartedAt, EndedAt, PausedSeconds, now, IsBillable, ProjectId);
+        return new TimeEntry(Id, Description, StartedAt, EndedAt, PausedSeconds, now, IsBillable, ProjectId, TaskId);
     }
 
     /// <summary>
@@ -181,7 +188,7 @@ public sealed class TimeEntry
 
         var paused = (int)(now - PausedAt.Value).TotalSeconds;
 
-        return new TimeEntry(Id, Description, StartedAt, EndedAt, PausedSeconds + paused, null, IsBillable, ProjectId);
+        return new TimeEntry(Id, Description, StartedAt, EndedAt, PausedSeconds + paused, null, IsBillable, ProjectId, TaskId);
     }
 
     /// <summary>
@@ -202,7 +209,7 @@ public sealed class TimeEntry
 
         var paused = PausedAt is null ? 0 : (int)(now - PausedAt.Value).TotalSeconds;
 
-        return new TimeEntry(Id, Description, StartedAt, now, PausedSeconds + paused, null, IsBillable, ProjectId);
+        return new TimeEntry(Id, Description, StartedAt, now, PausedSeconds + paused, null, IsBillable, ProjectId, TaskId);
     }
 
     /// <summary>
@@ -216,7 +223,7 @@ public sealed class TimeEntry
     {
         var normalized = NormalizeName(name);
 
-        return new TimeEntry(Id, normalized, StartedAt, EndedAt, PausedSeconds, PausedAt, IsBillable, ProjectId);
+        return new TimeEntry(Id, normalized, StartedAt, EndedAt, PausedSeconds, PausedAt, IsBillable, ProjectId, TaskId);
     }
 
     /// <summary>

@@ -1,11 +1,11 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:TimeTracker.Presentation.ViewModels"
         x:Class="TimeTracker.Presentation.Views.ProjectEditorWindow"
         x:DataType="vm:ProjectsViewModel"
         Title="{Binding EditorTitle}"
         Width="420"
-        Height="460"
+        Height="560"
         CanResize="False"
         WindowStartupLocation="CenterOwner">
 
@@ -32,25 +32,34 @@
       <TextBlock DockPanel.Dock="Top"
                  Text="{DynamicResource Projects.Color}" />
 
-      <ListBox Margin="0,8,0,0"
-               ItemsSource="{Binding Palette}"
-               SelectedItem="{Binding EditorColor}">
-        <ListBox.ItemTemplate>
-          <DataTemplate x:DataType="x:String">
+      <TextBlock DockPanel.Dock="Top"
+                 Classes="secondary"
+                 Margin="0,8,0,0"
+                 Text="{DynamicResource Projects.ColorHint}" />
 
-            <StackPanel Orientation="Horizontal"
-                        Spacing="{DynamicResource SpacingMd}">
+      <StackPanel DockPanel.Dock="Top"
+                  Orientation="Horizontal"
+                  Spacing="{DynamicResource SpacingMd}"
+                  Margin="0,8,0,0">
 
-              <Border Classes="marker"
-                      Background="{Binding Converter={StaticResource HexColorToBrush}}" />
+        <Border Classes="marker"
+                Background="{Binding EditorColor, Converter={StaticResource HexColorToBrush}}" />
 
-              <TextBlock Text="{Binding}" />
+        <TextBox Width="160"
+                 Text="{Binding EditorColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-            </StackPanel>
+      </StackPanel>
 
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
+      <ColorPicker DockPanel.Dock="Top"
+                   Margin="0,8,0,0"
+                   HorizontalAlignment="Left"
+                   Color="{Binding PickerColor, Mode=TwoWay}" />
+
+      <TextBlock DockPanel.Dock="Top"
+                 Classes="secondary"
+                 Margin="0,8,0,0"
+                 Text="{Binding EditorError}"
+                 IsVisible="{Binding HasError}" />
 
     </DockPanel>
 

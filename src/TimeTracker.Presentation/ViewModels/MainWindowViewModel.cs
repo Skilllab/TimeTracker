@@ -1,141 +1,98 @@
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using TimeTracker.Presentation.Shell;
+using TimeTracker.Presentation.Views;
 
 namespace TimeTracker.Presentation.ViewModels;
 
 /// <summary>
-/// ViewModel оболочки: навигация между экранами, выбор темы и языка.
+/// ViewModel оболочки: показывает единственный экран — список задач.
+/// Навигации нет, а настройки и отчеты открываются отдельными модальными окнами.
 /// </summary>
 public sealed partial class MainWindowViewModel : ObservableObject
 {
-    private readonly ThemeManager _themeManager;
-    private readonly LocalizationManager _localizationManager;
+    private readonly SettingsViewModel _settingsViewModel;
+    private readonly ReportsViewModel _reportsViewModel;
+    private Func<SettingsViewModel, SettingsWindow> _settingsWindowFactory = null!;
+    private Func<ReportsViewModel, ReportsWindow> _reportsWindowFactory = null!;
+    private Control _owner = null!;
 
     /// <summary>
     /// Создает оболочку.
     /// </summary>
-    /// <param name="timerViewModel">Экран таймера.</param>
-    /// <param name="entriesViewModel">Экран записей за сегодня.</param>
-    /// <param name="projectsViewModel">Экран проектов.</param>
-    /// <param name="settingsViewModel">Экран настроек.</param>
-    /// <param name="themeManager">Управление темой.</param>
-    /// <param name="localizationManager">Управление языком.</param>
+    /// <param name="tasksViewModel">Экран списка задач.</param>
+    /// <param name="settingsViewModel">Модель окна настроек.</param>
+    /// <param name="reportsViewModel">Модель окна отчетов.</param>
     public MainWindowViewModel(
-        TimerViewModel timerViewModel,
-        EntriesViewModel entriesViewModel,
-        ProjectsViewModel projectsViewModel,
+        TasksViewModel tasksViewModel,
         SettingsViewModel settingsViewModel,
-        ThemeManager themeManager,
-        LocalizationManager localizationManager)
+        ReportsViewModel reportsViewModel)
     {
-        _themeManager = themeManager ?? throw new ArgumentNullException(nameof(themeManager));
-        _localizationManager = localizationManager ?? throw new ArgumentNullException(nameof(localizationManager));
-
-        Items.Add(new NavigationItem("Nav.Timer", timerViewModel));
-        Items.Add(new NavigationItem("Nav.Entries", entriesViewModel));
-        Items.Add(new NavigationItem("Nav.Projects", projectsViewModel));
-        Items.Add(new NavigationItem("Nav.Settings", settingsViewModel));
-
-        SelectedItem = Items[0];
+        Page = tasksViewModel ?? throw new ArgumentNullException(nameof(tasksViewModel));
+        _settingsViewModel = settingsViewModel ?? throw new ArgumentNullException(nameof(settingsViewModel));
+        _reportsViewModel = reportsViewModel ?? throw new ArgumentNullException(nameof(reportsViewModel));
     }
 
     /// <summary>
-    /// Пункты навигации.
+    /// Единственный экран приложения: список задач виден сразу при запуске.
     /// </summary>
-    public ObservableCollection<NavigationItem> Items { get; } = new();
+    public TasksViewModel Page { get; }
 
     /// <summary>
-    /// Выбранный пункт навигации.
+    /// Передает модели фабрику окна настроек и владельца окна.
+    /// Окно создает код разметки: показ окна — работа представления,
+    /// а владелец берется из визуального дерева, поэтому окно открывается модально.
     /// </summary>
-    [ObservableProperty]
-    private NavigationItem? _selectedItem;
-
-    /// <summary>
-    /// Экран выбранного пункта.
-    /// </summary>
-    public object? CurrentPage => SelectedItem?.Page;
-
-    /// <summary>
-    /// Доступные темы.
-    /// </summary>
-    public IReadOnlyList<AppTheme> Themes { get; } = ThemeManager.AvailableThemes;
-
-    /// <summary>
-    /// Доступные языки.
-    /// </summary>
-    public IReadOnlyList<AppLanguage> Languages { get; } = LocalizationManager.AvailableLanguages;
-
-    /// <summary>
-    /// Текущая тема.
-    /// </summary>
-    public AppTheme Theme
+    /// <param name="settingsWindowFactory">Фабрика окна настроек.</param>
+    /// <param name="reportsWindowFactory">Фабрика окна отчетов.</param>
+    /// <param name="owner">Элемент управления, по которому ищется владелец окна.</param>
+    public void AttachWindowFactories(
+        Func<SettingsViewModel, SettingsWindow> settingsWindowFactory,
+        Func<ReportsViewModel, ReportsWindow> reportsWindowFactory,
+        Control owner)
     {
-        get => _themeManager.Current;
-        set
-        {
-            _themeManager.Select(value);
-            OnPropertyChanged();
-        }
+        _settingsWindowFactory = settingsWindowFactory ?? throw new ArgumentNullException(nameof(settingsWindowFactory));
+        _reportsWindowFactory = reportsWindowFactory ?? throw new ArgumentNullException(nameof(reportsWindowFactory));
+        _owner = owner ?? throw new ArgumentNullException(nameof(owner));
     }
 
     /// <summary>
-    /// Текущий язык.
+    /// Открывает окно настроек.
+    /// После закрытия список задач перечитывается: в настройках правят проекты,
+    /// поэтому имена и цвета проектов на плашках могли измениться.
     /// </summary>
-    public AppLanguage Language
-    {
-        get => _localizationManager.Language;
-        set
-        {
-            _localizationManager.Select(value);
-            OnPropertyChanged();
-            RefreshTitles();
-        }
-    }
-
-    /// <summary>
-    /// Открывает выбранный пункт навигации.
-    /// </summary>
-    /// <param name="item">Пункт, который нужно открыть.</param>
     [RelayCommand]
-    private void Select(NavigationItem? item)
+    private async Task OpenSettings()
     {
-        if (item is not null)
+        var window = _settingsWindowFactory(_settingsViewModel);
+
+        if (TopLevel.GetTopLevel(_owner) is Window owner)
         {
-            SelectedItem = item;
+            await window.ShowDialog(owner);
         }
+        else
+        {
+            window.Show();
+        }
+
+        await Page.RefreshFiltersAsync();
     }
 
     /// <summary>
-    /// Обновляет заголовки пунктов после смены языка.
+    /// Открывает окно отчетов модально.
     /// </summary>
-    private void RefreshTitles()
+    [RelayCommand]
+    private async Task OpenReports()
     {
-        foreach (var item in Items)
+        var window = _reportsWindowFactory(_reportsViewModel);
+
+        if (TopLevel.GetTopLevel(_owner) is Window owner)
         {
-            item.RefreshTitle();
+            await window.ShowDialog(owner);
         }
-    }
-
-    partial void OnSelectedItemChanged(NavigationItem? value)
-    {
-        OnPropertyChanged(nameof(CurrentPage));
-
-        if (value?.Page is EntriesViewModel entries)
+        else
         {
-            _ = entries.RefreshAsync();
-        }
-
-        if (value?.Page is ProjectsViewModel projects)
-        {
-            _ = projects.RefreshAsync();
-        }
-
-        if (value?.Page is TimerViewModel timer)
-        {
-            _ = timer.RefreshProjectsAsync();
+            window.Show();
         }
     }
 }

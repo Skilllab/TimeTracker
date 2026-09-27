@@ -99,7 +99,7 @@ public sealed class TimerControlTests
         time.Advance(TimeSpan.FromSeconds(65));
 
         control.IsRunning.Should().BeTrue();
-        control.GetElapsed().ToClockString().Should().Be("01:05");
+        control.GetElapsed().ToClockString().Should().Be("00:01:05");
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public sealed class TimerControlTests
         time.Advance(TimeSpan.FromMinutes(5));
 
         control.IsPaused.Should().BeTrue();
-        control.GetElapsed().ToClockString().Should().Be("00:10");
+        control.GetElapsed().ToClockString().Should().Be("00:00:10");
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public sealed class TimerControlTests
         time.Advance(TimeSpan.FromSeconds(5));
 
         control.IsRunning.Should().BeTrue();
-        control.GetElapsed().ToClockString().Should().Be("00:15");
+        control.GetElapsed().ToClockString().Should().Be("00:00:15");
     }
 
     [Fact]
@@ -151,7 +151,7 @@ public sealed class TimerControlTests
         closed.StartedAt.Should().Be(Start);
         closed.EndedAt.Should().Be(Start.AddSeconds(70));
         closed.PausedSeconds.Should().Be(60);
-        closed.ElapsedAt(Start).ToClockString().Should().Be("00:10");
+        closed.ElapsedAt(Start).ToClockString().Should().Be("00:00:10");
         unitOfWork.SaveCount.Should().Be(3);
     }
 

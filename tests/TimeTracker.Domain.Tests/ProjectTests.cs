@@ -40,7 +40,8 @@ public sealed class ProjectTests
     [InlineData("#B26A00")]
     [InlineData("#C62828")]
     [InlineData("#2f6fed")]
-    public void Constructor_PaletteColor_KeepsColor(string color)
+    [InlineData("#123456")]
+    public void Constructor_ValidColor_KeepsColor(string color)
     {
         var project = new Project(Guid.NewGuid(), "Работа", color);
 
@@ -48,20 +49,12 @@ public sealed class ProjectTests
     }
 
     [Fact]
-    public void Constructor_ColorOutsidePalette_Throws()
+    public void Constructor_ColorWithWrongFormat_Throws()
     {
-        var act = () => new Project(Guid.NewGuid(), "Работа", "#123456");
+        var act = () => new Project(Guid.NewGuid(), "Работа", "красный");
 
         act.Should().Throw<InvalidProjectException>()
-            .WithMessage("Цвет проекта не входит в палитру.");
-    }
-
-    [Fact]
-    public void NewProject_IsNotArchived()
-    {
-        var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
-
-        project.IsArchived.Should().BeFalse();
+            .WithMessage("Цвет проекта должен быть записан в виде #RRGGBB.");
     }
 
     [Fact]
@@ -74,7 +67,6 @@ public sealed class ProjectTests
         renamed.Name.Should().Be("Учебный курс");
         renamed.Id.Should().Be(project.Id);
         renamed.Color.Should().Be(project.Color);
-        renamed.IsArchived.Should().BeFalse();
         project.Name.Should().Be("Работа");
     }
 
@@ -90,35 +82,13 @@ public sealed class ProjectTests
     }
 
     [Fact]
-    public void ChangeColor_ColorOutsidePalette_Throws()
+    public void ChangeColor_WithWrongFormat_Throws()
     {
         var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
 
-        var act = () => project.ChangeColor("#123456");
+        var act = () => project.ChangeColor("красный");
 
         act.Should().Throw<InvalidProjectException>()
-            .WithMessage("Цвет проекта не входит в палитру.");
-    }
-
-    [Fact]
-    public void Archive_ThenUnarchive_RestoresAvailability()
-    {
-        var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
-
-        var archived = project.Archive();
-
-        archived.IsArchived.Should().BeTrue();
-        archived.Unarchive().IsArchived.Should().BeFalse();
-    }
-
-    [Fact]
-    public void Archive_KeepsNameAndColor()
-    {
-        var project = new Project(Guid.NewGuid(), "Работа", "#2E7D32");
-
-        var archived = project.Archive();
-
-        archived.Name.Should().Be("Работа");
-        archived.Color.Should().Be("#2E7D32");
+            .WithMessage("Цвет проекта должен быть записан в виде #RRGGBB.");
     }
 }

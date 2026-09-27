@@ -3,4 +3,14 @@
   <PropertyGroup>
     <RootNamespace>TimeTracker.Domain</RootNamespace>
   </PropertyGroup>
+
+  <!-- Справочник тегов убран: файл оставлен на диске, но исключен из сборки -->
+  <ItemGroup>
+    <Compile Remove="InvalidTagNameException.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="InvalidTagNameException.cs" />
+  </ItemGroup>
+
 </Project>

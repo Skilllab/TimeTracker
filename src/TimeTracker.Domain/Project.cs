@@ -3,8 +3,8 @@ namespace TimeTracker.Domain;
 /// <summary>
 /// Проект: именованная категория работ с цветовым маркером.
 /// Имя обрезается по краям; пустое имя и имя длиннее предельного недопустимы.
-/// Цвет обязан входить в фиксированный набор палитры.
-/// Признак архивности отделяет проекты, скрытые из выбора, от действующих.
+/// Цвет задается в виде #RRGGBB, а палитра лишь предлагает готовые значения,
+/// поэтому выбрать можно любой цвет.
 /// Свойства получают переданные значения без дальнейших изменений,
 /// поэтому созданный проект считается неизменяемым, а операции возвращают новый экземпляр.
 /// </summary>
@@ -17,15 +17,14 @@ public sealed class Project
     /// Создает проект, проверяя согласованность значений.
     /// Имя обрезается по краям, а <c>null</c> заменяется пустой строкой;
     /// пустое имя и имя длиннее предельного отвергаются.
-    /// Цвет проверяется по набору палитры.
+    /// Цвет проверяется по формату #RRGGBB.
     /// При нарушении любого правила бросается <c>InvalidProjectException</c>
     /// и проект не создается.
     /// </summary>
     /// <param name="id">Идентификатор проекта.</param>
     /// <param name="name">Имя проекта; обрезается по краям.</param>
-    /// <param name="color">Цвет маркера в виде #RRGGBB из набора палитры.</param>
-    /// <param name="isArchived">Признак того, что проект скрыт из выбора; новый проект не архивный.</param>
-    public Project(Guid id, string name, string color, bool isArchived = false)
+    /// <param name="color">Цвет маркера в виде #RRGGBB.</param>
+    public Project(Guid id, string name, string color)
     {
         var normalized = (name ?? string.Empty).Trim();
 
@@ -39,15 +38,14 @@ public sealed class Project
             throw new InvalidProjectException($"Имя проекта длиннее {MaxNameLength} символов.");
         }
 
-        if (!ProjectPalette.Contains(color))
+        if (!ProjectPalette.IsValid(color))
         {
-            throw new InvalidProjectException("Цвет проекта не входит в палитру.");
+            throw new InvalidProjectException("Цвет проекта должен быть записан в виде #RRGGBB.");
         }
 
         Id = id;
         Name = normalized;
         Color = color;
-        IsArchived = isArchived;
     }
 
     /// <summary>Идентификатор проекта.</summary>
@@ -59,35 +57,19 @@ public sealed class Project
     /// <summary>Цвет маркера в виде #RRGGBB.</summary>
     public string Color { get; }
 
-    /// <summary>Признак того, что проект скрыт из выбора.</summary>
-    public bool IsArchived { get; }
-
     /// <summary>
     /// Возвращает проект с новым именем.
     /// Имя проверяется конструктором: пустое имя и имя длиннее предельного отвергаются.
-    /// Идентификатор, цвет и признак архивности переносятся без изменений.
+    /// Идентификатор и цвет переносятся без изменений.
     /// </summary>
     /// <param name="name">Новое имя проекта; обрезается по краям.</param>
-    public Project Rename(string name) => new(Id, name, Color, IsArchived);
+    public Project Rename(string name) => new(Id, name, Color);
 
     /// <summary>
     /// Возвращает проект с новым цветом маркера.
-    /// Цвет проверяется по набору палитры, поэтому значение вне набора отвергается.
+    /// Цвет проверяется по формату #RRGGBB.
     /// Остальные значения переносятся без изменений.
     /// </summary>
-    /// <param name="color">Новый цвет маркера в виде #RRGGBB из набора палитры.</param>
-    public Project ChangeColor(string color) => new(Id, Name, color, IsArchived);
-
-    /// <summary>
-    /// Возвращает архивный проект.
-    /// Пометка архива не удаляет проект: старые записи продолжают ссылаться на него,
-    /// а из выбора он исчезает.
-    /// </summary>
-    public Project Archive() => new(Id, Name, Color, true);
-
-    /// <summary>
-    /// Возвращает проект, возвращенный из архива.
-    /// После возврата проект снова доступен для выбора при старте записи.
-    /// </summary>
-    public Project Unarchive() => new(Id, Name, Color, false);
+    /// <param name="color">Новый цвет маркера в виде #RRGGBB.</param>
+    public Project ChangeColor(string color) => new(Id, Name, color);
 }
