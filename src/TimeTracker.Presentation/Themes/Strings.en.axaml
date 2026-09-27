@@ -23,6 +23,7 @@
   <x:String x:Key="Tray.Exit">Exit</x:String>
 
   <x:String x:Key="Settings.AutoStart">Start with system</x:String>
+  <x:String x:Key="Settings.Version">Version</x:String>
 
   <x:String x:Key="Projects.Title">Projects</x:String>
   <x:String x:Key="Timer.Project">No project selected</x:String>

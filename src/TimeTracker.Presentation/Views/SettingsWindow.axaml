@@ -78,6 +78,15 @@
         <CheckBox Content="{DynamicResource Settings.AutoStart}"
                   IsChecked="{Binding AutoStartEnabled, Mode=TwoWay}" />
 
+        <StackPanel Spacing="{DynamicResource SpacingSm}">
+
+          <TextBlock Text="{DynamicResource Settings.Version}" />
+
+          <TextBlock Classes="secondary"
+                     Text="{Binding AppVersion}" />
+
+        </StackPanel>
+
         <views:ProjectsView DataContext="{Binding Projects}" />
 
       </StackPanel>

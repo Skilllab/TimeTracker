@@ -23,6 +23,7 @@
   <x:String x:Key="Tray.Exit">Выход</x:String>
 
   <x:String x:Key="Settings.AutoStart">Запускать при входе в систему</x:String>
+  <x:String x:Key="Settings.Version">Версия</x:String>
 
   <x:String x:Key="Projects.Title">Проекты</x:String>
   <x:String x:Key="Timer.Project">Проект не выбран</x:String>

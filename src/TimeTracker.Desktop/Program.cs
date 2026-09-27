@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Avalonia;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,8 @@ using TimeTracker.Presentation;
 using TimeTracker.Presentation.Shell;
 using TimeTracker.Presentation.ViewModels;
 using TimeTracker.Presentation.Views;
+using Velopack;
+using Velopack.Sources;
 
 namespace TimeTracker.Desktop;
 
@@ -34,7 +37,52 @@ internal static class Program
             return;
         }
 
+        VelopackApp.Build().Run();
+
+        ApplyUpdatesIfAvailable();
+
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    }
+
+    /// <summary>
+    /// Адрес репозитория: из него установленное приложение берет обновления.
+    /// </summary>
+    private const string RepositoryUrl = "https://github.com/Skilllab/TimeTracker";
+
+    /// <summary>
+    /// Проверяет обновления и запускает установку найденной версии.
+    /// Проверка выполняется только для установленного приложения: запуск из исходников
+    /// и из конвейера сборки не обновляется, поэтому там проверка пропускается.
+    /// Ошибка проверки не прерывает запуск: без сети приложение должно открываться.
+    /// Обновление заменяет только файлы приложения: база и настройки лежат в папке данных,
+    /// поэтому установка новой версии их не затрагивает.
+    /// </summary>
+    private static void ApplyUpdatesIfAvailable()
+    {
+        try
+        {
+            var updateManager = new UpdateManager(new GithubSource(RepositoryUrl, null, false));
+
+            if (!updateManager.IsInstalled)
+            {
+                return;
+            }
+
+            var updateInfo = updateManager.CheckForUpdatesAsync().GetAwaiter().GetResult();
+
+            if (updateInfo is null)
+            {
+                return;
+            }
+
+            updateManager.DownloadUpdatesAsync(updateInfo).GetAwaiter().GetResult();
+
+            updateManager.ApplyUpdatesAndRestart(updateInfo);
+        }
+        catch (Exception exception)
+        {
+            Trace.TraceError(exception.ToString());
+        }
     }
 
     /// <summary>
