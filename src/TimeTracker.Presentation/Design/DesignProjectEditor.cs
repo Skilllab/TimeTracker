@@ -35,6 +35,14 @@ internal sealed class DesignProjectEditor : IProjectEditor
         => Task.CompletedTask;
 
     /// <summary>
+    /// Удаляет проект без возможности восстановления.
+    /// </summary>
+    /// <param name="projectId">Идентификатор проекта.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task DeleteAsync(Guid projectId, CancellationToken cancellationToken = default)
+        => Task.CompletedTask;
+
+    /// <summary>
     /// Архивирует проект.
     /// </summary>
     /// <param name="projectId">Идентификатор проекта.</param>

@@ -76,4 +76,28 @@ public sealed class ProjectRepository : IProjectRepository
 
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Удаляет проект без возможности восстановления.
+    /// Проект неизменяем, поэтому сущность с тем же идентификатором могла уже
+    /// отслеживаться контекстом: перед удалением прежняя версия открепляется,
+    /// иначе возникает конфликт ключа. Ссылки задач и записей времени снимает связь.
+    /// </summary>
+    /// <param name="project">Удаляемый проект.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task DeleteAsync(Project project, CancellationToken cancellationToken = default)
+    {
+        var tracked = _context.ChangeTracker
+            .Entries<Project>()
+            .FirstOrDefault(item => item.Entity.Id == project.Id);
+
+        if (tracked is not null)
+        {
+            tracked.State = EntityState.Detached;
+        }
+
+        _context.Projects.Remove(project);
+
+        return Task.CompletedTask;
+    }
 }

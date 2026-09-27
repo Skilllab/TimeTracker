@@ -377,5 +377,12 @@ public sealed class TaskListTests
 
             return Task.CompletedTask;
         }
+
+        public Task DeleteAsync(Project project, CancellationToken cancellationToken = default)
+        {
+            _projects.RemoveAll(existing => existing.Id == project.Id);
+
+            return Task.CompletedTask;
+        }
     }
 }

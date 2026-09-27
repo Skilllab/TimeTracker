@@ -65,6 +65,20 @@ public sealed class ProjectEditor : IProjectEditor
     }
 
     /// <summary>
+    /// Удаляет проект без возможности восстановления.
+    /// Задачи и записи времени остаются: ссылка на проект снимается настройкой связи.
+    /// </summary>
+    /// <param name="projectId">Идентификатор проекта.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public async Task DeleteAsync(Guid projectId, CancellationToken cancellationToken = default)
+    {
+        var project = await LoadAsync(projectId, cancellationToken);
+
+        await _repository.DeleteAsync(project, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// Читает проект по идентификатору.
     /// Отсутствие проекта — нарушение правила: правка несуществующей записи недопустима.
     /// </summary>

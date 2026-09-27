@@ -65,7 +65,7 @@ public sealed class WorkTaskConfiguration : IEntityTypeConfiguration<WorkTask>
         builder.HasOne<Project>()
             .WithMany()
             .HasForeignKey(task => task.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.Property(task => task.Tags).IsRequired().HasMaxLength(500);
 

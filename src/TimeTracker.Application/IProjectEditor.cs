@@ -29,4 +29,12 @@ public interface IProjectEditor
     /// <param name="color">Новый цвет маркера в виде #RRGGBB.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
     Task ChangeColorAsync(Guid projectId, string color, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Удаляет проект без возможности восстановления.
+    /// Задачи и записи времени остаются: у них только снимается ссылка на проект.
+    /// </summary>
+    /// <param name="projectId">Идентификатор проекта.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task DeleteAsync(Guid projectId, CancellationToken cancellationToken = default);
 }

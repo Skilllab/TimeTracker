@@ -52,6 +52,10 @@
                       Command="{Binding $parent[ItemsControl].((vm:ProjectsViewModel)DataContext).EditCommand}"
                       CommandParameter="{Binding}" />
 
+              <Button Content="{DynamicResource Projects.Delete}"
+                      Command="{Binding $parent[ItemsControl].((vm:ProjectsViewModel)DataContext).DeleteCommand}"
+                      CommandParameter="{Binding}" />
+
             </StackPanel>
 
           </Grid>

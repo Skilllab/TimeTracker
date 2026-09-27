@@ -33,4 +33,12 @@ public interface IProjectRepository
     /// <param name="project">Обновляемый проект.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
     Task UpdateAsync(Project project, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Удаляет проект без возможности восстановления.
+    /// Ссылки задач и записей времени снимает настройка связи, поэтому отдельного обновления не требуется.
+    /// </summary>
+    /// <param name="project">Удаляемый проект.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task DeleteAsync(Project project, CancellationToken cancellationToken = default);
 }

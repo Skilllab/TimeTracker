@@ -32,6 +32,10 @@ public partial class ProjectsView : UserControl
     {
         if (DataContext is ProjectsViewModel viewModel)
         {
+            viewModel.AttachConfirmWindowFactory(
+                (title, question) => new ConfirmWindow { DataContext = new ConfirmViewModel(title, question) },
+                this);
+
             viewModel.PropertyChanged += OnViewModelPropertyChanged;
         }
     }

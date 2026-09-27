@@ -123,6 +123,13 @@ public sealed class ProjectListTests
 
             return Task.CompletedTask;
         }
+
+        public Task DeleteAsync(Project project, CancellationToken cancellationToken = default)
+        {
+            _projects.RemoveAll(item => item.Id == project.Id);
+
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeEntryRepository : ITimeEntryRepository

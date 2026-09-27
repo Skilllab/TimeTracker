@@ -1,9 +1,11 @@
 using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TimeTracker.Application;
 using TimeTracker.Domain;
+using TimeTracker.Presentation.Views;
 
 namespace TimeTracker.Presentation.ViewModels;
 
@@ -15,6 +17,8 @@ public sealed partial class ProjectsViewModel : ObservableObject
 {
     private readonly IProjectList _projectList;
     private readonly IProjectEditor _projectEditor;
+    private Func<string, string, ConfirmWindow> _confirmWindowFactory = null!;
+    private Control _owner = null!;
 
     /// <summary>
     /// Создает экран проектов.
@@ -27,6 +31,18 @@ public sealed partial class ProjectsViewModel : ObservableObject
         _projectEditor = projectEditor ?? throw new ArgumentNullException(nameof(projectEditor));
 
         _ = RefreshAsync();
+    }
+
+    /// <summary>
+    /// Передает модели фабрику окна подтверждения.
+    /// Окно создает представление: только оно знает про диалоги.
+    /// </summary>
+    /// <param name="confirmWindowFactory">Фабрика окна подтверждения: заголовок и вопрос.</param>
+    /// <param name="owner">Элемент управления, по которому ищется владелец окна.</param>
+    public void AttachConfirmWindowFactory(Func<string, string, ConfirmWindow> confirmWindowFactory, Control owner)
+    {
+        _confirmWindowFactory = confirmWindowFactory ?? throw new ArgumentNullException(nameof(confirmWindowFactory));
+        _owner = owner ?? throw new ArgumentNullException(nameof(owner));
     }
 
     /// <summary>
@@ -186,6 +202,45 @@ public sealed partial class ProjectsViewModel : ObservableObject
         PickerColor = Color.Parse(EditorColor);
         EditorError = string.Empty;
         IsEditorOpen = true;
+    }
+
+    /// <summary>
+    /// Удаляет проект без возможности восстановления.
+    /// Перед удалением запрашивается подтверждение: действие необратимо,
+    /// поэтому отказ оставляет список без изменений.
+    /// Задачи и записи времени не удаляются: у них только снимается ссылка на проект.
+    /// </summary>
+    /// <param name="project">Удаляемый проект.</param>
+    [RelayCommand]
+    private async Task Delete(Project? project)
+    {
+        if (project is null)
+        {
+            return;
+        }
+
+        var title = "Удаление проекта";
+        var question = $"Проект «{project.Name}» будет удален безвозвратно. Задачи и записи времени останутся без проекта. Продолжить?";
+
+        var window = _confirmWindowFactory(title, question);
+
+        if (TopLevel.GetTopLevel(_owner) is Window owner)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+
+        if (window.DataContext is not ConfirmViewModel model || !model.IsConfirmed)
+        {
+            return;
+        }
+
+        await _projectEditor.DeleteAsync(project.Id);
+
+        await RefreshAsync();
     }
 
     /// <summary>

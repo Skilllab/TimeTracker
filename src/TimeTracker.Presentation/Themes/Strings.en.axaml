@@ -29,6 +29,7 @@
 
   <x:String x:Key="Projects.Create">Create</x:String>
   <x:String x:Key="Projects.Edit">Rename</x:String>
+  <x:String x:Key="Projects.Delete">Delete project</x:String>
   <x:String x:Key="Projects.Archive">Archive</x:String>
   <x:String x:Key="Projects.Unarchive">Restore</x:String>
   <x:String x:Key="Projects.Archived">archived</x:String>
