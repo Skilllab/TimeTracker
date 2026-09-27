@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="resources/logo.png" alt="TimeTracker" width="180">
 </p>
 
@@ -26,7 +26,7 @@
 - **EF Core + SQLite** — хранение данных.
 - **Serilog** — логирование; **`TimeProvider`** — работа со временем.
 - **ScottPlot.Avalonia** — диаграммы в отчетах.
-- **Velopack** — упаковка и автообновление.
+- **Velopack** — установщик и автообновление (артефакты Windows).
 - **Clean Architecture** — обязательное требование к структуре решения (см. ниже).
 
 ## Архитектура
@@ -42,6 +42,8 @@
 - Для отладки UI (только Debug): инструмент **AvaloniaUI.DeveloperTools** — устанавливается отдельно
   (`dotnet tool install --global AvaloniaUI.DeveloperTools`, команда `avdt`). Без него вызов
   `AttachDeveloperTools()` не сможет подключиться к инспектору.
+- Для локальной сборки установщика нужен инструмент **`vpk`** — он восстанавливается командой
+  `dotnet tool restore` (объявлен в `.config/dotnet-tools.json`).
 
 ## Команды
 
@@ -51,7 +53,19 @@
 | Запуск тестов | `dotnet test` |
 | Запуск приложения | `dotnet run --project src/TimeTracker.Desktop` |
 | Восстановить инструменты | `dotnet tool restore` |
+| Сборка установщика (Windows) | `dotnet publish src/TimeTracker.Desktop -c Release -r win-x64 --self-contained true -o publish`, затем `dotnet vpk pack --packId TimeTracker --packVersion 1.0.0 --packDir publish --mainExe TimeTracker.exe --outputDir releases` |
+| Выпуск релиза | создать и отправить тег: `git tag v1.0.0` и `git push origin v1.0.0` |
 | Форматирование кода | `dotnet format` |
+
+## Релиз и обновление
+
+- **Версия хранится в одном месте.** Номер задается свойством `VersionPrefix` в `Directory.Build.props` и вручную не правится.
+- **Релиз запускается тегом.** Тег вида `v1.2.3` запускает конвейер `.github/workflows/release.yml`: из имени тега извлекается номер `1.2.3`, записывается в файл сборки, после чего выполняется сборка, упаковка и публикация.
+- **Артефакты.** Собирается самодостаточная сборка приложения под Windows; из нее формируются установщик и файлы обновления (Velopack). Артефакты прикладываются к релизу GitHub и доступны как артефакт сборки.
+- **Обновление.** Установленное приложение проверяет обновления при запуске, до показа окна, и устанавливает найденную версию. Для запуска из исходников проверка пропускается: канала обновления у такой сборки нет.
+- **Данные не теряются.** База и настройки лежат в папке данных вне области установки (Windows: `%LocalAppData%\TimeTracker`), поэтому обновление их не затрагивает.
+- **Платформы.** В этом этапе артефакты формируются только под Windows; установщики Linux и macOS — позже.
+- Подробности: `docs/adr/ADR-013-versioning-and-release.md`, `docs/stages/stage-19-packaging-release.md`.
 
 ## Структура репозитория
 
@@ -64,7 +78,7 @@ src/
   TimeTracker.Desktop/         — тонкая точка входа: Program, App, DI
 
 tests/   — тестовые проекты
-docs/    — план и документация (docs/stages/)
+docs/    — план и документация (docs/stages/, docs/adr/)
 ```
 
 **Правило направления зависимостей (обязательное):** `Desktop` → `Presentation` → `Application` → `Domain`;
