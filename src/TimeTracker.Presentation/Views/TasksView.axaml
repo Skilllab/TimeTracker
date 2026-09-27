@@ -127,6 +127,7 @@
                           Content="{DynamicResource Tasks.EditTags}"
                           Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).OpenTaskTagsCommand}"
                           CommandParameter="{Binding}"
+                          IsVisible="{Binding CanEditTags}"
                           HorizontalAlignment="Left" />
 
                   <ItemsControl ItemsSource="{Binding LabelTexts}">

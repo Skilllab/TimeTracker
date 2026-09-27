@@ -258,7 +258,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task ToggleTask(TaskCardViewModel? card)
     {
-        if (card is null)
+        if (card is null || card.IsDeleted)
         {
             return;
         }
@@ -287,7 +287,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task ChangeProjectTask(TaskCardViewModel? card)
     {
-        if (card is null || card.IsRunning)
+        if (card is null || card.IsDeleted || card.IsRunning)
         {
             return;
         }
@@ -322,7 +322,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenTaskTags(TaskCardViewModel? card)
     {
-        if (card is null)
+        if (card is null || card.IsDeleted)
         {
             return;
         }
@@ -347,7 +347,7 @@ public sealed partial class TasksViewModel : ObservableObject
 
     /// <summary>
     /// Проверяет, можно ли сменить проект задачи.
-    /// Состояние читается заново: пока окно открыто, задача могла начаться.
+    /// Состояние читается заново: пока окно открыто, задача могла начаться или быть удалена.
     /// </summary>
     /// <param name="taskId">Идентификатор задачи.</param>
     private async Task<bool> CanChangeProjectAsync(Guid taskId)
@@ -355,7 +355,7 @@ public sealed partial class TasksViewModel : ObservableObject
         var items = await _taskList.GetAsync(null, null, null, includeDeleted: ShowDeleted);
         var item = items.FirstOrDefault(candidate => candidate.Id == taskId);
 
-        return item is not null && !item.IsRunning;
+        return item is not null && !item.IsRunning && !item.IsDeleted;
     }
 
     /// <summary>
@@ -365,7 +365,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task FinishTask(TaskCardViewModel? card)
     {
-        if (card is null)
+        if (card is null || card.IsDeleted)
         {
             return;
         }
@@ -382,7 +382,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task ReopenTask(TaskCardViewModel? card)
     {
-        if (card is null)
+        if (card is null || card.IsDeleted)
         {
             return;
         }

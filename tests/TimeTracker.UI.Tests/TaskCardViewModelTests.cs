@@ -70,6 +70,20 @@ public sealed class TaskCardViewModelTests
         card.IsDeleted.Should().BeTrue();
     }
 
+    [Fact]
+    public void DeletedTask_AllowsOnlyRestoreAndPermanentDelete()
+    {
+        var card = new TaskCardViewModel(CreateItem(DomainTaskStatus.Paused, isDeleted: true));
+
+        card.CanToggle.Should().BeFalse();
+        card.CanFinish.Should().BeFalse();
+        card.CanReopen.Should().BeFalse();
+        card.CanChangeProject.Should().BeFalse();
+        card.CanEditTags.Should().BeFalse();
+        card.CanRestore.Should().BeTrue();
+        card.CanDeletePermanently.Should().BeTrue();
+    }
+
     private static TaskListItem CreateItem(DomainTaskStatus status, bool isDeleted = false)
     {
         return new TaskListItem(
