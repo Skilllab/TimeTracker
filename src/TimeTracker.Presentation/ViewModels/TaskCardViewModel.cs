@@ -107,6 +107,21 @@ public sealed class TaskCardViewModel : ObservableObject
     /// <summary>Признак того, что завершенную задачу можно вернуть в работу.</summary>
     public bool CanReopen => _item.CanReopen;
 
+    /// <summary>Признак того, что задача помечена удаленной.</summary>
+    public bool IsDeleted => _item.IsDeleted;
+
+    /// <summary>
+    /// Признак того, что задачу можно пометить удаленной.
+    /// Идущую задачу не удаляют: сначала ее нужно приостановить или завершить.
+    /// </summary>
+    public bool CanDelete => !IsDeleted && !IsRunning;
+
+    /// <summary>Признак того, что удаленную задачу можно вернуть в список.</summary>
+    public bool CanRestore => IsDeleted;
+
+    /// <summary>Признак того, что удаленную задачу можно удалить из хранилища.</summary>
+    public bool CanDeletePermanently => IsDeleted;
+
     /// <summary>
     /// Признак того, что задачу можно запустить, приостановить или продолжить.
     /// </summary>

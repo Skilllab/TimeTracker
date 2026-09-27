@@ -37,6 +37,7 @@ public partial class TasksView : UserControl
                 CreateNameWindow,
                 (title, projects, selectedProjectId, taskId) => CreateProjectWindow(viewModel, title, projects, selectedProjectId, taskId),
                 (title, taskTitle, taskId, assignedTags) => CreateTagsWindow(viewModel, title, taskTitle, taskId, assignedTags),
+                (title, question) => new ConfirmWindow { DataContext = new ConfirmViewModel(title, question) },
                 this);
         }
     }

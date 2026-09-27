@@ -31,6 +31,7 @@ public sealed class WorkTask
     /// <param name="pausedSeconds">Накопленное время пауз в секундах; не может быть отрицательным.</param>
     /// <param name="isBillable">Признак биллингуемости.</param>
     /// <param name="status">Текущее состояние задачи.</param>
+    /// <param name="isDeleted">Признак того, что задача помечена удаленной.</param>
     public WorkTask(
         Guid id,
         string description,
@@ -42,8 +43,9 @@ public sealed class WorkTask
         DateTimeOffset? pausedAt,
         int pausedSeconds,
         bool isBillable,
-        TaskStatus status)
-        : this(id, description, projectId, createdAt, startedAt, lastStartedAt, finishedAt, pausedAt, pausedSeconds, isBillable, status, null)
+        TaskStatus status,
+        bool isDeleted = false)
+        : this(id, description, projectId, createdAt, startedAt, lastStartedAt, finishedAt, pausedAt, pausedSeconds, isBillable, status, null, isDeleted)
     {
     }
 
@@ -64,6 +66,7 @@ public sealed class WorkTask
     /// <param name="isBillable">Признак биллингуемости.</param>
     /// <param name="status">Текущее состояние задачи.</param>
     /// <param name="tags">Имена тегов задачи одной строкой через разделитель; <c>null</c> заменяется пустой строкой.</param>
+    /// <param name="isDeleted">Признак того, что задача помечена удаленной.</param>
     private WorkTask(
         Guid id,
         string description,
@@ -76,7 +79,8 @@ public sealed class WorkTask
         int pausedSeconds,
         bool isBillable,
         TaskStatus status,
-        string? tags)
+        string? tags,
+        bool isDeleted)
     {
         if (pausedSeconds < 0)
         {
@@ -115,6 +119,7 @@ public sealed class WorkTask
         IsBillable = isBillable;
         Status = status;
         _tags = NormalizeTags(tags);
+        IsDeleted = isDeleted;
     }
 
     /// <summary>
@@ -140,7 +145,8 @@ public sealed class WorkTask
             0,
             false,
             TaskStatus.NotStarted,
-            null);
+            null,
+            false);
     }
 
     /// <summary>Предельная длина наименования задачи.</summary>
@@ -181,6 +187,13 @@ public sealed class WorkTask
 
     /// <summary>Текущее состояние задачи.</summary>
     public TaskStatus Status { get; }
+
+    /// <summary>
+    /// Признак того, что задача помечена удаленной.
+    /// Пометка не убирает задачу из хранилища: проект, теги и записи времени сохраняются,
+    /// поэтому такая задача остается видимой в отчетах.
+    /// </summary>
+    public bool IsDeleted { get; }
 
     /// <summary>
     /// Имена тегов задачи одной строкой через разделитель.
@@ -295,7 +308,8 @@ public sealed class WorkTask
             PausedSeconds,
             IsBillable,
             TaskStatus.Running,
-            _tags);
+            _tags,
+            IsDeleted);
     }
 
     /// <summary>
@@ -326,7 +340,8 @@ public sealed class WorkTask
             PausedSeconds,
             IsBillable,
             TaskStatus.Paused,
-            _tags);
+            _tags,
+            IsDeleted);
     }
 
     /// <summary>
@@ -366,7 +381,8 @@ public sealed class WorkTask
             paused,
             IsBillable,
             TaskStatus.Running,
-            _tags);
+            _tags,
+            IsDeleted);
     }
 
     /// <summary>
@@ -401,7 +417,8 @@ public sealed class WorkTask
             paused,
             IsBillable,
             TaskStatus.Finished,
-            _tags);
+            _tags,
+            IsDeleted);
     }
 
     /// <summary>
@@ -437,7 +454,8 @@ public sealed class WorkTask
             PausedSeconds + idle,
             IsBillable,
             TaskStatus.Paused,
-            _tags);
+            _tags,
+            IsDeleted);
     }
 
     /// <summary>
@@ -462,7 +480,8 @@ public sealed class WorkTask
             PausedSeconds,
             IsBillable,
             Status,
-            _tags);
+            _tags,
+            IsDeleted);
     }
 
     /// <summary>
@@ -485,7 +504,8 @@ public sealed class WorkTask
             PausedSeconds,
             IsBillable,
             Status,
-            _tags);
+            _tags,
+            IsDeleted);
     }
 
     /// <summary>
@@ -523,11 +543,36 @@ public sealed class WorkTask
     public WorkTask WithTags(string? tags) => Copy(NormalizeTags(tags));
 
     /// <summary>
+    /// Возвращает задачу, помеченную удаленной.
+    /// Пометка не убирает задачу из хранилища: проект, теги и записи времени сохраняются,
+    /// поэтому задача остается видимой в отчетах.
+    /// Пометить удаленной можно только задачу, которая не выполняется сейчас:
+    /// у выполняемой задачи такого действия нет.
+    /// </summary>
+    public WorkTask Delete()
+    {
+        if (Status == TaskStatus.Running)
+        {
+            throw new InvalidTaskStateException("Удалить можно только задачу, которая не выполняется сейчас.");
+        }
+
+        return Copy(isDeleted: true);
+    }
+
+    /// <summary>
+    /// Возвращает задачу, снятую с пометки удаления.
+    /// Состояние, моменты, проект и теги переносятся без изменений,
+    /// поэтому восстановление не влияет на ход работы и отчеты.
+    /// </summary>
+    public WorkTask Restore() => Copy(isDeleted: false);
+
+    /// <summary>
     /// Возвращает копию задачи с указанной строкой тегов.
     /// Состояние, моменты и признаки переносятся без изменений.
     /// </summary>
     /// <param name="tags">Строка тегов новой задачи; <c>null</c> — теги текущей задачи.</param>
-    private WorkTask Copy(string? tags = null)
+    /// <param name="isDeleted">Признак удаления новой задачи; <c>null</c> — признак текущей задачи.</param>
+    private WorkTask Copy(string? tags = null, bool? isDeleted = null)
     {
         return new WorkTask(
             Id,
@@ -541,7 +586,8 @@ public sealed class WorkTask
             PausedSeconds,
             IsBillable,
             Status,
-            tags ?? _tags);
+            tags ?? _tags,
+            isDeleted ?? IsDeleted);
     }
 
     /// <summary>

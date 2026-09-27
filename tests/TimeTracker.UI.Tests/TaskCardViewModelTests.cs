@@ -43,7 +43,34 @@ public sealed class TaskCardViewModelTests
         card.CanChangeProject.Should().BeTrue();
     }
 
-    private static TaskListItem CreateItem(DomainTaskStatus status)
+    [Fact]
+    public void CanDelete_ForRunningTask_IsFalse()
+    {
+        var card = new TaskCardViewModel(CreateItem(DomainTaskStatus.Running));
+
+        card.CanDelete.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CanDelete_ForPausedTask_IsTrue()
+    {
+        var card = new TaskCardViewModel(CreateItem(DomainTaskStatus.Paused));
+
+        card.CanDelete.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CanDelete_ForDeletedTask_IsFalse()
+    {
+        var card = new TaskCardViewModel(CreateItem(DomainTaskStatus.Paused, isDeleted: true));
+
+        card.CanDelete.Should().BeFalse();
+        card.CanRestore.Should().BeTrue();
+        card.CanDeletePermanently.Should().BeTrue();
+        card.IsDeleted.Should().BeTrue();
+    }
+
+    private static TaskListItem CreateItem(DomainTaskStatus status, bool isDeleted = false)
     {
         return new TaskListItem(
             Id: Guid.NewGuid(),
@@ -57,6 +84,7 @@ public sealed class TaskCardViewModelTests
             StartedAt: null,
             LastStartedAt: null,
             FinishedAt: null,
-            Tags: string.Empty);
+            Tags: string.Empty,
+            IsDeleted: isDeleted);
     }
 }

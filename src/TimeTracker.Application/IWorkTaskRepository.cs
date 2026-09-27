@@ -15,10 +15,11 @@ public interface IWorkTaskRepository
     Task AddAsync(WorkTask task, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Возвращает все задачи независимо от состояния.
+    /// Возвращает все задачи; удаленные попадают в результат только по запросу.
     /// </summary>
+    /// <param name="includeDeleted">Признак того, что удаленные задачи тоже нужны.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
-    Task<IReadOnlyList<WorkTask>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<WorkTask>> GetAllAsync(bool includeDeleted = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Возвращает задачу по идентификатору; <c>null</c>, если задачи нет.
@@ -39,6 +40,14 @@ public interface IWorkTaskRepository
     /// <param name="task">Обновляемая задача.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
     Task UpdateAsync(WorkTask task, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Удаляет задачу из хранилища вместе с ее записями времени.
+    /// Действие необратимо: пометка удаления для этого не используется.
+    /// </summary>
+    /// <param name="task">Удаляемая задача.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    Task DeletePermanentlyAsync(WorkTask task, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Возвращает задачи, созданные в указанном интервале, в порядке создания.

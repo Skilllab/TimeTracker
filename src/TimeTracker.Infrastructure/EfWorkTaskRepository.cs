@@ -34,14 +34,20 @@ public sealed class EfWorkTaskRepository : IWorkTaskRepository
     }
 
     /// <summary>
-    /// Возвращает все задачи.
+    /// Возвращает задачи; удаленные попадают в результат только по запросу.
     /// </summary>
+    /// <param name="includeDeleted">Признак того, что удаленные задачи тоже нужны.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
-    public async Task<IReadOnlyList<WorkTask>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<WorkTask>> GetAllAsync(bool includeDeleted = false, CancellationToken cancellationToken = default)
     {
-        return await _context.Tasks
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+        var tasks = _context.Tasks.AsNoTracking();
+
+        if (!includeDeleted)
+        {
+            tasks = tasks.Where(task => !task.IsDeleted);
+        }
+
+        return await tasks.ToListAsync(cancellationToken);
     }
 
     /// <summary>
@@ -85,6 +91,19 @@ public sealed class EfWorkTaskRepository : IWorkTaskRepository
         }
 
         _context.Tasks.Update(task);
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Удаляет задачу из хранилища вместе с ее записями времени.
+    /// Записи уходят по связи задачи и записи, поэтому отдельных удалений не требуется.
+    /// </summary>
+    /// <param name="task">Удаляемая задача.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task DeletePermanentlyAsync(WorkTask task, CancellationToken cancellationToken = default)
+    {
+        _context.Tasks.Remove(task);
 
         return Task.CompletedTask;
     }

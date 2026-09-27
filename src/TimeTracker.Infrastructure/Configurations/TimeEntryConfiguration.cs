@@ -53,7 +53,7 @@ public sealed class TimeEntryConfiguration : IEntityTypeConfiguration<TimeEntry>
         builder.HasOne<WorkTask>()
             .WithMany()
             .HasForeignKey(entry => entry.TaskId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Ignore(entry => entry.IsOpen);
 

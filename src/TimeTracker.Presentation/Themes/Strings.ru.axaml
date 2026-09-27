@@ -73,6 +73,15 @@
   <x:String x:Key="Tasks.Created">Создана</x:String>
   <x:String x:Key="Tasks.Started">Начата</x:String>
   <x:String x:Key="Tasks.Empty">Задач пока нет</x:String>
+  <x:String x:Key="Tasks.ShowDeleted">Показывать удаленные задачи</x:String>
+  <x:String x:Key="Tasks.Delete">Удалить задачу</x:String>
+  <x:String x:Key="Tasks.Restore">Восстановить</x:String>
+  <x:String x:Key="Tasks.DeletePermanently">Удалить полностью</x:String>
+  <x:String x:Key="Tasks.DeletedLabel">Удалена</x:String>
+  <x:String x:Key="Tasks.DeletePermanentlyTitle">Удаление задачи</x:String>
+  <x:String x:Key="Tasks.DeletePermanentlyQuestion">Задача и все ее записи времени будут удалены безвозвратно. Продолжить?</x:String>
+  <x:String x:Key="Tasks.ConfirmYes">Подтвердить</x:String>
+  <x:String x:Key="Tasks.ConfirmNo">Отмена</x:String>
 
   <x:String x:Key="Reports.Title">Отчеты</x:String>
   <x:String x:Key="Reports.ByProject">По проектам</x:String>

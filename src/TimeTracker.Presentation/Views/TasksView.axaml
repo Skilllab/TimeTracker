@@ -46,6 +46,10 @@
           </ComboBox.ItemTemplate>
         </ComboBox>
 
+        <CheckBox Content="{DynamicResource Tasks.ShowDeleted}"
+                  IsChecked="{Binding ShowDeleted, Mode=TwoWay}"
+                  VerticalAlignment="Center" />
+
         <Button Classes="accent"
                 Content="{DynamicResource Tasks.New}"
                 Command="{Binding CreateTaskCommand}" />
@@ -65,6 +69,7 @@
           <DataTemplate x:DataType="vm:TaskCardViewModel">
 
             <Border Classes="card"
+                    Classes.deleted="{Binding IsDeleted}"
                     Margin="{DynamicResource MarginCard}">
 
               <Grid ColumnDefinitions="*,Auto">
@@ -74,6 +79,10 @@
 
                   <TextBlock Classes="subtitle"
                              Text="{Binding Title}" />
+
+                  <TextBlock Classes="secondary"
+                             Text="{DynamicResource Tasks.DeletedLabel}"
+                             IsVisible="{Binding IsDeleted}" />
 
                   <Button Classes="nav"
                           Content="{Binding ProjectName}"
@@ -164,6 +173,24 @@
                           Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).ReopenTaskCommand}"
                           CommandParameter="{Binding}"
                           IsVisible="{Binding CanReopen}"
+                          HorizontalAlignment="Right" />
+
+                  <Button Content="{DynamicResource Tasks.Delete}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).DeleteTaskCommand}"
+                          CommandParameter="{Binding}"
+                          IsVisible="{Binding CanDelete}"
+                          HorizontalAlignment="Right" />
+
+                  <Button Content="{DynamicResource Tasks.Restore}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).RestoreTaskCommand}"
+                          CommandParameter="{Binding}"
+                          IsVisible="{Binding CanRestore}"
+                          HorizontalAlignment="Right" />
+
+                  <Button Content="{DynamicResource Tasks.DeletePermanently}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).DeletePermanentlyCommand}"
+                          CommandParameter="{Binding}"
+                          IsVisible="{Binding CanDeletePermanently}"
                           HorizontalAlignment="Right" />
 
                   <StackPanel Orientation="Horizontal"

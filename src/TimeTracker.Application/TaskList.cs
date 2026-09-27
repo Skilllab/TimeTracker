@@ -6,6 +6,8 @@ namespace TimeTracker.Application;
 /// Сценарий списка задач: читает задачи, считает их время и упорядочивает для показа.
 /// Сверху оказывается выполняемая задача, затем недавно запускавшиеся,
 /// а завершенные уходят в конец списка.
+/// Удаленные задачи читаются только по запросу и всегда идут последними:
+/// они не участвуют в сортировке, но остаются видимыми и участвуют в отчетах.
 /// Минипоиск по наименованию и по тегам только сужает список и не меняет состояние задач.
 /// </summary>
 public sealed class TaskList : ITaskList
@@ -40,14 +42,16 @@ public sealed class TaskList : ITaskList
     /// <param name="tagSearch">Строка минипоиска по тегам; <c>null</c> или пустая строка — без фильтра.</param>
     /// <param name="projectId">Идентификатор проекта; <c>null</c> — все проекты.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
+    /// <param name="includeDeleted">Признак того, что удаленные задачи тоже нужны.</param>
     public async Task<IReadOnlyList<TaskListItem>> GetAsync(
         string? search,
         string? tagSearch,
         Guid? projectId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool includeDeleted = false)
     {
         var now = _timeProvider.GetUtcNow();
-        var tasks = await _taskRepository.GetAllAsync(cancellationToken);
+        var tasks = await _taskRepository.GetAllAsync(includeDeleted, cancellationToken);
         var projects = await _projectRepository.GetAllAsync(cancellationToken);
 
         var projectsById = projects.ToDictionary(project => project.Id);
@@ -74,9 +78,15 @@ public sealed class TaskList : ITaskList
             selected = selected.Where(task => task.ProjectId == selectedProjectId);
         }
 
+        if (!includeDeleted)
+        {
+            selected = selected.Where(task => !task.IsDeleted);
+        }
+
         return selected
             .Select(task => CreateItem(task, projectsById, now))
-            .OrderBy(item => item.IsFinished ? 1 : 0)
+            .OrderBy(item => item.IsDeleted ? 1 : 0)
+            .ThenBy(item => item.IsFinished ? 1 : 0)
             .ThenBy(item => item.IsRunning ? 0 : 1)
             .ThenByDescending(item => item.LastStartedAt)
             .ThenByDescending(item => item.CreatedAt)
@@ -114,6 +124,7 @@ public sealed class TaskList : ITaskList
             task.StartedAt,
             task.LastStartedAt,
             task.FinishedAt,
-            task.Tags);
+            task.Tags,
+            task.IsDeleted);
     }
 }

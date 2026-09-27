@@ -84,6 +84,27 @@ internal sealed class DesignTaskControl : ITaskControl
     public Task RemoveTagAsync(Guid taskId, string tag, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     /// <summary>
+    /// Помечает задачу удаленной.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task DeleteTaskAsync(Guid taskId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    /// <summary>
+    /// Снимает с задачи пометку удаления.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task RestoreTaskAsync(Guid taskId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    /// <summary>
+    /// Удаляет задачу из хранилища.
+    /// </summary>
+    /// <param name="taskId">Идентификатор задачи.</param>
+    /// <param name="cancellationToken">Признак отмены операции.</param>
+    public Task DeletePermanentlyAsync(Guid taskId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    /// <summary>
     /// Приводит задачи к согласованному состоянию.
     /// </summary>
     /// <param name="cancellationToken">Признак отмены операции.</param>

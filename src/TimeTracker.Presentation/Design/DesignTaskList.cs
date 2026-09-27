@@ -20,11 +20,13 @@ internal sealed class DesignTaskList : ITaskList
     /// <param name="tagSearch">Строка минипоиска по тегам; в заглушке не используется.</param>
     /// <param name="projectId">Идентификатор проекта; в заглушке не используется.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
+    /// <param name="includeDeleted">Признак того, что удаленные задачи тоже нужны; в заглушке не используется.</param>
     public Task<IReadOnlyList<TaskListItem>> GetAsync(
         string? search,
         string? tagSearch,
         Guid? projectId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool includeDeleted = false)
     {
         IReadOnlyList<TaskListItem> items = new[]
         {
@@ -40,7 +42,8 @@ internal sealed class DesignTaskList : ITaskList
                 Start,
                 Start,
                 null,
-                "Отчеты"),
+                "Отчеты",
+                false),
             new TaskListItem(
                 Guid.NewGuid(),
                 "Созвон с клиентом",
@@ -53,7 +56,8 @@ internal sealed class DesignTaskList : ITaskList
                 Start.AddDays(-1),
                 Start.AddHours(-2),
                 null,
-                string.Empty),
+                string.Empty,
+                false),
             new TaskListItem(
                 Guid.NewGuid(),
                 "Разбор требований",
@@ -66,7 +70,8 @@ internal sealed class DesignTaskList : ITaskList
                 Start.AddDays(-2),
                 Start.AddDays(-2),
                 Start.AddDays(-2),
-                "Анализ|Требования")
+                "Анализ|Требования",
+                false)
         };
 
         return Task.FromResult(items);
