@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
 
   <!-- Общие свойства для всех проектов решения TimeTracker -->
   <PropertyGroup>
@@ -32,7 +32,9 @@
   <PropertyGroup>
     <Product>TimeTracker</Product>
     <Company>TimeTracker</Company>
-    <Version>0.1.0</Version>
+
+    <!-- Единственный источник версии: релизный конвейер записывает сюда номер из тега -->
+    <VersionPrefix>0.1.0</VersionPrefix>
   </PropertyGroup>
 
 </Project>

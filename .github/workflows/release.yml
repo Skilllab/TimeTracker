@@ -1,4 +1,4 @@
-name: Release
+﻿name: Release
 
 on:
   push:
@@ -11,21 +11,12 @@ permissions:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 jobs:
-  publish:
-    name: publish ${{ matrix.rid }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            rid: win-x64
-          - os: ubuntu-latest
-            rid: linux-x64
-          - os: macos-latest
-            rid: osx-x64
+  publish-windows:
+    name: Windows
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -36,24 +27,72 @@ jobs:
         with:
           global-json-file: global.json
 
+      # Локальные инструменты: husky и vpk (упаковка Velopack)
       - name: Restore local tools
         run: dotnet tool restore
 
-      - name: Publish
+      # Номер версии задается тегом: вручную номер не вводится
+      - name: Version from tag
         shell: pwsh
         run: |
-          $proj = "src/TimeTracker.Desktop/TimeTracker.Desktop.csproj"
-          if (Test-Path $proj) {
-            dotnet publish $proj -c Release -r ${{ matrix.rid }} --self-contained false -o publish
+          $tag = "${{ github.ref_name }}"
+
+          if ($tag -match '^v(\d+\.\d+\.\d+)') {
+            $version = $Matches[1]
           } else {
-            Write-Host "App project not found yet (stage < 08) — creating placeholder artifact."
-            New-Item -ItemType Directory -Force -Path publish | Out-Null
-            Set-Content -Path publish/PLACEHOLDER.txt -Value "TimeTracker: app project not created yet (${{ matrix.rid }})"
+            $version = [regex]::Match((Get-Content Directory.Build.props -Raw), '<VersionPrefix>([^<]+)</VersionPrefix>').Groups[1].Value
+            Write-Host "Тег не задан: версия взята из файла сборки."
           }
 
-      - name: Upload artifact
+          "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+          Write-Host "Версия сборки: $version"
+
+      # Версия из тега попадает в файл сборки: сборка и установщик получают один номер
+      - name: Write version to Directory.Build.props
+        shell: pwsh
+        run: |
+          $path = "Directory.Build.props"
+          $content = Get-Content $path -Raw
+          $content = $content -replace '<VersionPrefix>[^<]*</VersionPrefix>', "<VersionPrefix>$env:APP_VERSION</VersionPrefix>"
+          Set-Content -Path $path -Value $content -NoNewline
+
+          Write-Host "Версия записана в файл сборки: $env:APP_VERSION"
+
+      - name: Restore
+        run: dotnet restore TimeTracker.slnx
+
+      # Самодостаточная сборка: среда выполнения входит в установщик
+      - name: Publish
+        run: dotnet publish src/TimeTracker.Desktop/TimeTracker.Desktop.csproj -c Release -r win-x64 --self-contained true -o publish
+
+      # Установщик и файлы обновления Velopack
+      - name: Pack installer and update files
+        shell: pwsh
+        run: >
+          dotnet vpk pack
+          --packId TimeTracker
+          --packVersion $env:APP_VERSION
+          --packDir publish
+          --mainExe TimeTracker.exe
+          --packTitle TimeTracker
+          --packAuthors TimeTracker
+          --icon src/TimeTracker.Presentation/Assets/app.ico
+          --outputDir releases
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: TimeTracker-${{ matrix.rid }}
-          path: publish/**
+          name: TimeTracker-win-x64
+          path: releases/**
           if-no-files-found: error
+
+      # Релиз создается только по тегу; при ручном запуске артефакты остаются в artifacts
+      - name: Publish release
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $files = Get-ChildItem -Path releases -File | Select-Object -ExpandProperty FullName
+          gh release create "${{ github.ref_name }}" --title "${{ github.ref_name }}" --generate-notes $files

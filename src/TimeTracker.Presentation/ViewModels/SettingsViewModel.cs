@@ -1,3 +1,4 @@
+using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TimeTracker.Application;
@@ -54,6 +55,32 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// Список проектов: создание, правка, архивация и показ архивных.
     /// </summary>
     public ProjectsViewModel Projects { get; }
+
+    /// <summary>
+    /// Версия приложения: номер записан в сборку при сборке.
+    /// </summary>
+    public string AppVersion { get; } = ResolveAppVersion();
+
+    /// <summary>
+    /// Читает версию из метаданных сборки.
+    /// Номер информационной версии содержит значение, записанное при сборке;
+    /// часть после знака «+» отбрасывается, потому что это метка сборки, а не номер.
+    /// </summary>
+    private static string ResolveAppVersion()
+    {
+        var informational = typeof(SettingsViewModel).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion;
+
+        if (string.IsNullOrWhiteSpace(informational))
+        {
+            return typeof(SettingsViewModel).Assembly.GetName().Version?.ToString() ?? string.Empty;
+        }
+
+        var separatorIndex = informational.IndexOf('+');
+
+        return separatorIndex < 0 ? informational : informational[..separatorIndex];
+    }
 
     /// <summary>
     /// Доступные темы.

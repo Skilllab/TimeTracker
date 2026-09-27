@@ -6,12 +6,18 @@
     <AssemblyName>TimeTracker</AssemblyName>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Иконка исполняемого файла: тот же файл, что используется окном и треем -->
+    <ApplicationIcon>..\TimeTracker.Presentation\Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+
+    <!-- Упаковка и автообновление: установщик формируется из этого пакета -->
+    <PackageReference Include="Velopack" />
 
   </ItemGroup>
 
