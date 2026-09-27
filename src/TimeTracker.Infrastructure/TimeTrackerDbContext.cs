@@ -27,6 +27,11 @@ public sealed class TimeTrackerDbContext : DbContext
     public DbSet<Project> Projects => Set<Project>();
 
     /// <summary>
+    /// Задачи списка работ.
+    /// </summary>
+    public DbSet<WorkTask> Tasks => Set<WorkTask>();
+
+    /// <summary>
     /// Подключает конфигурации сущностей из этой сборки.
     /// </summary>
     /// <param name="modelBuilder">Построитель модели.</param>

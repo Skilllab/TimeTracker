@@ -1,8 +1,7 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:TimeTracker.Presentation.ViewModels"
         xmlns:views="using:TimeTracker.Presentation.Views"
-        xmlns:shell="clr-namespace:TimeTracker.Presentation.Shell"
         x:Class="TimeTracker.Presentation.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="{DynamicResource App.Title}"
@@ -12,56 +11,32 @@
         MinWidth="640"
         MinHeight="420"
         WindowStartupLocation="CenterScreen">
-  <Grid RowDefinitions="Auto,*"
-        Background="{DynamicResource BrushBackground}">
-    <Border Grid.Row="0"
-            BorderBrush="{DynamicResource BrushBorder}"
-            BorderThickness="0,0,0,1"
-            Padding="16,8">
-      <Grid ColumnDefinitions="Auto,*,Auto">
-        <ItemsControl Grid.Column="0"
-                      ItemsSource="{Binding Items}">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <StackPanel Orientation="Horizontal"
-                          Spacing="8" />
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="shell:NavigationItem">
-              <Button Classes="nav"
-                      Content="{Binding Title}"
-                      Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectCommand}"
-                      CommandParameter="{Binding}" />
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <StackPanel Grid.Column="2"
-                    Orientation="Horizontal"
-                    Spacing="8">
-          <ComboBox ItemsSource="{Binding Themes}"
-                    SelectedItem="{Binding Theme}" />
-          <ComboBox ItemsSource="{Binding Languages}"
-                    SelectedItem="{Binding Language}" />
-        </StackPanel>
-      </Grid>
-    </Border>
-    <ContentControl Grid.Row="1"
-                    Content="{Binding CurrentPage}">
+
+  <Grid Background="{DynamicResource BrushBackground}"
+        RowDefinitions="Auto,*">
+
+    <StackPanel Grid.Row="0"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource SpacingMd}"
+                HorizontalAlignment="Right"
+                Margin="{DynamicResource MarginFilter}">
+
+      <Button Content="{DynamicResource Settings.Title}"
+              Command="{Binding OpenSettingsCommand}" />
+
+      <Button Content="{DynamicResource Reports.Title}"
+              Command="{Binding OpenReportsCommand}" />
+
+    </StackPanel>
+
+    <ContentControl Grid.Row="1" Content="{Binding Page}">
       <ContentControl.DataTemplates>
-        <DataTemplate DataType="vm:TimerViewModel">
-          <views:TimerView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:EntriesViewModel">
-          <views:EntriesView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:ProjectsViewModel">
-          <views:ProjectsView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:SettingsViewModel">
-          <views:SettingsView />
+        <DataTemplate DataType="vm:TasksViewModel">
+          <views:TasksView />
         </DataTemplate>
       </ContentControl.DataTemplates>
     </ContentControl>
+
   </Grid>
+
 </Window>

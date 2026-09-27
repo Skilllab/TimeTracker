@@ -29,12 +29,17 @@ public readonly record struct Duration
     }
 
     /// <summary>
-    /// Форматирует длительность как MM:SS (минуты:секунды), усекая доли секунды.
+    /// Форматирует длительность как часы, минуты и секунды; доли секунды усекаются.
+    /// Каждый разряд выводится двумя цифрами, часы не переносятся в сутки.
     /// </summary>
     public string ToClockString()
     {
         var totalSeconds = (long)Value.TotalSeconds;
-        return $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
+        var hours = totalSeconds / 3600;
+        var minutes = totalSeconds % 3600 / 60;
+        var seconds = totalSeconds % 60;
+
+        return $"{hours:00}:{minutes:00}:{seconds:00}";
     }
 
     /// <summary>

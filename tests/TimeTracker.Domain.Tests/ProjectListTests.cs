@@ -43,44 +43,16 @@ public sealed class ProjectListTests
     }
 
     [Fact]
-    public async Task GetAvailableAsync_ExcludesArchived()
+    public async Task GetAllAsync_ReturnsAllProjects()
     {
         var repository = new FakeProjectRepository(
             new Project(Guid.NewGuid(), "Работа", "#2F6FED"),
-            new Project(Guid.NewGuid(), "Закрытый", "#2E7D32", isArchived: true));
+            new Project(Guid.NewGuid(), "Учебный курс", "#2E7D32"));
         var scenario = new ProjectList(repository, new FakeEntryRepository());
 
-        var projects = await scenario.GetAvailableAsync(TestContext.Current.CancellationToken);
-
-        projects.Should().HaveCount(1);
-        projects[0].Name.Should().Be("Работа");
-    }
-
-    [Fact]
-    public async Task GetAllAsync_WithArchived_ReturnsBoth()
-    {
-        var repository = new FakeProjectRepository(
-            new Project(Guid.NewGuid(), "Работа", "#2F6FED"),
-            new Project(Guid.NewGuid(), "Закрытый", "#2E7D32", isArchived: true));
-        var scenario = new ProjectList(repository, new FakeEntryRepository());
-
-        var projects = await scenario.GetAllAsync(includeArchived: true, TestContext.Current.CancellationToken);
+        var projects = await scenario.GetAllAsync(TestContext.Current.CancellationToken);
 
         projects.Should().HaveCount(2);
-    }
-
-    [Fact]
-    public async Task GetAllAsync_WithoutArchived_HidesArchived()
-    {
-        var repository = new FakeProjectRepository(
-            new Project(Guid.NewGuid(), "Работа", "#2F6FED"),
-            new Project(Guid.NewGuid(), "Закрытый", "#2E7D32", isArchived: true));
-        var scenario = new ProjectList(repository, new FakeEntryRepository());
-
-        var projects = await scenario.GetAllAsync(includeArchived: false, TestContext.Current.CancellationToken);
-
-        projects.Should().HaveCount(1);
-        projects[0].Name.Should().Be("Работа");
     }
 
     [Fact]
@@ -162,6 +134,9 @@ public sealed class ProjectListTests
 
         public Task<TimeEntry?> GetActiveAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(Active);
+
+        public Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+            => Task.FromResult<TimeEntry?>(null);
 
         public Task<IReadOnlyList<TimeEntry>> GetRangeAsync(
             DateTimeOffset from,

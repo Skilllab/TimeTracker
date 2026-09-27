@@ -16,7 +16,8 @@ public sealed class EntriesViewModelTests
         var project = new Project(Guid.NewGuid(), "Учебный курс", "#2E7D32");
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(project.Id)),
-            new FakeProjectList(project));
+            new FakeProjectList(project),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -30,7 +31,8 @@ public sealed class EntriesViewModelTests
     {
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(null)),
-            new FakeProjectList());
+            new FakeProjectList(),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -44,7 +46,8 @@ public sealed class EntriesViewModelTests
     {
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(Guid.NewGuid())),
-            new FakeProjectList());
+            new FakeProjectList(),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -59,7 +62,8 @@ public sealed class EntriesViewModelTests
         var project = new Project(Guid.NewGuid(), "Работа", "#2F6FED");
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(project.Id), CreateEntry(null)),
-            new FakeProjectList(project));
+            new FakeProjectList(project),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
@@ -103,46 +107,35 @@ public sealed class EntriesViewModelTests
             _projects = projects;
         }
 
-        public bool LastIncludeArchived { get; private set; }
-
         public Task<IReadOnlyList<Project>> GetAvailableAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(_projects);
 
-        public Task<IReadOnlyList<Project>> GetAllAsync(bool includeArchived, CancellationToken cancellationToken = default)
-        {
-            LastIncludeArchived = includeArchived;
-
-            return Task.FromResult(_projects);
-        }
+        public Task<IReadOnlyList<Project>> GetAllAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(_projects);
 
         public Task<Guid?> GetActiveProjectIdAsync(CancellationToken cancellationToken = default)
             => Task.FromResult<Guid?>(null);
     }
 
     [Fact]
-    public async Task RefreshAsync_ArchivedProject_KeepsNameAndMarksArchive()
+    public async Task RefreshAsync_EntryWithProject_KeepsNameAndColor()
     {
-        var project = new Project(Guid.NewGuid(), "Учебный курс", "#2E7D32", isArchived: true);
+        var project = new Project(Guid.NewGuid(), "Учебный курс", "#2E7D32");
         var viewModel = new EntriesViewModel(
             new FakeEntryList(CreateEntry(project.Id)),
-            new FakeProjectList(project));
+            new FakeProjectList(project),
+            new FakeTimeEntryEditor());
 
         await viewModel.RefreshAsync();
 
         viewModel.Entries.Should().HaveCount(1);
         viewModel.Entries[0].ProjectName.Should().Be("Учебный курс");
         viewModel.Entries[0].ProjectColor.Should().Be("#2E7D32");
-        viewModel.Entries[0].IsProjectArchived.Should().BeTrue();
     }
 
-    [Fact]
-    public async Task RefreshAsync_ProjectListRequestedWithArchived()
+    private sealed class FakeTimeEntryEditor : ITimeEntryEditor
     {
-        var projectList = new FakeProjectList();
-        var viewModel = new EntriesViewModel(new FakeEntryList(), projectList);
-
-        await viewModel.RefreshAsync();
-
-        projectList.LastIncludeArchived.Should().BeTrue();
+        public Task RenameAsync(Guid entryId, string name, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 }

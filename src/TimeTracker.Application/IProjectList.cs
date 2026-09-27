@@ -8,18 +8,16 @@ namespace TimeTracker.Application;
 public interface IProjectList
 {
     /// <summary>
-    /// Возвращает действующие проекты в порядке, пригодном для выбора.
-    /// Архивные проекты в результат не попадают.
+    /// Возвращает проекты в порядке, пригодном для выбора.
     /// </summary>
     /// <param name="cancellationToken">Признак отмены операции.</param>
     Task<IReadOnlyList<Project>> GetAvailableAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Возвращает проекты для показа на экране проектов.
+    /// Возвращает проекты для показа.
     /// </summary>
-    /// <param name="includeArchived">Признак того, что архивные проекты тоже нужны.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
-    Task<IReadOnlyList<Project>> GetAllAsync(bool includeArchived, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Project>> GetAllAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Возвращает идентификатор проекта идущей записи; <c>null</c>, если записи нет или проект не задан.

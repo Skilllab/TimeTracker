@@ -1,0 +1,73 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+        xmlns:domain="using:TimeTracker.Domain"
+        x:Class="TimeTracker.Presentation.Views.ProjectPickerWindow"
+        x:DataType="vm:ProjectPickerViewModel"
+        Title="{Binding Title}"
+        Width="420"
+        Height="460"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+  <Grid Margin="{DynamicResource MarginPage}"
+        RowDefinitions="Auto,Auto,*,Auto,Auto,Auto"
+        RowSpacing="{DynamicResource SpacingLg}">
+
+    <TextBlock Grid.Row="0"
+               Classes="title"
+               Text="{Binding Title}" />
+
+    <TextBlock Grid.Row="1"
+               Classes="secondary"
+               Text="{Binding SelectedText}" />
+
+    <ListBox Grid.Row="2"
+             ItemsSource="{Binding Projects}"
+             SelectedItem="{Binding SelectedProject, Mode=TwoWay}">
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="domain:Project">
+
+          <StackPanel Orientation="Horizontal"
+                      Spacing="{DynamicResource SpacingSm}">
+
+            <Border Classes="marker"
+                    Background="{Binding Color, Converter={StaticResource HexColorToBrush}}" />
+
+            <TextBlock Text="{Binding Name}" />
+
+          </StackPanel>
+
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <Button Grid.Row="3"
+            Content="{DynamicResource Tasks.WithoutProject}"
+            Command="{Binding ClearProjectCommand}"
+            HorizontalAlignment="Left" />
+
+    <TextBlock Grid.Row="4"
+               Classes="secondary"
+               Foreground="{DynamicResource BrushError}"
+               Text="{Binding ErrorText}"
+               IsVisible="{Binding HasError}"
+               TextWrapping="Wrap" />
+
+    <StackPanel Grid.Row="5"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource SpacingMd}"
+                HorizontalAlignment="Right">
+
+      <Button Content="{DynamicResource Projects.Save}"
+              Command="{Binding ConfirmCommand}"
+              Classes="accent" />
+
+      <Button Content="{DynamicResource Projects.Cancel}"
+              Command="{Binding CancelCommand}" />
+
+    </StackPanel>
+
+  </Grid>
+
+</Window>

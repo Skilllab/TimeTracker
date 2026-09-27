@@ -1,0 +1,88 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+        xmlns:views="using:TimeTracker.Presentation.Views"
+        x:Class="TimeTracker.Presentation.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="{DynamicResource Settings.Title}"
+        Width="720"
+        Height="640"
+        MinWidth="560"
+        MinHeight="480"
+        WindowStartupLocation="CenterOwner">
+
+  <DockPanel Margin="{DynamicResource MarginPage}"
+             LastChildFill="True">
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="title"
+               Text="{DynamicResource Settings.Title}" />
+
+    <StackPanel DockPanel.Dock="Bottom"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource SpacingMd}"
+                HorizontalAlignment="Right"
+                Margin="{DynamicResource MarginCard}">
+
+      <Button Content="{DynamicResource Settings.Close}"
+              Command="{Binding CloseCommand}"
+              Classes="accent" />
+
+    </StackPanel>
+
+    <ScrollViewer>
+      <StackPanel Spacing="{DynamicResource SpacingLg}">
+
+        <StackPanel Spacing="{DynamicResource SpacingSm}">
+
+          <TextBlock Text="{DynamicResource Settings.Theme}" />
+
+          <ComboBox ItemsSource="{Binding Themes}"
+                    SelectedItem="{Binding Theme, Mode=TwoWay}" />
+
+        </StackPanel>
+
+        <StackPanel Spacing="{DynamicResource SpacingSm}">
+
+          <TextBlock Text="{DynamicResource Settings.Language}" />
+
+          <ComboBox ItemsSource="{Binding Languages}"
+                    SelectedItem="{Binding Language, Mode=TwoWay}" />
+
+        </StackPanel>
+
+        <StackPanel Spacing="{DynamicResource SpacingSm}">
+
+          <TextBlock Text="{DynamicResource Settings.Idle}" />
+
+          <NumericUpDown Value="{Binding IdleMinutes}"
+                         Minimum="1"
+                         Maximum="120"
+                         Increment="1"
+                         FormatString="0" />
+
+        </StackPanel>
+
+        <StackPanel Spacing="{DynamicResource SpacingSm}">
+
+          <TextBlock Text="{DynamicResource Settings.HotKey}" />
+
+          <TextBlock Text="{Binding HotKeyCaption}" />
+
+          <TextBlock Classes="secondary"
+                     Text="{DynamicResource Settings.HotKeyBusy}"
+                     IsVisible="{Binding IsHotKeyBusy}" />
+
+        </StackPanel>
+
+        <CheckBox Content="{DynamicResource Settings.AutoStart}"
+                  IsChecked="{Binding AutoStartEnabled, Mode=TwoWay}" />
+
+        <views:ProjectsView DataContext="{Binding Projects}" />
+
+      </StackPanel>
+    </ScrollViewer>
+
+  </DockPanel>
+
+</Window>

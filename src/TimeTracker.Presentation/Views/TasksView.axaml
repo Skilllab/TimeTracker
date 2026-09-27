@@ -1,0 +1,207 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+             x:Class="TimeTracker.Presentation.Views.TasksView"
+             x:DataType="vm:TasksViewModel">
+
+  <DockPanel Margin="{DynamicResource MarginPage}"
+             LastChildFill="True">
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="title"
+               Text="{DynamicResource Tasks.Title}" />
+
+    <DockPanel DockPanel.Dock="Top"
+               Margin="{DynamicResource MarginFilter}">
+
+      <StackPanel Orientation="Horizontal"
+                  Spacing="{DynamicResource SpacingMd}">
+
+        <TextBox Width="240"
+                 Text="{Binding SearchText, Mode=TwoWay}"
+                 Watermark="{DynamicResource Tasks.Search}" />
+
+        <TextBox Width="240"
+                 Text="{Binding TagSearchText, Mode=TwoWay}"
+                 Watermark="{DynamicResource Tasks.TagSearch}" />
+
+        <ComboBox MinWidth="200"
+                  ItemsSource="{Binding ProjectFilters}"
+                  SelectedItem="{Binding SelectedProjectFilter, Mode=TwoWay}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:ProjectFilterItem">
+
+              <StackPanel Orientation="Horizontal"
+                          Spacing="{DynamicResource SpacingSm}">
+
+                <Border Classes="marker"
+                        Background="{Binding Color, Converter={StaticResource HexColorToBrush}}"
+                        IsVisible="{Binding HasColor}" />
+
+                <TextBlock Text="{Binding Name}" />
+
+              </StackPanel>
+
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <Button Classes="accent"
+                Content="{DynamicResource Tasks.New}"
+                Command="{Binding CreateTaskCommand}" />
+
+      </StackPanel>
+
+    </DockPanel>
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="secondary"
+               IsVisible="{Binding IsEmpty}"
+               Text="{DynamicResource Tasks.Empty}" />
+
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Cards}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:TaskCardViewModel">
+
+            <Border Classes="card"
+                    Margin="{DynamicResource MarginCard}">
+
+              <Grid ColumnDefinitions="*,Auto">
+
+                <StackPanel Grid.Column="0"
+                            Spacing="{DynamicResource SpacingSm}">
+
+                  <TextBlock Classes="subtitle"
+                             Text="{Binding Title}" />
+
+                  <Button Classes="nav"
+                          Content="{Binding ProjectName}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).ChangeProjectTaskCommand}"
+                          CommandParameter="{Binding}"
+                          Foreground="{Binding ProjectColor, Converter={StaticResource HexColorToBrush}}"
+                          IsVisible="{Binding HasProject}"
+                          IsEnabled="{Binding CanChangeProject}"
+                          HorizontalAlignment="Left" />
+
+                  <Button Classes="nav"
+                          Content="{DynamicResource Tasks.WithoutProject}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).ChangeProjectTaskCommand}"
+                          CommandParameter="{Binding}"
+                          IsVisible="{Binding IsWithoutProject}"
+                          IsEnabled="{Binding CanChangeProject}"
+                          HorizontalAlignment="Left" />
+
+                  <ItemsControl ItemsSource="{Binding TagNames}"
+                                IsVisible="{Binding HasTags}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="x:String">
+
+                        <Border Margin="{DynamicResource MarginChip}"
+                                Padding="{DynamicResource PaddingChip}">
+
+                          <TextBlock Classes="secondary"
+                                     Text="{Binding}" />
+
+                        </Border>
+
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <Button Classes="nav"
+                          Content="{DynamicResource Tasks.EditTags}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).OpenTaskTagsCommand}"
+                          CommandParameter="{Binding}"
+                          HorizontalAlignment="Left" />
+
+                  <ItemsControl ItemsSource="{Binding LabelTexts}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="x:String">
+
+                        <TextBlock Classes="secondary"
+                                   Margin="{DynamicResource MarginChip}"
+                                   Text="{Binding}" />
+
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                            Spacing="{DynamicResource SpacingSm}"
+                            HorizontalAlignment="Right">
+
+                  <TextBlock Classes="subtitle"
+                             Text="{Binding TimeText}"
+                             HorizontalAlignment="Right" />
+
+                  <Button Classes="accent"
+                          Content="{Binding ToggleCaption}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).ToggleTaskCommand}"
+                          CommandParameter="{Binding}"
+                          IsVisible="{Binding CanToggle}"
+                          HorizontalAlignment="Right" />
+
+                  <Button Content="{DynamicResource Tasks.Finish}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).FinishTaskCommand}"
+                          CommandParameter="{Binding}"
+                          IsVisible="{Binding CanFinish}"
+                          HorizontalAlignment="Right" />
+
+                  <Button Content="{DynamicResource Tasks.Reopen}"
+                          Command="{Binding $parent[UserControl].((vm:TasksViewModel)DataContext).ReopenTaskCommand}"
+                          CommandParameter="{Binding}"
+                          IsVisible="{Binding CanReopen}"
+                          HorizontalAlignment="Right" />
+
+                  <StackPanel Orientation="Horizontal"
+                              Spacing="{DynamicResource SpacingSm}"
+                              HorizontalAlignment="Right"
+                              IsVisible="{Binding HasStarted}">
+
+                    <TextBlock Classes="secondary"
+                               Text="{DynamicResource Tasks.Started}" />
+
+                    <TextBlock Classes="secondary"
+                               Text="{Binding StartedText}" />
+
+                  </StackPanel>
+
+                  <StackPanel Orientation="Horizontal"
+                              Spacing="{DynamicResource SpacingSm}"
+                              HorizontalAlignment="Right">
+
+                    <TextBlock Classes="secondary"
+                               Text="{DynamicResource Tasks.Created}" />
+
+                    <TextBlock Classes="secondary"
+                               Text="{Binding CreatedText}" />
+
+                  </StackPanel>
+
+                </StackPanel>
+
+              </Grid>
+
+            </Border>
+
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+  </DockPanel>
+
+</UserControl>

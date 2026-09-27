@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <x:String x:Key="App.Title">TimeTracker</x:String>
@@ -9,9 +9,12 @@
   <x:String x:Key="Timer.Pause">Пауза</x:String>
   <x:String x:Key="Timer.Resume">Продолжить</x:String>
   <x:String x:Key="Timer.Stop">Завершить</x:String>
+  <x:String x:Key="Timer.NewTask">Новая задача</x:String>
 
-  <x:String x:Key="Nav.Settings">Настройки</x:String>
   <x:String x:Key="Settings.Title">Настройки</x:String>
+  <x:String x:Key="Settings.Theme">Тема</x:String>
+  <x:String x:Key="Settings.Language">Язык</x:String>
+  <x:String x:Key="Settings.Close">Закрыть</x:String>
   <x:String x:Key="Settings.Idle">Считать простоем</x:String>
   <x:String x:Key="Settings.IdleMinutes">минут</x:String>
   <x:String x:Key="Settings.HotKey">Горячая клавиша</x:String>
@@ -21,7 +24,6 @@
 
   <x:String x:Key="Settings.AutoStart">Запускать при входе в систему</x:String>
 
-  <x:String x:Key="Nav.Projects">Проекты</x:String>
   <x:String x:Key="Projects.Title">Проекты</x:String>
   <x:String x:Key="Timer.Project">Проект не выбран</x:String>
 
@@ -33,8 +35,55 @@
   <x:String x:Key="Projects.ShowArchived">Показать архивные</x:String>
   <x:String x:Key="Projects.Name">Имя проекта</x:String>
   <x:String x:Key="Projects.Color">Цвет маркера</x:String>
+  <x:String x:Key="Projects.ColorHint">Введите цвет в виде #RRGGBB</x:String>
   <x:String x:Key="Projects.Save">Сохранить</x:String>
   <x:String x:Key="Projects.Cancel">Отмена</x:String>
 
+  <x:String x:Key="Entries.Name">Имя задачи</x:String>
+  <x:String x:Key="Entries.NewName">Новая задача</x:String>
+  <x:String x:Key="Entries.EditName">Имя задачи</x:String>
+  <x:String x:Key="Entries.Rename">Переименовать</x:String>
+  <x:String x:Key="Entries.Save">Сохранить</x:String>
+  <x:String x:Key="Entries.Cancel">Отмена</x:String>
+
+  <x:String x:Key="Tasks.Title">Задачи</x:String>
+  <x:String x:Key="Tasks.Search">Поиск по имени</x:String>
+  <x:String x:Key="Tasks.AllProjects">Все проекты</x:String>
+  <x:String x:Key="Tasks.TagSearch">Поиск по тегам</x:String>
+  <x:String x:Key="Tasks.AddTagHint">Поиск или новый тег</x:String>
+  <x:String x:Key="Tasks.LabelCreated">Создана</x:String>
+  <x:String x:Key="Tasks.LabelStarted">Начата</x:String>
+  <x:String x:Key="Tasks.LabelFinished">Завершена</x:String>
+  <x:String x:Key="Tasks.WithoutProject">Без проекта</x:String>
+  <x:String x:Key="Tasks.Project">Проект задачи</x:String>
+  <x:String x:Key="Tasks.ProjectBusy">Нельзя сменить проект у выполняемой задачи.</x:String>
+  <x:String x:Key="Tasks.New">Новая задача</x:String>
+  <x:String x:Key="Tasks.Start">Старт</x:String>
+  <x:String x:Key="Tasks.Resume">Продолжить</x:String>
+  <x:String x:Key="Tasks.Pause">Пауза</x:String>
+  <x:String x:Key="Tasks.Finish">Завершить</x:String>
+  <x:String x:Key="Tasks.Reopen">Вернуть в работу</x:String>
+  <x:String x:Key="Tasks.EditTags">Теги</x:String>
+  <x:String x:Key="Tasks.AssignedTags">Теги задачи</x:String>
+  <x:String x:Key="Tasks.AvailableTags">Справочник тегов</x:String>
+  <x:String x:Key="Tasks.AddTag">Добавить</x:String>
+  <x:String x:Key="Tasks.RemoveTag">Убрать</x:String>
+  <x:String x:Key="Tasks.NewTag">Новый тег</x:String>
+  <x:String x:Key="Tasks.CreateTag">Создать тег</x:String>
+  <x:String x:Key="Tasks.Created">Создана</x:String>
+  <x:String x:Key="Tasks.Started">Начата</x:String>
+  <x:String x:Key="Tasks.Empty">Задач пока нет</x:String>
+
+  <x:String x:Key="Reports.Title">Отчеты</x:String>
+  <x:String x:Key="Reports.ByProject">По проектам</x:String>
+  <x:String x:Key="Reports.ByTag">По тегам</x:String>
+  <x:String x:Key="Reports.ByDate">По дням</x:String>
+  <x:String x:Key="Reports.From">С</x:String>
+  <x:String x:Key="Reports.To">По</x:String>
+  <x:String x:Key="Reports.Export">Экспорт в CSV</x:String>
+  <x:String x:Key="Reports.Close">Закрыть</x:String>
+  <x:String x:Key="Reports.Total">Итого</x:String>
+  <x:String x:Key="Reports.Empty">Данных за период нет</x:String>
+  <x:String x:Key="Reports.Saved">Файл сохранен</x:String>
 
 </ResourceDictionary>

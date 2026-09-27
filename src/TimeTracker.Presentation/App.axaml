@@ -1,4 +1,4 @@
-<Application xmlns="https://github.com/avaloniaui"
+﻿<Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="using:TimeTracker.Presentation.Converters"
              x:Class="TimeTracker.Presentation.App"
@@ -17,6 +17,7 @@
 
   <Application.Styles>
     <FluentTheme />
+    <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
     <StyleInclude Source="avares://TimeTracker.Presentation/Themes/Controls.axaml" />
   </Application.Styles>
 

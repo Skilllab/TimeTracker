@@ -27,17 +27,12 @@ namespace TimeTracker.Infrastructure.Migrations
                         .HasMaxLength(7)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("IsArchived");
 
                     b.ToTable("Projects", (string)null);
                 });
@@ -71,16 +66,88 @@ namespace TimeTracker.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("TaskId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
 
                     b.HasIndex("StartedAt");
 
+                    b.HasIndex("TaskId");
+
                     b.ToTable("TimeEntries", (string)null);
                 });
 
+            modelBuilder.Entity("TimeTracker.Domain.WorkTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedAt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FinishedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsBillable")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastStartedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PausedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PausedSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StartedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LastStartedAt");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("WorkTasks", (string)null);
+                });
+
             modelBuilder.Entity("TimeTracker.Domain.TimeEntry", b =>
+                {
+                    b.HasOne("TimeTracker.Domain.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TimeTracker.Domain.WorkTask", null)
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("TimeTracker.Domain.WorkTask", b =>
                 {
                     b.HasOne("TimeTracker.Domain.Project", null)
                         .WithMany()

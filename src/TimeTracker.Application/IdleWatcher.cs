@@ -6,7 +6,7 @@ namespace TimeTracker.Application;
 public sealed class IdleWatcher : IDisposable
 {
     private readonly IIdleDetector _detector;
-    private readonly ITimerControl _timerControl;
+    private readonly ITaskControl _taskControl;
     private readonly IdleSettings _settings;
     private readonly TimeProvider _timeProvider;
     private readonly TimeSpan _pollInterval;
@@ -16,19 +16,19 @@ public sealed class IdleWatcher : IDisposable
     /// Создает сценарий.
     /// </summary>
     /// <param name="detector">Исходящий порт определения простоя.</param>
-    /// <param name="timerControl">Входящий порт управления записью.</param>
+    /// <param name="taskControl">Входящий порт управления задачами.</param>
     /// <param name="settings">Настройка порога простоя.</param>
     /// <param name="timeProvider">Источник времени.</param>
     /// <param name="pollInterval">Период опроса простоя.</param>
     public IdleWatcher(
         IIdleDetector detector,
-        ITimerControl timerControl,
+        ITaskControl taskControl,
         IdleSettings settings,
         TimeProvider timeProvider,
         TimeSpan pollInterval)
     {
         _detector = detector ?? throw new ArgumentNullException(nameof(detector));
-        _timerControl = timerControl ?? throw new ArgumentNullException(nameof(timerControl));
+        _taskControl = taskControl ?? throw new ArgumentNullException(nameof(taskControl));
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
         _pollInterval = pollInterval;
@@ -48,7 +48,9 @@ public sealed class IdleWatcher : IDisposable
     public void Dispose() => _timer?.Dispose();
 
     /// <summary>
-    /// Проверяет простой и приостанавливает запись, если порог превышен.
+    /// Проверяет простой и приостанавливает идущую задачу, если порог превышен.
+    /// Задача выбирается сценарием: наблюдение за простоем не знает состояние списка,
+    /// а отсутствие идущей задачи для сценария означает пустую операцию.
     /// </summary>
     public void Check()
     {
@@ -57,11 +59,6 @@ public sealed class IdleWatcher : IDisposable
             return;
         }
 
-        if (!_timerControl.IsRunning)
-        {
-            return;
-        }
-
-        _ = _timerControl.Pause();
+        _ = _taskControl.PauseRunningAsync();
     }
 }

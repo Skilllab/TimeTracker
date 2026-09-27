@@ -1,4 +1,4 @@
-<!--Словарь значений. Отвечает на вопрос «как выглядит»-->
+﻿<!--Словарь значений. Отвечает на вопрос «как выглядит»-->
 <!--словарь стилей — «кто и когда это применяет»-->
 
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
@@ -65,6 +65,10 @@
   <Thickness x:Key="PaddingControl">16,8</Thickness>
   <Thickness x:Key="PaddingCard">16</Thickness>
   <Thickness x:Key="MarginPage">24</Thickness>
+  <Thickness x:Key="MarginFilter">12</Thickness>
+  <Thickness x:Key="MarginCard">16</Thickness>
+  <Thickness x:Key="MarginChip">8</Thickness>
+  <Thickness x:Key="PaddingChip">8</Thickness>
 
   <x:Double x:Key="MarkerSize">12</x:Double>
 

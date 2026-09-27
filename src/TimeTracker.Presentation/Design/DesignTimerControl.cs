@@ -11,6 +11,9 @@ internal sealed class DesignTimerControl : ITimerControl
     /// <summary>Образец длительности для предпросмотра.</summary>
     private static readonly Duration Sample = Duration.From(TimeSpan.FromSeconds(65));
 
+    /// <summary>Образец имени задачи для предпросмотра.</summary>
+    private const string SampleName = "Работа над отчетом";
+
     /// <summary>
     /// Признак того, что запись идет.
     /// </summary>
@@ -27,10 +30,11 @@ internal sealed class DesignTimerControl : ITimerControl
     public bool IsFinished => false;
 
     /// <summary>
-    /// Запускает запись с указанным проектом.
+    /// Запускает запись с указанным именем задачи и проектом.
     /// </summary>
+    /// <param name="name">Имя задачи; обязательно.</param>
     /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
-    public Task Start(Guid? projectId) => Task.CompletedTask;
+    public Task Start(string name, Guid? projectId) => Task.CompletedTask;
 
     /// <summary>
     /// Приостанавливает идущую запись.
@@ -48,6 +52,17 @@ internal sealed class DesignTimerControl : ITimerControl
     public Task Stop() => Task.CompletedTask;
 
     /// <summary>
+    /// Переименовывает идущую запись.
+    /// </summary>
+    /// <param name="name">Новое имя задачи.</param>
+    public Task Rename(string name) => Task.CompletedTask;
+
+    /// <summary>
+    /// Переводит таймер в исходное состояние для следующей задачи.
+    /// </summary>
+    public Task NewTask() => Task.CompletedTask;
+
+    /// <summary>
     /// Восстанавливает незавершенную сессию.
     /// </summary>
     /// <param name="cancellationToken">Признак отмены операции.</param>
@@ -57,4 +72,9 @@ internal sealed class DesignTimerControl : ITimerControl
     /// Возвращает длительность записи без времени пауз.
     /// </summary>
     public Duration GetElapsed() => Sample;
+
+    /// <summary>
+    /// Возвращает образец имени задачи для предпросмотра.
+    /// </summary>
+    public static string NameForPreview => SampleName;
 }

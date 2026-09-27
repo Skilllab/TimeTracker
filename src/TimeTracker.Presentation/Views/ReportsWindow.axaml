@@ -1,0 +1,123 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimeTracker.Presentation.ViewModels"
+        x:Class="TimeTracker.Presentation.Views.ReportsWindow"
+        x:DataType="vm:ReportsViewModel"
+        Title="{DynamicResource Reports.Title}"
+        Width="900"
+        Height="640"
+        MinWidth="640"
+        MinHeight="480"
+        WindowStartupLocation="CenterOwner">
+
+  <DockPanel Margin="{DynamicResource MarginPage}"
+             LastChildFill="True">
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="title"
+               Text="{DynamicResource Reports.Title}" />
+
+    <StackPanel DockPanel.Dock="Top"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource SpacingMd}"
+                Margin="{DynamicResource MarginFilter}">
+
+      <Button Classes="nav"
+              Classes.active="{Binding IsByProject}"
+              Content="{DynamicResource Reports.ByProject}"
+              Command="{Binding ShowByProjectCommand}" />
+
+      <Button Classes="nav"
+              Classes.active="{Binding IsByTag}"
+              Content="{DynamicResource Reports.ByTag}"
+              Command="{Binding ShowByTagCommand}" />
+
+      <Button Classes="nav"
+              Classes.active="{Binding IsByDate}"
+              Content="{DynamicResource Reports.ByDate}"
+              Command="{Binding ShowByDateCommand}" />
+
+      <TextBlock Text="{DynamicResource Reports.From}"
+                 VerticalAlignment="Center"
+                 IsVisible="{Binding IsByDate}" />
+
+      <CalendarDatePicker SelectedDate="{Binding From, Mode=TwoWay}"
+                          CustomDateFormatString="dd.MM.yyyy"
+                          Width="200"
+                          IsVisible="{Binding IsByDate}" />
+
+      <TextBlock Text="{DynamicResource Reports.To}"
+                 VerticalAlignment="Center"
+                 IsVisible="{Binding IsByDate}" />
+
+      <CalendarDatePicker SelectedDate="{Binding To, Mode=TwoWay}"
+                          CustomDateFormatString="dd.MM.yyyy"
+                          Width="200"
+                          IsVisible="{Binding IsByDate}" />
+
+    </StackPanel>
+
+    <StackPanel DockPanel.Dock="Bottom"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource SpacingMd}"
+                HorizontalAlignment="Right"
+                Margin="{DynamicResource MarginCard}">
+
+      <TextBlock Classes="secondary"
+                 Text="{DynamicResource Reports.Saved}"
+                 VerticalAlignment="Center"
+                 IsVisible="{Binding IsSaved}" />
+
+      <TextBlock Classes="secondary"
+                 Text="{DynamicResource Reports.Total}"
+                 VerticalAlignment="Center" />
+
+      <TextBlock Text="{Binding TotalText}"
+                 VerticalAlignment="Center" />
+
+      <Button Content="{DynamicResource Reports.Export}"
+              Command="{Binding ExportCommand}"
+              Classes="accent" />
+
+      <Button Content="{DynamicResource Reports.Close}"
+              Command="{Binding CloseCommand}" />
+
+    </StackPanel>
+
+    <TextBlock DockPanel.Dock="Top"
+               Classes="secondary"
+               Text="{DynamicResource Reports.Empty}"
+               IsVisible="{Binding IsEmpty}" />
+
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Rows}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:ReportRowViewModel">
+
+            <Grid ColumnDefinitions="*,Auto"
+                  Margin="{DynamicResource MarginCard}">
+
+              <StackPanel Grid.Column="0"
+                          Spacing="{DynamicResource SpacingSm}">
+
+                <TextBlock Classes="subtitle"
+                           Text="{Binding Name}" />
+
+                <TextBlock Classes="secondary"
+                           Text="{Binding Details}" />
+
+              </StackPanel>
+
+              <TextBlock Grid.Column="1"
+                         Text="{Binding TimeText}" />
+
+            </Grid>
+
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+  </DockPanel>
+
+</Window>

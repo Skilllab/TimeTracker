@@ -2,7 +2,8 @@ using System.Runtime.InteropServices;
 using Avalonia;
 using Microsoft.EntityFrameworkCore;
 using TimeTracker.Application;
-using TimeTracker.Domain;
+using TimeTracker.Application.ReportExport;
+using TimeTracker.Application.Reports;
 using TimeTracker.Infrastructure;
 using TimeTracker.Infrastructure.Linux;
 using TimeTracker.Infrastructure.Mac;
@@ -50,6 +51,8 @@ internal static class Program
 
     /// <summary>
     /// Создает приложение: хранилище, порты, экраны и управления собираются в одном месте.
+    /// Задачи и их записи работают через один контекст базы данных,
+    /// поэтому задача и сегмент ее работы фиксируются одной операцией сохранения.
     /// </summary>
     private static App CreateApp()
     {
@@ -58,17 +61,21 @@ internal static class Program
         var context = CreateContext(paths);
         context.Database.Migrate();
 
-        ITimeEntryRepository repository = new TimeEntryRepository(context);
+        ITimeEntryRepository entryRepository = new TimeEntryRepository(context);
+        IWorkTaskRepository taskRepository = new EfWorkTaskRepository(context);
         IUnitOfWork unitOfWork = new EfUnitOfWork(context);
 
         IProjectRepository projectRepository = new ProjectRepository(context);
-        IProjectList projectList = new ProjectList(projectRepository, repository);
-        IProjectEditor projectEditor = new ProjectEditor(projectRepository, repository, unitOfWork);
+        IProjectList projectList = new ProjectList(projectRepository, entryRepository);
+        IProjectEditor projectEditor = new ProjectEditor(projectRepository, unitOfWork);
 
-        var session = new TimerSession();
+        ITaskControl taskControl = new TaskControl(taskRepository, entryRepository, unitOfWork, timeProvider);
+        ITaskList taskList = new TaskList(taskRepository, projectRepository, timeProvider);
 
-        ITimerControl timerControl = new TimerControl(session, timeProvider, repository, unitOfWork, projectRepository);
-        ITimeEntryList entryList = new TimeEntryList(repository, timeProvider);
+        IReportReader reportReader = new EfReportReader(context, timeProvider);
+        IReportService reportService = new ReportService(reportReader);
+        IReportExporter reportExporter = new CsvReportExporter();
+        ITaskTagSuggestions tagSuggestions = new EfTaskTagSuggestions(context);
 
         IHotKeyService hotKeyService;
         IIdleDetector idleDetector;
@@ -90,28 +97,35 @@ internal static class Program
         var themeManager = new ThemeManager();
         var localizationManager = new LocalizationManager();
 
-        var timerViewModel = new TimerViewModel(timerControl, projectList, localizationManager);
-        var entriesViewModel = new EntriesViewModel(entryList, projectList);
+        var tasksViewModel = new TasksViewModel(taskList, taskControl, projectList, localizationManager, tagSuggestions);
         var projectsViewModel = new ProjectsViewModel(projectList, projectEditor);
         var autoStartService = CreateAutoStartService();
-        var settingsViewModel = new SettingsViewModel(idleSettings, hotKeySettings, localizationManager, autoStartService);
-
-        var shellViewModel = new MainWindowViewModel(
-            timerViewModel,
-            entriesViewModel,
-            projectsViewModel,
-            settingsViewModel,
+        var settingsViewModel = new SettingsViewModel(
+            idleSettings,
+            hotKeySettings,
+            localizationManager,
+            autoStartService,
             themeManager,
-            localizationManager);
+            projectsViewModel);
 
-        timerControl.RestoreAsync().GetAwaiter().GetResult();
+        var reportsViewModel = new ReportsViewModel(reportService, reportExporter, timeProvider);
+        var shellViewModel = new MainWindowViewModel(tasksViewModel, settingsViewModel, reportsViewModel);
+
+        taskControl.RestoreAsync().GetAwaiter().GetResult();
 
         hotKeySettings.RegisterDefault();
-        hotKeyService.Pressed += async (_, _) => await timerViewModel.ToggleCommand.ExecuteAsync(null);
+
+        // Горячая клавиша приостанавливает идущую задачу: какой именно задачей управлять,
+        // решает список, а не сочетание клавиш.
+        hotKeyService.Pressed += async (_, _) =>
+        {
+            await taskControl.PauseRunningAsync();
+            await tasksViewModel.RefreshAsync();
+        };
 
         var idleWatcher = new IdleWatcher(
             idleDetector,
-            timerControl,
+            taskControl,
             idleSettings,
             timeProvider,
             TimeSpan.FromSeconds(30));

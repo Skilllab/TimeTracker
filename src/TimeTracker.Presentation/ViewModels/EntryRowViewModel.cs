@@ -17,6 +17,16 @@ public sealed class EntryRowViewModel
         Entry = entry ?? throw new ArgumentNullException(nameof(entry));
         Project = project;
     }
+    /// <summary>
+    /// Имя задачи записи.
+    /// </summary>
+    public string TaskName => Entry.Description;
+
+    /// <summary>
+    /// Признак того, что запись завершена и ее имя можно править из списка.
+    /// Идущая запись правится на экране таймера: ее состоянием владеет сценарий таймера.
+    /// </summary>
+    public bool CanRename => !Entry.IsOpen;
 
     /// <summary>
     /// Запись времени.
@@ -37,11 +47,4 @@ public sealed class EntryRowViewModel
     /// Цвет маркера проекта; пустая строка, если категория не задана.
     /// </summary>
     public string ProjectColor => Project?.Color ?? string.Empty;
-
-    /// <summary>
-    /// Признак того, что проект записи архивный.
-    /// Архивный проект показывается приглушенно: он остается в старых записях,
-    /// но выбрать его для новой записи нельзя.
-    /// </summary>
-    public bool IsProjectArchived => Project?.IsArchived ?? false;
 }

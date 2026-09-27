@@ -24,6 +24,7 @@ public sealed class TimeEntry
     /// <param name="pausedAt">Момент начала паузы; <c>null</c>, если запись не на паузе.</param>
     /// <param name="isBillable">Признак биллингуемости.</param>
     /// <param name="projectId">Идентификатор проекта; <c>null</c>, если категория не задана.</param>
+    /// <param name="taskId">Идентификатор задачи; <c>null</c>, если запись создана вне списка задач.</param>
     public TimeEntry(
         Guid id,
         string description,
@@ -32,7 +33,8 @@ public sealed class TimeEntry
         int pausedSeconds,
         DateTimeOffset? pausedAt,
         bool isBillable,
-        Guid? projectId)
+        Guid? projectId,
+        Guid? taskId = null)
     {
         if (endedAt < startedAt)
         {
@@ -64,6 +66,25 @@ public sealed class TimeEntry
         PausedAt = pausedAt;
         IsBillable = isBillable;
         ProjectId = projectId;
+        TaskId = taskId;
+    }
+
+    /// <summary>
+    /// Создает новую запись с указанным именем задачи.
+    /// Имя обязательно: пустое значение и значение из одних пробелов отвергаются.
+    /// Идущая запись не имеет окончания и накопленных пауз,
+    /// признак биллингуемости не задан.
+    /// </summary>
+    /// <param name="id">Идентификатор записи.</param>
+    /// <param name="name">Имя задачи; обрезается по краям.</param>
+    /// <param name="startedAt">Момент начала записи.</param>
+    /// <param name="projectId">Идентификатор проекта; <c>null</c> — запись без проекта.</param>
+    /// <param name="taskId">Идентификатор задачи; <c>null</c> — запись вне списка задач.</param>
+    public static TimeEntry Start(Guid id, string name, DateTimeOffset startedAt, Guid? projectId, Guid? taskId = null)
+    {
+        var normalized = NormalizeName(name);
+
+        return new TimeEntry(id, normalized, startedAt, null, 0, null, false, projectId, taskId);
     }
 
     /// <summary>Предельная длина описания.</summary>
@@ -89,6 +110,9 @@ public sealed class TimeEntry
 
     /// <summary>Идентификатор проекта; <c>null</c>, если категория не задана.</summary>
     public Guid? ProjectId { get; }
+
+    /// <summary>Идентификатор задачи; <c>null</c>, если запись создана вне списка задач.</summary>
+    public Guid? TaskId { get; }
 
     /// <summary>Момент начала паузы; <c>null</c>, если запись не на паузе.</summary>
     public DateTimeOffset? PausedAt { get; }
@@ -137,7 +161,7 @@ public sealed class TimeEntry
             throw new InvalidTimeEntryException("Приостановить можно только идущую запись.");
         }
 
-        return new TimeEntry(Id, Description, StartedAt, EndedAt, PausedSeconds, now, IsBillable, ProjectId);
+        return new TimeEntry(Id, Description, StartedAt, EndedAt, PausedSeconds, now, IsBillable, ProjectId, TaskId);
     }
 
     /// <summary>
@@ -156,6 +180,7 @@ public sealed class TimeEntry
         {
             throw new InvalidTimeEntryException("Возобновить можно только приостановленную запись.");
         }
+
         if (now < PausedAt.Value)
         {
             throw new InvalidTimeEntryException("Момент возобновления не может быть раньше начала паузы.");
@@ -163,19 +188,18 @@ public sealed class TimeEntry
 
         var paused = (int)(now - PausedAt.Value).TotalSeconds;
 
-        return new TimeEntry(Id, Description, StartedAt, EndedAt, PausedSeconds + paused, null, IsBillable, ProjectId);
+        return new TimeEntry(Id, Description, StartedAt, EndedAt, PausedSeconds + paused, null, IsBillable, ProjectId, TaskId);
     }
 
     /// <summary>
-    /// Возвращает запись, возобновленную с указанного момента.
-    /// Время от начала паузы прибавляется к накопленному времени пауз и округляется
-    /// вниз до целых секунд, поэтому простой перестает учитываться в длительности.
-    /// Момент начала паузы снимается, а окончание не меняется: запись снова считается идущей.
-    /// Возобновить можно только приостановленную запись, и момент возобновления
-    /// не может быть раньше начала паузы: в обоих случаях бросается
+    /// Возвращает завершенную запись.
+    /// Незакрытая пауза при завершении закрывается: ее время прибавляется
+    /// к накопленному, поэтому простой не попадает в длительность.
+    /// Момент начала паузы снимается, окончание становится равным переданному моменту.
+    /// Завершить можно только идущую запись: для уже завершенной бросается
     /// <c>InvalidTimeEntryException</c>.
     /// </summary>
-    /// <param name="now">Момент возобновления; не раньше момента начала паузы.</param>
+    /// <param name="now">Момент завершения.</param>
     public TimeEntry Close(DateTimeOffset now)
     {
         if (!IsOpen)
@@ -185,6 +209,36 @@ public sealed class TimeEntry
 
         var paused = PausedAt is null ? 0 : (int)(now - PausedAt.Value).TotalSeconds;
 
-        return new TimeEntry(Id, Description, StartedAt, now, PausedSeconds + paused, null, IsBillable, ProjectId);
+        return new TimeEntry(Id, Description, StartedAt, now, PausedSeconds + paused, null, IsBillable, ProjectId, TaskId);
+    }
+
+    /// <summary>
+    /// Возвращает запись с новым именем задачи.
+    /// Имя обязательно: пустое значение и значение из одних пробелов отвергаются.
+    /// Начало, окончание, накопленные паузы, момент паузы и признаки
+    /// переносятся без изменений, идентификатор сохраняется.
+    /// </summary>
+    /// <param name="name">Новое имя задачи; обрезается по краям.</param>
+    public TimeEntry Rename(string name)
+    {
+        var normalized = NormalizeName(name);
+
+        return new TimeEntry(Id, normalized, StartedAt, EndedAt, PausedSeconds, PausedAt, IsBillable, ProjectId, TaskId);
+    }
+
+    /// <summary>
+    /// Обрезает имя задачи по краям и проверяет, что оно не пустое.
+    /// </summary>
+    /// <param name="name">Проверяемое имя задачи.</param>
+    private static string NormalizeName(string name)
+    {
+        var normalized = (name ?? string.Empty).Trim();
+
+        if (normalized.Length == 0)
+        {
+            throw new InvalidTimeEntryException("Имя задачи не может быть пустым.");
+        }
+
+        return normalized;
     }
 }
