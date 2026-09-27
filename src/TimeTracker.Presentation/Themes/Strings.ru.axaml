@@ -58,6 +58,7 @@
   <x:String x:Key="Tasks.Project">Проект задачи</x:String>
   <x:String x:Key="Tasks.ProjectBusy">Нельзя сменить проект у выполняемой задачи.</x:String>
   <x:String x:Key="Tasks.New">Новая задача</x:String>
+  <x:String x:Key="Tasks.Rename">Переименовать</x:String>
   <x:String x:Key="Tasks.Start">Старт</x:String>
   <x:String x:Key="Tasks.Resume">Продолжить</x:String>
   <x:String x:Key="Tasks.Pause">Пауза</x:String>

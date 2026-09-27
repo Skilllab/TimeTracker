@@ -25,7 +25,7 @@ public sealed partial class TasksViewModel : ObservableObject
     private readonly LocalizationManager _localizationManager;
     private readonly DispatcherTimer _ticker = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly Dictionary<Guid, TaskCardViewModel> _cards = new();
-    private Func<string, EntryNameWindow> _nameWindowFactory = null!;
+    private Func<string, string, EntryNameWindow> _nameWindowFactory = null!;
     private Func<string, IReadOnlyList<Project>, Guid?, Guid, ProjectPickerWindow> _projectWindowFactory = null!;
     private Func<string, string, Guid, IReadOnlyList<string>, TaskTagsWindow> _tagsWindowFactory = null!;
     private Func<string, string, ConfirmWindow> _confirmWindowFactory = null!;
@@ -137,13 +137,13 @@ public sealed partial class TasksViewModel : ObservableObject
     /// Окна создает код разметки: показ окна — работа представления,
     /// а владелец берется из визуального дерева, поэтому окна открываются модально.
     /// </summary>
-    /// <param name="nameWindowFactory">Фабрика окна имени задачи.</param>
+    /// <param name="nameWindowFactory">Фабрика окна имени задачи: заголовок и текущее имя.</param>
     /// <param name="projectWindowFactory">Фабрика окна выбора проекта задачи.</param>
     /// <param name="tagsWindowFactory">Фабрика окна тегов задачи.</param>
     /// <param name="confirmWindowFactory">Фабрика окна подтверждения.</param>
     /// <param name="owner">Элемент управления, по которому ищется владелец окна.</param>
     public void AttachWindowFactories(
-        Func<string, EntryNameWindow> nameWindowFactory,
+        Func<string, string, EntryNameWindow> nameWindowFactory,
         Func<string, IReadOnlyList<Project>, Guid?, Guid, ProjectPickerWindow> projectWindowFactory,
         Func<string, string, Guid, IReadOnlyList<string>, TaskTagsWindow> tagsWindowFactory,
         Func<string, string, ConfirmWindow> confirmWindowFactory,
@@ -238,7 +238,7 @@ public sealed partial class TasksViewModel : ObservableObject
     [RelayCommand]
     private async Task CreateTask()
     {
-        var name = await RequestNameAsync(string.Empty);
+        var name = await RequestNameAsync(_localizationManager["Tasks.New"], string.Empty);
 
         if (name is null)
         {
@@ -393,6 +393,33 @@ public sealed partial class TasksViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Переименовывает задачу через окно ввода имени.
+    /// Удаленную задачу не переименовывают: она ждет восстановления или полного удаления.
+    /// Идущую задачу переименовывать можно: имя не влияет на отсчет времени.
+    /// Порт вызывается только когда имя подтверждено и отличается от текущего.
+    /// </summary>
+    /// <param name="card">Плашка задачи.</param>
+    [RelayCommand]
+    private async Task RenameTask(TaskCardViewModel? card)
+    {
+        if (card is null || card.IsDeleted)
+        {
+            return;
+        }
+
+        var name = await RequestNameAsync(_localizationManager["Tasks.Rename"], card.Title);
+
+        if (name is null || string.Equals(name, card.Title, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        await _taskControl.RenameAsync(card.Id, name);
+
+        await RefreshAsync();
+    }
+
+    /// <summary>
     /// Перечитывает список при включении или выключении показа удаленных задач.
     /// </summary>
     /// <param name="value">Признак того, что удаленные задачи показываются.</param>
@@ -471,11 +498,13 @@ public sealed partial class TasksViewModel : ObservableObject
 
     /// <summary>
     /// Запрашивает имя задачи в отдельном окне; <c>null</c>, если пользователь отказался.
+    /// Заголовок передается вызывающим: при создании и при переименовании он разный.
     /// </summary>
+    /// <param name="title">Заголовок окна.</param>
     /// <param name="current">Текущее имя задачи.</param>
-    private async Task<string?> RequestNameAsync(string current)
+    private async Task<string?> RequestNameAsync(string title, string current)
     {
-        var window = _nameWindowFactory(current);
+        var window = _nameWindowFactory(title, current);
 
         if (TopLevel.GetTopLevel(_owner) is Window owner)
         {

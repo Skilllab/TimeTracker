@@ -97,12 +97,23 @@ public sealed class EfWorkTaskRepository : IWorkTaskRepository
 
     /// <summary>
     /// Удаляет задачу из хранилища вместе с ее записями времени.
-    /// Записи уходят по связи задачи и записи, поэтому отдельных удалений не требуется.
+    /// Удаляется именно переданный экземпляр, а прежняя отслеживаемая копия отцепляется:
+    /// иначе в контексте оказались бы два экземпляра с одним ключом.
+    /// Записи времени уходят по связи задачи и записи, поэтому отдельных удалений не требуется.
     /// </summary>
     /// <param name="task">Удаляемая задача.</param>
     /// <param name="cancellationToken">Признак отмены операции.</param>
     public Task DeletePermanentlyAsync(WorkTask task, CancellationToken cancellationToken = default)
     {
+        var tracked = _context.ChangeTracker
+            .Entries<WorkTask>()
+            .FirstOrDefault(item => item.Entity.Id == task.Id);
+
+        if (tracked is not null)
+        {
+            tracked.State = EntityState.Detached;
+        }
+
         _context.Tasks.Remove(task);
 
         return Task.CompletedTask;

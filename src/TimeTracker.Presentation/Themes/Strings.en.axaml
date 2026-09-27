@@ -58,6 +58,7 @@
   <x:String x:Key="Tasks.Project">Task project</x:String>
   <x:String x:Key="Tasks.ProjectBusy">The project of a running task cannot be changed.</x:String>
   <x:String x:Key="Tasks.New">New task</x:String>
+  <x:String x:Key="Tasks.Rename">Rename</x:String>
   <x:String x:Key="Tasks.Start">Start</x:String>
   <x:String x:Key="Tasks.Resume">Resume</x:String>
   <x:String x:Key="Tasks.Pause">Pause</x:String>

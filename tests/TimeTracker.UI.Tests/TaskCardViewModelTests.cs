@@ -84,6 +84,22 @@ public sealed class TaskCardViewModelTests
         card.CanDeletePermanently.Should().BeTrue();
     }
 
+    [Fact]
+    public void CanRename_ForDeletedTask_IsFalse()
+    {
+        var card = new TaskCardViewModel(CreateItem(DomainTaskStatus.Paused, isDeleted: true));
+
+        card.CanRename.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CanRename_ForRunningTask_IsTrue()
+    {
+        var card = new TaskCardViewModel(CreateItem(DomainTaskStatus.Running));
+
+        card.CanRename.Should().BeTrue();
+    }
+
     private static TaskListItem CreateItem(DomainTaskStatus status, bool isDeleted = false)
     {
         return new TaskListItem(

@@ -78,7 +78,8 @@
                             Spacing="{DynamicResource SpacingSm}">
 
                   <TextBlock Classes="subtitle"
-                             Text="{Binding Title}" />
+                             Text="{Binding Title}"
+                             DoubleTapped="OnTaskNameDoubleTapped" />
 
                   <TextBlock Classes="secondary"
                              Text="{DynamicResource Tasks.DeletedLabel}"
